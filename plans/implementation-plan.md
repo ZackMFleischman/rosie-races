@@ -17,21 +17,21 @@ Racing game for 4-year-old Rosie with math challenges!
 
 ### 1.1 Project Setup
 
-- [ ] **Initialize Vite + React + TypeScript**
+- [x] **Initialize Vite + React + TypeScript**
   > Run `npx create-vite@latest ./ --template react-ts`. Choose current directory. This scaffolds React 18 with TypeScript and Vite's fast HMR.
 
-- [ ] **Install Phaser 3**
+- [x] **Install Phaser 3**
   > Run `npm install phaser`. Phaser 3.60+ has built-in TypeScript types. No @types package needed.
 
-- [ ] **ESLint + Prettier config**
+- [x] **ESLint + Prettier config**
   > Install: `npm install -D eslint @typescript-eslint/eslint-plugin @typescript-eslint/parser prettier eslint-config-prettier`
   > Create `.eslintrc.cjs` extending `plugin:@typescript-eslint/recommended`. Create `.prettierrc` with `{ "singleQuote": true, "semi": true }`. Add scripts: `"lint": "eslint src"`, `"format": "prettier --write src"`.
 
-- [ ] **Jest + RTL + factory.ts + jest-mock-extended + faker**
+- [x] **Jest + RTL + factory.ts + jest-mock-extended + faker**
   > Install: `npm install -D jest @types/jest ts-jest @testing-library/react @testing-library/jest-dom jest-environment-jsdom factory.ts jest-mock-extended @faker-js/faker`
   > Create `jest.config.js` with `preset: 'ts-jest'`, `testEnvironment: 'jsdom'`, `setupFilesAfterEnv: ['<rootDir>/src/test/jestSetup.ts']`. Pattern: `**/*.test.{ts,tsx}`.
 
-- [ ] **Testing patterns: Jest setup + per-suite setupTest**
+- [x] **Testing patterns: Jest setup + per-suite setupTest**
   > Create `src/test/jestSetup.ts` for global Jest config (import jest-dom, global mocks). Does NOT export setupTest. Each test suite defines its own `const setupTest = (options?: OptionsType) => {...}` at top of describe block for atomic Arrange. Tests live next to source: `Button.tsx` → `Button.test.tsx`. Create `src/test/factories/` for factory.ts model factories.
 
 ### 1.2 PWA Configuration
