@@ -48,11 +48,11 @@ Racing game for 4-year-old Rosie with math challenges!
 
   > Use `vite-plugin-pwa`: `npm install -D vite-plugin-pwa`. Configure in `vite.config.ts` with `VitePWA({ registerType: 'autoUpdate' })`. This auto-generates sw.js with precaching.
 
-- [ ] **iOS meta tags for fullscreen**
+- [x] **iOS meta tags for fullscreen**
 
-  > Add to `index.html` head: `<meta name="apple-mobile-web-app-capable" content="yes">`, `<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">`, `<link rel="apple-touch-icon" href="/icon-192.png">`.
+  > Add to `index.html` head: `<meta name="apple-mobile-web-app-capable" content="yes">`, `<meta name="apple-mobile-web-app-status-bar-style" content="black-translucент">`, `<link rel="apple-touch-icon" href="/icon-192.png">`.
 
-- [ ] **App icons**
+- [x] **App icons**
   > Create placeholder icons (solid color with "RR" text) at `public/icon-192.png` and `public/icon-512.png`. Use any image tool or generate programmatically.
 
 ### 1.3 Design System & Responsive
