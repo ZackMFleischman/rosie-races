@@ -527,7 +527,12 @@ For each section within a phase, execute this workflow:
 - Note any blockers or changes
 
 ### 8. Review or Continue
-- **REVIEW mode:** Ask user to review before proceeding
+- **REVIEW mode:** Prepare for user review:
+  1. Start the dev server with `npm run dev`
+  2. Launch/refresh the browser at http://localhost:5173
+  3. List the key files created/modified in this section
+  4. Provide file paths so user can easily navigate to the code
+  5. Wait for user approval before proceeding
 - **AUTONOMOUS mode:** Continue to next section
 
 ### 9. Commit
