@@ -36,10 +36,10 @@ Racing game for 4-year-old Rosie with math challenges!
 
 ### 1.2 PWA Configuration
 
-- [ ] **manifest.json for installability**
+- [x] **manifest.json for installability**
   > Create `public/manifest.json` with `name`, `short_name: "Rosie Races"`, `start_url: "/"`, `display: "standalone"`, `background_color`, `theme_color`, and `icons` array (192px, 512px). Link in `index.html`: `<link rel="manifest" href="/manifest.json">`.
 
-- [ ] **Service worker for offline**
+- [x] **Service worker for offline**
   > Use `vite-plugin-pwa`: `npm install -D vite-plugin-pwa`. Configure in `vite.config.ts` with `VitePWA({ registerType: 'autoUpdate' })`. This auto-generates sw.js with precaching.
 
 - [ ] **iOS meta tags for fullscreen**
@@ -508,7 +508,7 @@ For each section within a phase, execute this workflow:
 - Run `npm run test` - all must pass
 
 ### 4. Validate in Browser
-- Run `npm run dev`
+- Run `npm run dev` if its not already running.
 - Test in browser (use browser tools)
 - Verify feature works correctly
 
@@ -528,11 +528,6 @@ For each section within a phase, execute this workflow:
 
 ### 8. Review or Continue
 - **REVIEW mode:** Prepare for user review:
-  1. Start the dev server with `npm run dev`
-  2. Launch/refresh the browser at http://localhost:5173
-  3. List the key files created/modified in this section
-  4. Provide file paths so user can easily navigate to the code
-  5. Wait for user approval before proceeding
 - **AUTONOMOUS mode:** Continue to next section
 
 ### 9. Commit
