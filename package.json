@@ -9,7 +9,10 @@
     "lint": "eslint .",
     "format": "prettier --write src",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "serena": "uvx --from git+https://github.com/oraios/serena serena",
+    "serena:start": "npm run serena -- start-mcp-server",
+    "serena:index": "npm run serena -- project index"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -39,6 +42,7 @@
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
     "jest-mock-extended": "^4.0.0",
+    "playwright": "^1.57.0",
     "pngjs": "^7.0.0",
     "prettier": "^3.7.4",
     "ts-jest": "^29.4.6",
