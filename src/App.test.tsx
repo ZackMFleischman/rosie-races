@@ -17,9 +17,9 @@ describe('App', () => {
     expect(screen.getByText('Rosie Races')).toBeInTheDocument();
   });
 
-  it('renders the placeholder game message', () => {
+  it('renders the game container', () => {
     setupTest();
-    expect(screen.getByText('Game coming soon!')).toBeInTheDocument();
+    expect(screen.getByTestId('game-container')).toBeInTheDocument();
   });
 
   it('renders the TAP button placeholder', () => {

@@ -1,8 +1,19 @@
+import { useMemo } from 'react';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
+import GameContainer from './components/GameContainer';
+import { RaceScene } from './game/scenes/RaceScene';
 
 function App() {
+  // Memoize game config to prevent recreation on re-renders
+  const gameConfig = useMemo(
+    () => ({
+      scene: [RaceScene],
+    }),
+    []
+  );
+
   return (
     <Box
       sx={{
@@ -34,7 +45,7 @@ function App() {
         </Typography>
       </Box>
 
-      {/* Main game area - will contain Phaser canvas */}
+      {/* Main game area - contains Phaser canvas */}
       <Box
         component="main"
         sx={{
@@ -58,30 +69,18 @@ function App() {
             justifyContent: 'center',
           }}
         >
-          {/* Placeholder for game canvas */}
+          {/* Game canvas container */}
           <Box
             sx={{
               width: '100%',
               maxWidth: { xs: '100%', sm: 600, md: 800, lg: 1024 },
               aspectRatio: '4/3',
-              bgcolor: '#4CAF50', // Grass green placeholder
               borderRadius: 2,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
+              overflow: 'hidden',
               boxShadow: 3,
             }}
           >
-            <Typography
-              variant="h5"
-              sx={{
-                color: 'white',
-                textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
-                fontSize: { xs: '1.25rem', sm: '1.5rem' },
-              }}
-            >
-              Game coming soon!
-            </Typography>
+            <GameContainer config={gameConfig} />
           </Box>
         </Container>
       </Box>

@@ -45,12 +45,38 @@ export const Game = jest.fn().mockImplementation((config: unknown) => {
   return new MockGame(config);
 });
 
+// Mock Graphics object
+const createMockGraphics = () => ({
+  fillStyle: jest.fn().mockReturnThis(),
+  fillRect: jest.fn().mockReturnThis(),
+  lineStyle: jest.fn().mockReturnThis(),
+  lineBetween: jest.fn().mockReturnThis(),
+  strokeRect: jest.fn().mockReturnThis(),
+  clear: jest.fn().mockReturnThis(),
+});
+
+// Mock Circle object
+const createMockCircle = () => ({
+  setStrokeStyle: jest.fn().mockReturnThis(),
+  setFillStyle: jest.fn().mockReturnThis(),
+  x: 0,
+  y: 0,
+});
+
+// Mock Text object
+const createMockText = () => ({
+  setOrigin: jest.fn().mockReturnThis(),
+  setText: jest.fn().mockReturnThis(),
+});
+
 export class Scene {
+  key: string = '';
+
   add = {
-    circle: jest.fn(),
+    circle: jest.fn().mockImplementation(() => createMockCircle()),
     rectangle: jest.fn(),
-    text: jest.fn(),
-    graphics: jest.fn(),
+    text: jest.fn().mockImplementation(() => createMockText()),
+    graphics: jest.fn().mockImplementation(() => createMockGraphics()),
     sprite: jest.fn(),
     image: jest.fn(),
   };
@@ -58,6 +84,13 @@ export class Scene {
     add: {
       sprite: jest.fn(),
     },
+    world: {
+      setBounds: jest.fn(),
+    },
+  };
+  scale = {
+    width: 1024,
+    height: 768,
   };
   input = {
     on: jest.fn(),
@@ -86,6 +119,12 @@ export class Scene {
   time = {
     addEvent: jest.fn(),
   };
+
+  constructor(config?: { key?: string }) {
+    if (config?.key) {
+      this.key = config.key;
+    }
+  }
 }
 
 export const Math = {
