@@ -110,19 +110,19 @@ Racing game for 4-year-old Rosie with math challenges!
 
 ### 2.1 Tap-to-Run System
 
-- [ ] **Big "TAP!" button at bottom center**
+- [x] **Big "TAP!" button at bottom center**
 
   > Create `src/components/TapButton.tsx`. Style: large circular button (min 100px), bright color (pink/purple), "TAP!" text. Position with CSS: `position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%)`. Use `onPointerDown` for instant response.
 
-- [ ] **Tap increases speed/momentum**
+- [x] **Tap increases speed/momentum**
 
   > In game state, track `velocity: number`. Each tap adds to velocity (e.g., `velocity += 15`). Cap max velocity (e.g., 300). Communicate taps from React to Phaser via custom event: `game.events.emit('tap')`.
 
-- [ ] **Momentum decays over time**
+- [x] **Momentum decays over time**
 
   > In RaceScene `update(time, delta)`, apply friction: `velocity *= 0.98` per frame. This creates natural slowdown. Tune decay rate for good feel—player should need ~3-4 taps/second to maintain speed.
 
-- [ ] **Smooth horizontal movement**
+- [x] **Smooth horizontal movement**
   > In `update()`, move Rosie: `rosie.x += velocity * (delta / 1000)`. Use delta-time for frame-rate independence. Clamp x position to track bounds.
 
 ### 2.2 Player Avatar

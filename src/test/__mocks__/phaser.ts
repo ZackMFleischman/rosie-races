@@ -102,8 +102,15 @@ export class Scene {
   };
   game = {
     events: {
+      on: jest.fn(),
+      off: jest.fn(),
       emit: jest.fn(),
     },
+  };
+  events = {
+    on: jest.fn(),
+    off: jest.fn(),
+    emit: jest.fn(),
   };
   load = {
     audio: jest.fn(),
@@ -131,6 +138,9 @@ export const Math = {
   FloatBetween: jest.fn((min: number, max: number) => (min + max) / 2),
   Between: jest.fn((min: number, max: number) =>
     globalThis.Math.floor((min + max) / 2)
+  ),
+  Clamp: jest.fn((value: number, min: number, max: number) =>
+    globalThis.Math.min(globalThis.Math.max(value, min), max)
   ),
 };
 

@@ -1,11 +1,20 @@
-import { useMemo } from 'react';
+import { useMemo, useCallback } from 'react';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import GameContainer from './components/GameContainer';
+import TapButton from './components/TapButton';
+import { GameProvider } from './context/GameContext';
+import { useGame } from './hooks/useGame';
 import { RaceScene } from './game/scenes/RaceScene';
+import * as Phaser from 'phaser';
 
-function App() {
+/**
+ * Inner app component that uses the game context
+ */
+function AppContent() {
+  const { setGame, emitTap } = useGame();
+
   // Memoize game config to prevent recreation on re-renders
   const gameConfig = useMemo(
     () => ({
@@ -13,6 +22,19 @@ function App() {
     }),
     []
   );
+
+  // Handle game ready - store reference in context
+  const handleGameReady = useCallback(
+    (game: Phaser.Game) => {
+      setGame(game);
+    },
+    [setGame]
+  );
+
+  // Handle tap button press
+  const handleTap = useCallback(() => {
+    emitTap();
+  }, [emitTap]);
 
   return (
     <Box
@@ -80,12 +102,12 @@ function App() {
               boxShadow: 3,
             }}
           >
-            <GameContainer config={gameConfig} />
+            <GameContainer config={gameConfig} onGameReady={handleGameReady} />
           </Box>
         </Container>
       </Box>
 
-      {/* Footer area - will contain TAP button */}
+      {/* Footer area - TAP button */}
       <Box
         component="footer"
         sx={{
@@ -96,40 +118,20 @@ function App() {
           alignItems: 'center',
         }}
       >
-        {/* Placeholder for TAP button */}
-        <Box
-          sx={{
-            width: { xs: 100, sm: 120 },
-            height: { xs: 100, sm: 120 },
-            borderRadius: '50%',
-            bgcolor: 'primary.main',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: 4,
-            cursor: 'pointer',
-            '&:hover': {
-              bgcolor: 'primary.dark',
-            },
-            '&:active': {
-              transform: 'scale(0.95)',
-            },
-            transition: 'all 0.1s ease-in-out',
-          }}
-        >
-          <Typography
-            variant="h4"
-            sx={{
-              color: 'primary.contrastText',
-              fontWeight: 700,
-              fontSize: { xs: '1.5rem', sm: '1.75rem' },
-            }}
-          >
-            TAP!
-          </Typography>
-        </Box>
+        <TapButton onTap={handleTap} />
       </Box>
     </Box>
+  );
+}
+
+/**
+ * Main App component with GameProvider wrapper
+ */
+function App() {
+  return (
+    <GameProvider>
+      <AppContent />
+    </GameProvider>
   );
 }
 

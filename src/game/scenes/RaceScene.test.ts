@@ -1,5 +1,5 @@
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
-import { RaceScene } from './RaceScene';
+import { RaceScene, MOVEMENT_CONFIG, TRACK_CONFIG } from './RaceScene';
 
 describe('RaceScene', () => {
   const setupTest = () => {
@@ -88,6 +88,24 @@ describe('RaceScene', () => {
       const lanePositions = scene.getLaneYPositions();
       expect(rosieCall?.[1]).toBe(lanePositions[0]);
     });
+
+    it('sets up tap event listener on game events', () => {
+      const { scene } = setupTest();
+      expect(scene.game.events.on).toHaveBeenCalledWith(
+        'tap',
+        expect.any(Function),
+        scene
+      );
+    });
+
+    it('sets up restart event listener on game events', () => {
+      const { scene } = setupTest();
+      expect(scene.game.events.on).toHaveBeenCalledWith(
+        'restartRace',
+        expect.any(Function),
+        scene
+      );
+    });
   });
 
   describe('getRosie', () => {
@@ -139,6 +157,49 @@ describe('RaceScene', () => {
         expect(pos).toBeGreaterThan(skyHeight);
         expect(pos).toBeLessThan(canvasHeight);
       });
+    });
+  });
+
+  describe('getVelocity', () => {
+    it('returns 0 initially', () => {
+      const { scene } = setupTest();
+      expect(scene.getVelocity()).toBe(0);
+    });
+  });
+
+  describe('getHasFinished', () => {
+    it('returns false initially', () => {
+      const { scene } = setupTest();
+      expect(scene.getHasFinished()).toBe(false);
+    });
+  });
+
+  describe('MOVEMENT_CONFIG', () => {
+    it('has expected tap velocity boost', () => {
+      expect(MOVEMENT_CONFIG.TAP_VELOCITY_BOOST).toBe(15);
+    });
+
+    it('has expected max velocity', () => {
+      expect(MOVEMENT_CONFIG.MAX_VELOCITY).toBe(300);
+    });
+
+    it('has expected friction value', () => {
+      expect(MOVEMENT_CONFIG.FRICTION).toBe(0.98);
+    });
+  });
+
+  describe('TRACK_CONFIG', () => {
+    it('has 6 lanes', () => {
+      expect(TRACK_CONFIG.LANE_COUNT).toBe(6);
+    });
+
+    it('has expected start and finish positions', () => {
+      expect(TRACK_CONFIG.START_LINE_X).toBe(50);
+      expect(TRACK_CONFIG.FINISH_LINE_X).toBe(974);
+    });
+
+    it('has Rosie start position after start line', () => {
+      expect(TRACK_CONFIG.ROSIE_START_X).toBeGreaterThan(TRACK_CONFIG.START_LINE_X);
     });
   });
 });
