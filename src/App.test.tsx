@@ -1,18 +1,36 @@
 import { render, screen } from '@testing-library/react';
+import { ThemeProvider } from '@mui/material/styles';
+import theme from './theme';
 import App from './App';
 
 describe('App', () => {
   const setupTest = () => {
-    return render(<App />);
+    return render(
+      <ThemeProvider theme={theme}>
+        <App />
+      </ThemeProvider>
+    );
   };
 
-  it('renders the app heading', () => {
+  it('renders the game title in the header', () => {
     setupTest();
-    expect(screen.getByText('Vite + React')).toBeInTheDocument();
+    expect(screen.getByText('Rosie Races')).toBeInTheDocument();
   });
 
-  it('renders the count button with initial value of 0', () => {
+  it('renders the placeholder game message', () => {
     setupTest();
-    expect(screen.getByRole('button', { name: /count is 0/i })).toBeInTheDocument();
+    expect(screen.getByText('Game coming soon!')).toBeInTheDocument();
+  });
+
+  it('renders the TAP button placeholder', () => {
+    setupTest();
+    expect(screen.getByText('TAP!')).toBeInTheDocument();
+  });
+
+  it('has correct semantic structure', () => {
+    setupTest();
+    expect(document.querySelector('header')).toBeInTheDocument();
+    expect(document.querySelector('main')).toBeInTheDocument();
+    expect(document.querySelector('footer')).toBeInTheDocument();
   });
 });

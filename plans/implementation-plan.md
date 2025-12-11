@@ -57,23 +57,23 @@ Racing game for 4-year-old Rosie with math challenges!
 
 ### 1.3 Design System & Responsive
 
-- [ ] **MaterialUI setup**
+- [x] **MaterialUI setup**
 
   > Install: `npm install @mui/material @emotion/react @emotion/styled`. Create theme in `src/theme.ts` with kid-friendly colors. Use system props (`sx`) or `styled()` for styling—no CSS modules. Wrap app in `<ThemeProvider>`.
 
-- [ ] **Responsive layout with MUI**
+- [x] **Responsive layout with MUI**
 
   > Use MUI's responsive breakpoints: `xs` (phone), `sm`/`md` (tablet). Use `Box`, `Container`, `Stack` for layout. Set root height with `100dvh`. All sizing via theme spacing.
 
-- [ ] **Phaser canvas scales to screen**
+- [x] **Phaser canvas scales to screen**
 
   > In Phaser config, set `scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH, width: 1024, height: 768 }`. This maintains aspect ratio while fitting container. Parent div should be 100% of viewport.
 
-- [ ] **UI scales proportionally**
+- [x] **UI scales proportionally**
 
   > Use `rem` units based on root font size. Set root font size with `clamp(14px, 2vw, 20px)` for fluid scaling. All UI components inherit proportional sizing.
 
-- [ ] **Test iPhone + iPad sizes**
+- [x] **Test iPhone + iPad sizes**
   > Use browser DevTools device emulation. Test: iPhone SE (375x667), iPhone 14 (390x844), iPad (768x1024), iPad Pro (1024x1366). Verify no overflow, touch targets ≥44px.
 
 ### 1.4 Phaser Integration

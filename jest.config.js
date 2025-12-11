@@ -6,6 +6,8 @@ export default {
   testMatch: ['**/*.test.{ts,tsx}'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
+    // Mock Phaser to avoid canvas/WebGL issues in tests
+    '^phaser$': '<rootDir>/src/test/__mocks__/phaser.ts',
     // Mock static assets
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
     '\\.(jpg|jpeg|png|gif|webp|svg)$': '<rootDir>/src/test/__mocks__/fileMock.ts',
