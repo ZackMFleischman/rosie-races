@@ -87,6 +87,40 @@ export const COUNTDOWN_CONFIG = {
   INTERVAL_MS: 1000, // 1 second between counts
 };
 
+// Constants for fairy dust trail effect
+export const SPARKLE_CONFIG = {
+  // Texture settings - tiny soft dots
+  TEXTURE_SIZE: 6,
+  OUTER_RADIUS: 3,
+  INNER_RADIUS: 1,
+
+  // Particle behavior - stay in place and fade slowly for trail effect
+  SPEED_MIN: 0,
+  SPEED_MAX: 3,
+  ANGLE_MIN: 160,
+  ANGLE_MAX: 200,
+  SCALE_START: 0.5,
+  SCALE_END: 0.15,
+  ALPHA_START: 0.9,
+  ALPHA_END: 0,
+
+  // Spawn spread
+  SPAWN_SPREAD_X: 8, // Random spread in X
+  SPAWN_SPREAD_Y: 10, // Random spread in Y
+  LIFESPAN_MIN: 1200, // Long fade for visible trail
+  LIFESPAN_MAX: 1800,
+  BASE_FREQUENCY: 40,
+
+  // Velocity-based emission
+  VELOCITY_THRESHOLD: 10,
+  FREQUENCY_MIN: 15,
+  FREQUENCY_MAX: 60,
+  FREQUENCY_VELOCITY_DIVISOR: 4,
+
+  // Fairy dust colors - soft whites, golds, pale pinks
+  COLORS: [0xffffff, 0xfffacd, 0xffefd5, 0xffb6c1, 0xffe4b5],
+};
+
 /**
  * RaceScene - Main gameplay scene for the racing game.
  * Features:
@@ -139,6 +173,9 @@ export class RaceScene extends Phaser.Scene {
 
   // Countdown state
   private countdownTimer: Phaser.Time.TimerEvent | null = null;
+
+  // Sparkle trail effect
+  private sparkleEmitter: Phaser.GameObjects.Particles.ParticleEmitter | null = null;
 
   constructor() {
     super({ key: 'RaceScene' });
@@ -202,6 +239,9 @@ export class RaceScene extends Phaser.Scene {
 
     // Create Rosie placeholder
     this.createRosie();
+
+    // Create sparkle trail emitter for Rosie
+    this.createSparkleEmitter();
 
     // Create AI competitors
     this.createCompetitors();
@@ -695,6 +735,39 @@ export class RaceScene extends Phaser.Scene {
   }
 
   /**
+   * Create sparkle particle emitter for Rosie's trail effect
+   */
+  private createSparkleEmitter(): void {
+    const cfg = SPARKLE_CONFIG;
+
+    // Create a sparkle texture (star-like shape)
+    const graphics = this.add.graphics();
+    const center = cfg.TEXTURE_SIZE / 2;
+    graphics.fillStyle(0xffffff, 1);
+    graphics.fillCircle(center, center, cfg.OUTER_RADIUS);
+    // Add a bright center
+    graphics.fillStyle(0xffffcc, 1);
+    graphics.fillCircle(center, center, cfg.INNER_RADIUS);
+    graphics.generateTexture('sparkle', cfg.TEXTURE_SIZE, cfg.TEXTURE_SIZE);
+    graphics.destroy();
+
+    // Create the particle emitter
+    this.sparkleEmitter = this.add.particles(0, 0, 'sparkle', {
+      speed: { min: cfg.SPEED_MIN, max: cfg.SPEED_MAX },
+      angle: { min: cfg.ANGLE_MIN, max: cfg.ANGLE_MAX },
+      scale: { start: cfg.SCALE_START, end: cfg.SCALE_END },
+      alpha: { start: cfg.ALPHA_START, end: cfg.ALPHA_END },
+      lifespan: { min: cfg.LIFESPAN_MIN, max: cfg.LIFESPAN_MAX },
+      frequency: cfg.BASE_FREQUENCY,
+      emitting: false, // Start inactive
+      tint: cfg.COLORS,
+    });
+
+    // Set depth below Rosie so trail appears behind her
+    this.sparkleEmitter.setDepth(14);
+  }
+
+  /**
    * Create AI competitor sprites in lanes 2-6
    */
   private createCompetitors(): void {
@@ -942,10 +1015,33 @@ export class RaceScene extends Phaser.Scene {
         Math.sin(time * ANIMATION_CONFIG.SCALE_PULSE_FREQUENCY) *
           ANIMATION_CONFIG.SCALE_PULSE_AMOUNT;
       this.rosie.setScale(this.rosieBaseScale * scalePulse);
+
+      // Update sparkle trail - position behind Rosie and emit based on velocity
+      if (this.sparkleEmitter) {
+        // Emit fairy dust underneath Rosie - particles stay in world space
+        if (this.velocity > SPARKLE_CONFIG.VELOCITY_THRESHOLD) {
+          if (Math.random() < 0.6) {
+            const spriteHeight = this.rosie.height * this.rosieBaseScale;
+            // Random spread around spawn point
+            const spreadX = (Math.random() - 0.5) * SPARKLE_CONFIG.SPAWN_SPREAD_X;
+            const spreadY = (Math.random() - 0.5) * SPARKLE_CONFIG.SPAWN_SPREAD_Y;
+            // Emit directly underneath Rosie
+            this.sparkleEmitter.emitParticleAt(
+              this.rosie.x + spreadX,
+              this.rosie.y + spriteHeight * 0.4 + spreadY
+            );
+          }
+        }
+      }
     } else {
       // Reset to base position when not moving
       this.rosie.y = this.rosieBaseY;
       this.rosie.setScale(this.rosieBaseScale);
+
+      // Stop sparkle trail when not moving
+      if (this.sparkleEmitter && this.sparkleEmitter.emitting) {
+        this.sparkleEmitter.stop();
+      }
     }
   }
 
