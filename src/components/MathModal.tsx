@@ -121,10 +121,9 @@ function MathModal({ problem, onAnswer }: MathModalProps) {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'flex-start',
-        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+        justifyContent: 'center', // Center the modal so it doesn't cover the timer
+        backgroundColor: 'rgba(0, 0, 0, 0.25)', // Semi-transparent to see racers behind
         zIndex: 999, // Below timer (1000)
-        pt: { xs: 8, sm: 10 }, // Account for timer at top
       }}
     >
       {/* Math problem card */}
@@ -133,12 +132,12 @@ function MathModal({ problem, onAnswer }: MathModalProps) {
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          gap: { xs: 2, sm: 3 },
-          p: { xs: 3, sm: 4 },
-          borderRadius: 3,
-          backgroundColor: 'rgba(255, 255, 255, 0.95)',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
-          maxWidth: { xs: '95%', sm: '450px' },
+          gap: { xs: 3, sm: 4 },
+          p: { xs: 4, sm: 5 },
+          borderRadius: 4,
+          backgroundColor: 'rgba(255, 255, 255, 0.75)', // Slightly more transparent but high contrast
+          boxShadow: '0 12px 40px rgba(0, 0, 0, 0.4)',
+          maxWidth: { xs: '95%', sm: '550px' }, // Wider modal
           width: '100%',
         }}
       >
@@ -146,7 +145,7 @@ function MathModal({ problem, onAnswer }: MathModalProps) {
         <Typography
           component="span"
           sx={{
-            fontSize: { xs: '2.5rem', sm: '3rem' },
+            fontSize: { xs: '3rem', sm: '4rem' }, // Bigger emoji
             lineHeight: 1,
           }}
         >
@@ -159,7 +158,7 @@ function MathModal({ problem, onAnswer }: MathModalProps) {
           data-testid="math-question"
           sx={{
             fontWeight: 800,
-            fontSize: { xs: '1.8rem', sm: '2.5rem', md: '3rem' },
+            fontSize: { xs: '2.5rem', sm: '3.5rem', md: '4rem' }, // Bigger question
             color: 'text.primary',
             textAlign: 'center',
             fontFamily: '"Courier New", Courier, monospace',
@@ -169,7 +168,7 @@ function MathModal({ problem, onAnswer }: MathModalProps) {
         </Typography>
 
         {/* Answer buttons - 2x2 grid at TOP of content */}
-        <Grid container spacing={2} sx={{ maxWidth: { xs: '300px', sm: '400px' } }}>
+        <Grid container spacing={3} sx={{ maxWidth: { xs: '350px', sm: '480px' } }}>
           {problem.choices.map((choice, index) => (
             <Grid size={{ xs: 6 }} key={index}>
               <Button
@@ -181,14 +180,14 @@ function MathModal({ problem, onAnswer }: MathModalProps) {
                 data-choice={choice}
                 sx={{
                   width: '100%',
-                  py: { xs: 2, sm: 2.5 },
-                  fontSize: { xs: '1.5rem', sm: '2rem' },
+                  py: { xs: 2.5, sm: 3.5 }, // Taller buttons
+                  fontSize: { xs: '2rem', sm: '2.5rem' }, // Bigger text
                   fontWeight: 700,
-                  borderRadius: 2,
-                  minHeight: { xs: '70px', sm: '80px' },
-                  boxShadow: 3,
+                  borderRadius: 3,
+                  minHeight: { xs: '90px', sm: '110px' }, // Much larger touch targets
+                  boxShadow: 4,
                   '&:hover': {
-                    boxShadow: 5,
+                    boxShadow: 6,
                     transform: feedback === 'none' ? 'scale(1.05)' : 'none',
                   },
                   '&:active': {
