@@ -23,7 +23,7 @@ function FinishedScreen({ finishTime, onRestart }: FinishedScreenProps) {
       data-testid="finished-screen"
       sx={{
         position: 'fixed',
-        top: 60, // Below the timer
+        top: 0,
         left: 0,
         right: 0,
         bottom: 0,
@@ -32,7 +32,7 @@ function FinishedScreen({ finishTime, onRestart }: FinishedScreenProps) {
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: 'rgba(0, 0, 0, 0.7)',
-        zIndex: 900, // Below timer (1000) but above game
+        zIndex: 1100, // Above timer (1000) and everything else
       }}
     >
       {/* Celebration content */}
