@@ -230,50 +230,50 @@ Racing game for 4-year-old Rosie with math challenges!
 
 ### 4.1 Sound Effects (Placeholders)
 
-- [ ] **Countdown: 3, 2, 1 beeps + gunshot GO!**
+- [x] **Countdown: 3, 2, 1 beeps + gunshot GO!**
 
-  > Create placeholder audio files in `public/assets/audio/`: `beep.mp3` (short tone), `go.mp3` (louder tone). Can use Web Audio API to generate tones programmatically, or download free SFX. Play sequence with delays.
+  > Created placeholder audio files in `public/assets/audio/`: `beep.mp3`, `go.mp3`. Generated via script in `scripts/generate-audio-placeholders.js`. Actual sounds can be added later.
 
-- [ ] **Race background music loop**
+- [x] **Race background music loop**
 
-  > Use any royalty-free upbeat loop. Save as `race-music.mp3`. Set loop=true in Phaser audio config. Keep file small (<500KB) for fast load.
+  > Created `race-music.mp3` placeholder. AudioManager plays it on race start with loop=true.
 
-- [ ] **Finish celebration sound**
+- [x] **Finish celebration sound**
 
-  > Short victory fanfare or chime. Save as `finish.mp3`. Play on race completion, stop background music.
+  > Created `finish.mp3` placeholder. Plays on race completion, stops background music with fade out.
 
-- [ ] **Post-race screen music**
-  > Calmer loop for results screen. Save as `results-music.mp3`. Crossfade from finish sound.
+- [x] **Post-race screen music**
+  > Created `results-music.mp3` placeholder. Crossfade support implemented in AudioManager.
 
 ### 4.2 Volume Control UI
 
-- [ ] **Speaker icon 🔊 in corner**
+- [x] **Speaker icon 🔊 in corner**
 
-  > Create `src/components/VolumeControl.tsx`. Position: `fixed; top: 10px; right: 10px`. Use emoji or SVG icon. Icon changes: 🔊 (on) / 🔇 (muted).
+  > Created `src/components/VolumeControl.tsx`. Position: `fixed; top: 10px; right: 10px`. Uses MUI VolumeUp/VolumeOff/VolumeMute icons. Icon changes based on volume/mute state.
 
-- [ ] **Tap toggles volume slider**
+- [x] **Tap toggles volume slider**
 
-  > On icon tap, show/hide slider. Slider: vertical or horizontal range input, 0-100. Style with CSS for larger thumb (touch-friendly). Animate slide in/out.
+  > On icon tap, shows/hides Popover with vertical slider. Slider uses MUI Slider with touch-friendly styling.
 
-- [ ] **Mute/unmute toggle**
+- [x] **Mute/unmute toggle**
 
-  > Long-press or double-tap on icon to mute. Store `isMuted` state. When muted, set Phaser `sound.mute = true`. Visual: icon changes, slider dims.
+  > Double-tap on icon to mute. Store `isMuted` state. When muted, sets Phaser `sound.mute = true`. Visual: icon changes based on state.
 
-- [ ] **Persist to localStorage**
-  > On volume change: `localStorage.setItem('volume', value)`. On mount: read and apply saved volume. Default to 70% if not set.
+- [x] **Persist to localStorage**
+  > Volume saved to `rosie-races-volume`, mute state saved to `rosie-races-muted`. Default volume is 70%.
 
 ### 4.3 Audio System
 
-- [ ] **Phaser audio manager**
+- [x] **Phaser audio manager**
 
-  > Create `src/game/systems/AudioManager.ts`. Singleton pattern. Methods: `playMusic(key)`, `playSFX(key)`, `setVolume(0-1)`, `mute()`. Wraps Phaser's `this.sound` API.
+  > Created `src/game/systems/AudioManager.ts`. Singleton pattern. Methods: `playMusic(key)`, `playSFX(key)`, `setVolume(0-1)`, `toggleMute()`, `crossfadeMusic()`. Wraps Phaser's `this.sound` API.
 
-- [ ] **Preload placeholder sounds**
+- [x] **Preload placeholder sounds**
 
-  > In `PreloadScene.ts`, load all audio: `this.load.audio('beep', 'assets/audio/beep.mp3')`, etc. Show loading progress for slow connections.
+  > Audio preloaded in RaceScene's `preload()` method via `AudioManager.preloadAudio(scene)`. All 8 audio files loaded.
 
-- [ ] **Smooth music transitions**
-  > Use Phaser tweens to fade volume: `this.tweens.add({ targets: music, volume: 0, duration: 500 })`. Start new track at 0, fade in. Prevents jarring cuts.
+- [x] **Smooth music transitions**
+  > Implemented fade in/out using Phaser tweens with 500ms duration. `crossfadeMusic()` method for smooth transitions between tracks.
 
 **✅ Milestone:** Audio working, volume controllable
 

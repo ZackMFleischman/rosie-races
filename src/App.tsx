@@ -5,6 +5,7 @@ import Typography from '@mui/material/Typography';
 import GameContainer from './components/GameContainer';
 import TapButton from './components/TapButton';
 import Timer from './components/Timer';
+import VolumeControl from './components/VolumeControl';
 import { GameProvider } from './context/GameContext';
 import { useGame } from './hooks/useGame';
 import { RaceScene } from './game/scenes/RaceScene';
@@ -46,6 +47,9 @@ function AppContent() {
         bgcolor: 'background.default',
       }}
     >
+      {/* Volume control - always visible in top-right corner */}
+      <VolumeControl />
+
       {/* Timer - always visible at top, never pauses */}
       <Timer isRunning={isRacing} />
 
