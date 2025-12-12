@@ -140,15 +140,15 @@ Racing game for 4-year-old Rosie with math challenges!
 
 ### 2.3 Race Timer
 
-- [ ] **Always-visible timer at top**
+- [x] **Always-visible timer at top**
 
   > Create `src/components/Timer.tsx`. Display MM:SS.ms format. Position: `position: fixed; top: 10px; left: 50%; transform: translateX(-50%)`. Large font (2rem+), high contrast colors. Add `z-index: 1000` to stay above modals.
 
-- [ ] **Timer never pauses**
+- [x] **Timer never pauses**
 
   > Store `raceStartTime` in state. In React `useEffect` with `requestAnimationFrame` loop, calculate elapsed: `Date.now() - raceStartTime`. Update display every frame. Timer logic lives entirely in React, independent of game state.
 
-- [ ] **Large kid-friendly font**
+- [x] **Large kid-friendly font**
   > Use Google Font like "Fredoka One" or "Bubblegum Sans". Import in `index.css`: `@import url('...')`. Apply to timer with large size, text shadow for readability, and playful color.
 
 ### 2.4 Finish Detection

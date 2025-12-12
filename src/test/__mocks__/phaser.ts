@@ -49,6 +49,7 @@ export const Game = jest.fn().mockImplementation((config: unknown) => {
 const createMockGraphics = () => ({
   fillStyle: jest.fn().mockReturnThis(),
   fillRect: jest.fn().mockReturnThis(),
+  fillRoundedRect: jest.fn().mockReturnThis(),
   lineStyle: jest.fn().mockReturnThis(),
   lineBetween: jest.fn().mockReturnThis(),
   strokeRect: jest.fn().mockReturnThis(),

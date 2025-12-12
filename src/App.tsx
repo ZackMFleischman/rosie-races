@@ -4,6 +4,7 @@ import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import GameContainer from './components/GameContainer';
 import TapButton from './components/TapButton';
+import Timer from './components/Timer';
 import { GameProvider } from './context/GameContext';
 import { useGame } from './hooks/useGame';
 import { RaceScene } from './game/scenes/RaceScene';
@@ -13,7 +14,7 @@ import * as Phaser from 'phaser';
  * Inner app component that uses the game context
  */
 function AppContent() {
-  const { setGame, emitTap } = useGame();
+  const { setGame, emitTap, isRacing } = useGame();
 
   // Memoize game config to prevent recreation on re-renders
   const gameConfig = useMemo(
@@ -45,6 +46,9 @@ function AppContent() {
         bgcolor: 'background.default',
       }}
     >
+      {/* Timer - always visible at top, never pauses */}
+      <Timer isRunning={isRacing} />
+
       {/* Header area - will contain timer and volume control */}
       <Box
         component="header"

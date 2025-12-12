@@ -1,5 +1,11 @@
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
-import { RaceScene, MOVEMENT_CONFIG, TRACK_CONFIG, ANIMATION_CONFIG } from './RaceScene';
+import {
+  RaceScene,
+  MOVEMENT_CONFIG,
+  TRACK_CONFIG,
+  ANIMATION_CONFIG,
+  CHECKPOINT_CONFIG,
+} from './RaceScene';
 
 describe('RaceScene', () => {
   const setupTest = () => {
@@ -244,6 +250,79 @@ describe('RaceScene', () => {
       const scene = new RaceScene();
       // Don't call create
       expect(scene.getRosieBaseY()).toBe(0);
+    });
+  });
+
+  describe('CHECKPOINT_CONFIG', () => {
+    it('has 2 checkpoint positions', () => {
+      expect(CHECKPOINT_CONFIG.POSITIONS).toHaveLength(2);
+    });
+
+    it('has checkpoint positions between start and finish', () => {
+      CHECKPOINT_CONFIG.POSITIONS.forEach((pos) => {
+        expect(pos).toBeGreaterThan(TRACK_CONFIG.START_LINE_X);
+        expect(pos).toBeLessThan(TRACK_CONFIG.FINISH_LINE_X);
+      });
+    });
+
+    it('has checkpoint positions roughly at 1/3 and 2/3 of track', () => {
+      const trackLength = TRACK_CONFIG.FINISH_LINE_X - TRACK_CONFIG.START_LINE_X;
+      expect(CHECKPOINT_CONFIG.POSITIONS[0]).toBeCloseTo(TRACK_CONFIG.START_LINE_X + trackLength * 0.27, -1);
+      expect(CHECKPOINT_CONFIG.POSITIONS[1]).toBeCloseTo(TRACK_CONFIG.START_LINE_X + trackLength * 0.60, -1);
+    });
+
+    it('has velocity boost values configured', () => {
+      expect(CHECKPOINT_CONFIG.FAST_ANSWER_BOOST).toBe(50);
+      expect(CHECKPOINT_CONFIG.SLOW_ANSWER_BOOST).toBe(20);
+      expect(CHECKPOINT_CONFIG.FAST_ANSWER_THRESHOLD).toBe(3000);
+    });
+  });
+
+  describe('getIsPaused', () => {
+    it('returns false initially', () => {
+      const { scene } = setupTest();
+      expect(scene.getIsPaused()).toBe(false);
+    });
+  });
+
+  describe('getPassedCheckpoints', () => {
+    it('returns array of false values initially', () => {
+      const { scene } = setupTest();
+      const checkpoints = scene.getPassedCheckpoints();
+      expect(checkpoints).toHaveLength(CHECKPOINT_CONFIG.POSITIONS.length);
+      checkpoints.forEach((passed) => {
+        expect(passed).toBe(false);
+      });
+    });
+
+    it('returns a copy of passed checkpoints (not the original array)', () => {
+      const { scene } = setupTest();
+      const checkpoints1 = scene.getPassedCheckpoints();
+      const checkpoints2 = scene.getPassedCheckpoints();
+      expect(checkpoints1).not.toBe(checkpoints2);
+      expect(checkpoints1).toEqual(checkpoints2);
+    });
+  });
+
+  describe('create with checkpoints', () => {
+    it('sets up math answer event listener on game events', () => {
+      const { scene } = setupTest();
+      expect(scene.game.events.on).toHaveBeenCalledWith(
+        'mathAnswerSubmitted',
+        expect.any(Function),
+        scene
+      );
+    });
+
+    it('creates checkpoint visual markers with ? symbols', () => {
+      const { scene } = setupTest();
+      const textCalls = (scene.add.text as jest.Mock).mock.calls;
+
+      // Find the ? labels for checkpoints
+      const questionMarks = textCalls.filter(
+        (call: unknown[]) => call[2] === '?'
+      );
+      expect(questionMarks).toHaveLength(CHECKPOINT_CONFIG.POSITIONS.length);
     });
   });
 });

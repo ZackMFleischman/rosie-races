@@ -1,5 +1,6 @@
 import * as Phaser from 'phaser';
 import { GAME_EVENTS } from '../events';
+import type { MathAnswerPayload } from '../events';
 import rosieSpriteUrl from '../../assets/rosie-sprite.png';
 
 // Constants for track layout
@@ -10,6 +11,22 @@ export const TRACK_CONFIG = {
   ROSIE_START_X: 80,
   ROSIE_RADIUS: 30,
   ROSIE_COLOR: 0xff69b4, // Pink
+};
+
+// Constants for checkpoints
+export const CHECKPOINT_CONFIG = {
+  POSITIONS: [300, 600], // X positions for checkpoints (roughly 1/3 and 2/3 of track)
+  ARCH_HEIGHT: 60, // Height of the checkpoint arch
+  ARCH_WIDTH: 30, // Width of the arch
+  COLORS: {
+    PRIMARY: 0xff0000, // Red
+    SECONDARY: 0xffffff, // White
+    QUESTION_MARK: 0xffff00, // Yellow
+  },
+  // Velocity boosts for correct answers
+  FAST_ANSWER_THRESHOLD: 3000, // 3 seconds in ms
+  FAST_ANSWER_BOOST: 50,
+  SLOW_ANSWER_BOOST: 20,
 };
 
 // Constants for movement physics
@@ -43,11 +60,16 @@ export class RaceScene extends Phaser.Scene {
 
   // Movement state
   private velocity: number = 0;
+  private hasStarted: boolean = false;
   private hasFinished: boolean = false;
 
   // Animation state
   private rosieBaseY: number = 0; // Base Y position for bobbing animation
   private rosieBaseScale: number = 1; // Base scale for the sprite
+
+  // Checkpoint state
+  private isPaused: boolean = false; // Whether Rosie is paused at a checkpoint
+  private passedCheckpoints: boolean[] = []; // Track which checkpoints have been passed
 
   constructor() {
     super({ key: 'RaceScene' });
@@ -63,6 +85,9 @@ export class RaceScene extends Phaser.Scene {
     this.laneHeight = this.scale.height / TRACK_CONFIG.LANE_COUNT;
     this.calculateLanePositions();
 
+    // Initialize checkpoint state
+    this.passedCheckpoints = CHECKPOINT_CONFIG.POSITIONS.map(() => false);
+
     // Set world bounds to match camera (fixed viewport)
     this.physics.world.setBounds(0, 0, this.scale.width, this.scale.height);
 
@@ -75,6 +100,9 @@ export class RaceScene extends Phaser.Scene {
     // Draw start and finish lines
     this.drawStartFinishLines();
 
+    // Draw checkpoints
+    this.drawCheckpoints();
+
     // Create Rosie placeholder
     this.createRosie();
 
@@ -84,6 +112,7 @@ export class RaceScene extends Phaser.Scene {
 
   update(time: number, delta: number): void {
     if (this.hasFinished) return;
+    if (this.isPaused) return; // Don't move while paused at checkpoint
 
     // Apply friction (momentum decay)
     this.velocity *= MOVEMENT_CONFIG.FRICTION;
@@ -104,6 +133,9 @@ export class RaceScene extends Phaser.Scene {
         TRACK_CONFIG.START_LINE_X,
         TRACK_CONFIG.FINISH_LINE_X
       );
+
+      // Check for checkpoints
+      this.checkForCheckpoint();
 
       // Check for finish line
       if (this.rosie.x >= TRACK_CONFIG.FINISH_LINE_X) {
@@ -131,6 +163,12 @@ export class RaceScene extends Phaser.Scene {
     this.events.on('shutdown', () => {
       this.game.events.off(GAME_EVENTS.RESTART_RACE, this.handleRestart, this);
     });
+
+    // Listen for math answer submissions
+    this.game.events.on(GAME_EVENTS.MATH_ANSWER_SUBMITTED, this.handleMathAnswer, this);
+    this.events.on('shutdown', () => {
+      this.game.events.off(GAME_EVENTS.MATH_ANSWER_SUBMITTED, this.handleMathAnswer, this);
+    });
   }
 
   /**
@@ -138,6 +176,13 @@ export class RaceScene extends Phaser.Scene {
    */
   private handleTap = (): void => {
     if (this.hasFinished) return;
+    if (this.isPaused) return; // Don't respond to taps while paused at checkpoint
+
+    // Emit race started on first tap
+    if (!this.hasStarted) {
+      this.hasStarted = true;
+      this.game.events.emit(GAME_EVENTS.RACE_STARTED);
+    }
 
     // Add velocity boost
     this.velocity += MOVEMENT_CONFIG.TAP_VELOCITY_BOOST;
@@ -159,13 +204,53 @@ export class RaceScene extends Phaser.Scene {
    * Handle race restart
    */
   private handleRestart = (): void => {
+    this.hasStarted = false;
     this.hasFinished = false;
     this.velocity = 0;
+    this.isPaused = false;
+    this.passedCheckpoints = CHECKPOINT_CONFIG.POSITIONS.map(() => false);
     if (this.rosie) {
       this.rosie.x = TRACK_CONFIG.ROSIE_START_X;
       this.rosie.y = this.rosieBaseY;
       this.rosie.setScale(this.rosieBaseScale);
     }
+  };
+
+  /**
+   * Check if Rosie has reached a checkpoint
+   */
+  private checkForCheckpoint(): void {
+    if (!this.rosie) return;
+
+    CHECKPOINT_CONFIG.POSITIONS.forEach((checkpointX, index) => {
+      // Check if Rosie has just crossed this checkpoint
+      if (!this.passedCheckpoints[index] && this.rosie!.x >= checkpointX) {
+        this.passedCheckpoints[index] = true;
+        this.isPaused = true;
+        this.velocity = 0; // Stop momentum while paused
+
+        // Emit event to show math problem
+        this.game.events.emit(GAME_EVENTS.SHOW_MATH_PROBLEM, { checkpointIndex: index });
+      }
+    });
+  }
+
+  /**
+   * Handle math answer submission from React
+   */
+  private handleMathAnswer = (payload: MathAnswerPayload): void => {
+    // Resume the race
+    this.isPaused = false;
+
+    if (payload.correct) {
+      // Apply velocity boost based on answer speed
+      if (payload.timeTaken < CHECKPOINT_CONFIG.FAST_ANSWER_THRESHOLD) {
+        this.velocity = CHECKPOINT_CONFIG.FAST_ANSWER_BOOST;
+      } else {
+        this.velocity = CHECKPOINT_CONFIG.SLOW_ANSWER_BOOST;
+      }
+    }
+    // Wrong answers: no boost, just resume (stumble delay handled in React)
   };
 
   /**
@@ -299,6 +384,56 @@ export class RaceScene extends Phaser.Scene {
   }
 
   /**
+   * Draw checkpoint markers (arches with ? symbols)
+   */
+  private drawCheckpoints(): void {
+    const graphics = this.add.graphics();
+    const skyHeight = this.scale.height * 0.2;
+
+    CHECKPOINT_CONFIG.POSITIONS.forEach((checkpointX) => {
+      // Draw arch poles (vertical red/white striped banners)
+      const poleWidth = 8;
+      const stripeHeight = 15;
+
+      // Draw pole on the track
+      for (let y = skyHeight; y < this.scale.height; y += stripeHeight * 2) {
+        // Red stripe
+        graphics.fillStyle(CHECKPOINT_CONFIG.COLORS.PRIMARY, 1);
+        graphics.fillRect(checkpointX - poleWidth / 2, y, poleWidth, stripeHeight);
+
+        // White stripe
+        graphics.fillStyle(CHECKPOINT_CONFIG.COLORS.SECONDARY, 1);
+        graphics.fillRect(
+          checkpointX - poleWidth / 2,
+          y + stripeHeight,
+          poleWidth,
+          Math.min(stripeHeight, this.scale.height - y - stripeHeight)
+        );
+      }
+
+      // Draw arch top (curved banner in sky area)
+      const archCenterY = skyHeight - 20;
+      graphics.fillStyle(CHECKPOINT_CONFIG.COLORS.PRIMARY, 1);
+      graphics.fillRoundedRect(
+        checkpointX - CHECKPOINT_CONFIG.ARCH_WIDTH / 2,
+        archCenterY - 15,
+        CHECKPOINT_CONFIG.ARCH_WIDTH,
+        30,
+        8
+      );
+
+      // Add "?" symbol on the arch
+      this.add
+        .text(checkpointX, archCenterY, '?', {
+          fontSize: '24px',
+          color: '#ffff00',
+          fontStyle: 'bold',
+        })
+        .setOrigin(0.5, 0.5);
+    });
+  }
+
+  /**
    * Draw a dashed line
    */
   private drawDashedLine(
@@ -407,6 +542,20 @@ export class RaceScene extends Phaser.Scene {
    */
   getHasFinished(): boolean {
     return this.hasFinished;
+  }
+
+  /**
+   * Check if Rosie is paused at a checkpoint (for external access/testing)
+   */
+  getIsPaused(): boolean {
+    return this.isPaused;
+  }
+
+  /**
+   * Get array of passed checkpoints (for external access/testing)
+   */
+  getPassedCheckpoints(): boolean[] {
+    return [...this.passedCheckpoints];
   }
 }
 
