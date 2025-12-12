@@ -3,6 +3,17 @@ import { GAME_EVENTS } from '../events';
 import type { MathAnswerPayload } from '../events';
 import rosieSpriteUrl from '../../assets/rosie-sprite.png';
 import { AudioManager, AUDIO_KEYS } from '../systems/AudioManager';
+import { getRandomRacers, type FamilyMember } from '../../data/familyMembers';
+
+/**
+ * Competitor state for AI racers
+ */
+interface Competitor {
+  sprite: Phaser.GameObjects.Sprite;
+  familyMember: FamilyMember;
+  speed: number; // Current speed (pixels per second)
+  baseY: number; // Base Y position for bobbing animation
+}
 
 // Constants for track layout
 export const TRACK_CONFIG = {
@@ -72,6 +83,10 @@ export class RaceScene extends Phaser.Scene {
   private isPaused: boolean = false; // Whether Rosie is paused at a checkpoint
   private passedCheckpoints: boolean[] = []; // Track which checkpoints have been passed
 
+  // Competitor state
+  private competitors: Competitor[] = [];
+  private selectedRacers: FamilyMember[] = [];
+
   constructor() {
     super({ key: 'RaceScene' });
   }
@@ -83,6 +98,9 @@ export class RaceScene extends Phaser.Scene {
     // Preload all audio assets
     const audioManager = AudioManager.getInstance();
     audioManager.preloadAudio(this);
+
+    // Select random racers for this race
+    this.selectedRacers = getRandomRacers(5);
   }
 
   create(): void {
@@ -115,13 +133,22 @@ export class RaceScene extends Phaser.Scene {
     // Create Rosie placeholder
     this.createRosie();
 
+    // Create AI competitors
+    this.createCompetitors();
+
     // Listen for tap events from React
     this.setupTapListener();
   }
 
   update(time: number, delta: number): void {
     if (this.hasFinished) return;
-    if (this.isPaused) return; // Don't move while paused at checkpoint
+
+    const deltaSeconds = delta / 1000;
+
+    // Update AI competitors (they move even when Rosie is paused)
+    this.updateCompetitors(deltaSeconds);
+
+    if (this.isPaused) return; // Don't move Rosie while paused at checkpoint
 
     // Apply friction (momentum decay)
     this.velocity *= MOVEMENT_CONFIG.FRICTION;
@@ -133,7 +160,6 @@ export class RaceScene extends Phaser.Scene {
 
     // Move Rosie based on velocity (delta-time independent)
     if (this.rosie && this.velocity > 0) {
-      const deltaSeconds = delta / 1000;
       this.rosie.x += this.velocity * deltaSeconds;
 
       // Clamp position to track bounds
@@ -238,6 +264,9 @@ export class RaceScene extends Phaser.Scene {
       this.rosie.y = this.rosieBaseY;
       this.rosie.setScale(this.rosieBaseScale);
     }
+
+    // Reset competitors and select new random racers
+    this.resetCompetitors();
   };
 
   /**
@@ -338,6 +367,7 @@ export class RaceScene extends Phaser.Scene {
 
   /**
    * Draw the 6 horizontal lanes with alternating colors
+   * Lane 1 (Rosie's lane) is highlighted with a pink tint
    */
   private drawLanes(): void {
     const graphics = this.add.graphics();
@@ -345,12 +375,18 @@ export class RaceScene extends Phaser.Scene {
     const actualLaneHeight = (this.scale.height - skyHeight) / TRACK_CONFIG.LANE_COUNT;
 
     for (let i = 0; i < TRACK_CONFIG.LANE_COUNT; i++) {
-      // Alternating lane colors (light and dark grass)
-      const isEvenLane = i % 2 === 0;
-      const laneColor = isEvenLane ? 0x66bb6a : 0x4caf50;
       const laneY = skyHeight + actualLaneHeight * i;
 
-      graphics.fillStyle(laneColor, 1);
+      // Lane 1 (index 0) is Rosie's lane - highlight with pink tint
+      if (i === 0) {
+        graphics.fillStyle(0xffb6c1, 1); // Light pink for Rosie's lane
+      } else {
+        // Alternating lane colors (light and dark grass)
+        const isEvenLane = i % 2 === 0;
+        const laneColor = isEvenLane ? 0x66bb6a : 0x4caf50;
+        graphics.fillStyle(laneColor, 1);
+      }
+
       graphics.fillRect(0, laneY, this.scale.width, actualLaneHeight);
 
       // Add lane separator lines
@@ -500,17 +536,105 @@ export class RaceScene extends Phaser.Scene {
     // Rosie starts in lane 1 (index 0)
     this.rosieBaseY = this.laneYPositions[0];
 
-    this.rosie = this.add.sprite(
-      TRACK_CONFIG.ROSIE_START_X,
-      this.rosieBaseY,
-      'rosie-sprite'
-    );
+    this.rosie = this.add.sprite(TRACK_CONFIG.ROSIE_START_X, this.rosieBaseY, 'rosie-sprite');
 
     // Scale the sprite to fit nicely in the lane
     // Target height is roughly 2x the radius (diameter) of the original circle
     const targetHeight = TRACK_CONFIG.ROSIE_RADIUS * 2;
     this.rosieBaseScale = targetHeight / this.rosie.height;
     this.rosie.setScale(this.rosieBaseScale);
+  }
+
+  /**
+   * Create AI competitor sprites in lanes 2-6
+   */
+  private createCompetitors(): void {
+    this.competitors = [];
+
+    // Create 5 competitors in lanes 2-6 (indices 1-5)
+    this.selectedRacers.forEach((familyMember, index) => {
+      const laneIndex = index + 1; // Lanes 1-5 (indices 1-5), Rosie is in lane 0
+      const baseY = this.laneYPositions[laneIndex];
+
+      // Generate a texture for this competitor using their color
+      const textureKey = `competitor-${familyMember.id}`;
+      this.generateCompetitorTexture(textureKey, familyMember.color);
+
+      // Create the sprite
+      const sprite = this.add.sprite(TRACK_CONFIG.ROSIE_START_X, baseY, textureKey);
+
+      // Scale to match Rosie's size
+      const targetHeight = TRACK_CONFIG.ROSIE_RADIUS * 2;
+      const scale = targetHeight / sprite.height;
+      sprite.setScale(scale);
+
+      // Assign random speed within the family member's range
+      const speed = Phaser.Math.FloatBetween(familyMember.minSpeed, familyMember.maxSpeed);
+
+      this.competitors.push({
+        sprite,
+        familyMember,
+        speed,
+        baseY,
+      });
+    });
+  }
+
+  /**
+   * Generate a colored circle texture for a competitor
+   */
+  private generateCompetitorTexture(key: string, color: number): void {
+    // Check if texture already exists
+    if (this.textures.exists(key)) {
+      return;
+    }
+
+    const graphics = this.make.graphics({ x: 0, y: 0 });
+    graphics.fillStyle(color, 1);
+    graphics.fillCircle(
+      TRACK_CONFIG.ROSIE_RADIUS,
+      TRACK_CONFIG.ROSIE_RADIUS,
+      TRACK_CONFIG.ROSIE_RADIUS
+    );
+    graphics.generateTexture(key, TRACK_CONFIG.ROSIE_RADIUS * 2, TRACK_CONFIG.ROSIE_RADIUS * 2);
+    graphics.destroy();
+  }
+
+  /**
+   * Update AI competitors' movement (they move at constant speed, don't stop for checkpoints)
+   */
+  private updateCompetitors(deltaSeconds: number): void {
+    this.competitors.forEach((competitor) => {
+      // Only move if the race has started
+      if (!this.hasStarted) return;
+
+      // Move at constant speed
+      competitor.sprite.x += competitor.speed * deltaSeconds;
+
+      // Clamp to track bounds
+      competitor.sprite.x = Phaser.Math.Clamp(
+        competitor.sprite.x,
+        TRACK_CONFIG.START_LINE_X,
+        TRACK_CONFIG.FINISH_LINE_X
+      );
+    });
+  }
+
+  /**
+   * Reset competitors to starting position with new random racers and speeds
+   */
+  private resetCompetitors(): void {
+    // Destroy existing competitor sprites
+    this.competitors.forEach((competitor) => {
+      competitor.sprite.destroy();
+    });
+    this.competitors = [];
+
+    // Select new random racers
+    this.selectedRacers = getRandomRacers(5);
+
+    // Recreate competitors
+    this.createCompetitors();
   }
 
   /**
@@ -532,7 +656,9 @@ export class RaceScene extends Phaser.Scene {
 
       // Apply subtle scale pulse for "running" feel (relative to base scale)
       const scalePulse =
-        1 + Math.sin(time * ANIMATION_CONFIG.SCALE_PULSE_FREQUENCY) * ANIMATION_CONFIG.SCALE_PULSE_AMOUNT;
+        1 +
+        Math.sin(time * ANIMATION_CONFIG.SCALE_PULSE_FREQUENCY) *
+          ANIMATION_CONFIG.SCALE_PULSE_AMOUNT;
       this.rosie.setScale(this.rosieBaseScale * scalePulse);
     } else {
       // Reset to base position when not moving
@@ -589,6 +715,21 @@ export class RaceScene extends Phaser.Scene {
   getPassedCheckpoints(): boolean[] {
     return [...this.passedCheckpoints];
   }
+
+  /**
+   * Get competitors array (for external access/testing)
+   */
+  getCompetitors(): Competitor[] {
+    return [...this.competitors];
+  }
+
+  /**
+   * Get selected racers (for external access/testing)
+   */
+  getSelectedRacers(): FamilyMember[] {
+    return [...this.selectedRacers];
+  }
 }
 
 export default RaceScene;
+export type { Competitor };

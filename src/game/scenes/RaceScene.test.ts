@@ -6,11 +6,13 @@ import {
   ANIMATION_CONFIG,
   CHECKPOINT_CONFIG,
 } from './RaceScene';
+import { FAMILY_MEMBERS } from '../../data/familyMembers';
 
 describe('RaceScene', () => {
   const setupTest = () => {
     const scene = new RaceScene();
-    // Call create to initialize the scene
+    // Call preload to load assets and select racers, then create to initialize
+    scene.preload();
     scene.create();
     return { scene };
   };
@@ -54,16 +56,12 @@ describe('RaceScene', () => {
       const textCalls = (scene.add.text as jest.Mock).mock.calls;
 
       // Find the START label
-      const startLabel = textCalls.find(
-        (call: unknown[]) => call[2] === 'START'
-      );
+      const startLabel = textCalls.find((call: unknown[]) => call[2] === 'START');
       expect(startLabel).toBeDefined();
       expect(startLabel?.[0]).toBe(50); // START_LINE_X
 
       // Find the FINISH label
-      const finishLabel = textCalls.find(
-        (call: unknown[]) => call[2] === 'FINISH'
-      );
+      const finishLabel = textCalls.find((call: unknown[]) => call[2] === 'FINISH');
       expect(finishLabel).toBeDefined();
       expect(finishLabel?.[0]).toBe(974); // FINISH_LINE_X
     });
@@ -81,9 +79,7 @@ describe('RaceScene', () => {
       const spriteCalls = (scene.add.sprite as jest.Mock).mock.calls;
 
       // Rosie should be created as a sprite with 'rosie-sprite' texture
-      const rosieCall = spriteCalls.find(
-        (call: unknown[]) => call[2] === 'rosie-sprite'
-      );
+      const rosieCall = spriteCalls.find((call: unknown[]) => call[2] === 'rosie-sprite');
       expect(rosieCall).toBeDefined();
     });
 
@@ -92,9 +88,7 @@ describe('RaceScene', () => {
       const spriteCalls = (scene.add.sprite as jest.Mock).mock.calls;
 
       // Find Rosie by texture name
-      const rosieCall = spriteCalls.find(
-        (call: unknown[]) => call[2] === 'rosie-sprite'
-      );
+      const rosieCall = spriteCalls.find((call: unknown[]) => call[2] === 'rosie-sprite');
 
       // Rosie should be at x=80 (ROSIE_START_X)
       expect(rosieCall?.[0]).toBe(80);
@@ -106,20 +100,12 @@ describe('RaceScene', () => {
 
     it('sets up tap event listener on game events', () => {
       const { scene } = setupTest();
-      expect(scene.game.events.on).toHaveBeenCalledWith(
-        'tap',
-        expect.any(Function),
-        scene
-      );
+      expect(scene.game.events.on).toHaveBeenCalledWith('tap', expect.any(Function), scene);
     });
 
     it('sets up restart event listener on game events', () => {
       const { scene } = setupTest();
-      expect(scene.game.events.on).toHaveBeenCalledWith(
-        'restartRace',
-        expect.any(Function),
-        scene
-      );
+      expect(scene.game.events.on).toHaveBeenCalledWith('restartRace', expect.any(Function), scene);
     });
   });
 
@@ -267,8 +253,14 @@ describe('RaceScene', () => {
 
     it('has checkpoint positions roughly at 1/3 and 2/3 of track', () => {
       const trackLength = TRACK_CONFIG.FINISH_LINE_X - TRACK_CONFIG.START_LINE_X;
-      expect(CHECKPOINT_CONFIG.POSITIONS[0]).toBeCloseTo(TRACK_CONFIG.START_LINE_X + trackLength * 0.27, -1);
-      expect(CHECKPOINT_CONFIG.POSITIONS[1]).toBeCloseTo(TRACK_CONFIG.START_LINE_X + trackLength * 0.60, -1);
+      expect(CHECKPOINT_CONFIG.POSITIONS[0]).toBeCloseTo(
+        TRACK_CONFIG.START_LINE_X + trackLength * 0.27,
+        -1
+      );
+      expect(CHECKPOINT_CONFIG.POSITIONS[1]).toBeCloseTo(
+        TRACK_CONFIG.START_LINE_X + trackLength * 0.6,
+        -1
+      );
     });
 
     it('has velocity boost values configured', () => {
@@ -319,10 +311,143 @@ describe('RaceScene', () => {
       const textCalls = (scene.add.text as jest.Mock).mock.calls;
 
       // Find the ? labels for checkpoints
-      const questionMarks = textCalls.filter(
-        (call: unknown[]) => call[2] === '?'
-      );
+      const questionMarks = textCalls.filter((call: unknown[]) => call[2] === '?');
       expect(questionMarks).toHaveLength(CHECKPOINT_CONFIG.POSITIONS.length);
+    });
+  });
+
+  describe('competitors system', () => {
+    describe('getSelectedRacers', () => {
+      it('returns 5 randomly selected family members', () => {
+        const scene = new RaceScene();
+        scene.preload(); // preload selects random racers
+        scene.create();
+        const selectedRacers = scene.getSelectedRacers();
+        expect(selectedRacers).toHaveLength(5);
+      });
+
+      it('returns a copy of selected racers (not the original array)', () => {
+        const { scene } = setupTest();
+        const racers1 = scene.getSelectedRacers();
+        const racers2 = scene.getSelectedRacers();
+        expect(racers1).not.toBe(racers2);
+        expect(racers1).toEqual(racers2);
+      });
+
+      it('selected racers are valid family members', () => {
+        const { scene } = setupTest();
+        const selectedRacers = scene.getSelectedRacers();
+        const familyMemberIds = FAMILY_MEMBERS.map((m) => m.id);
+
+        selectedRacers.forEach((racer) => {
+          expect(familyMemberIds).toContain(racer.id);
+        });
+      });
+    });
+
+    describe('getCompetitors', () => {
+      it('returns 5 competitors after create', () => {
+        const { scene } = setupTest();
+        const competitors = scene.getCompetitors();
+        expect(competitors).toHaveLength(5);
+      });
+
+      it('returns a copy of competitors (not the original array)', () => {
+        const { scene } = setupTest();
+        const competitors1 = scene.getCompetitors();
+        const competitors2 = scene.getCompetitors();
+        expect(competitors1).not.toBe(competitors2);
+        expect(competitors1).toEqual(competitors2);
+      });
+
+      it('returns empty array before create is called', () => {
+        const scene = new RaceScene();
+        // Don't call create
+        const competitors = scene.getCompetitors();
+        expect(competitors).toHaveLength(0);
+      });
+
+      it('each competitor has a sprite, family member, speed, and baseY', () => {
+        const { scene } = setupTest();
+        const competitors = scene.getCompetitors();
+
+        competitors.forEach((competitor) => {
+          expect(competitor.sprite).toBeDefined();
+          expect(competitor.familyMember).toBeDefined();
+          expect(typeof competitor.speed).toBe('number');
+          expect(typeof competitor.baseY).toBe('number');
+        });
+      });
+
+      it('competitors are placed in lanes 2-6', () => {
+        const { scene } = setupTest();
+        const competitors = scene.getCompetitors();
+        const lanePositions = scene.getLaneYPositions();
+
+        competitors.forEach((competitor, index) => {
+          // Competitor index 0 should be in lane index 1, etc.
+          const expectedLaneIndex = index + 1;
+          expect(competitor.baseY).toBe(lanePositions[expectedLaneIndex]);
+        });
+      });
+
+      it('competitor speeds are within family member min/max range', () => {
+        const { scene } = setupTest();
+        const competitors = scene.getCompetitors();
+
+        competitors.forEach((competitor) => {
+          expect(competitor.speed).toBeGreaterThanOrEqual(competitor.familyMember.minSpeed);
+          expect(competitor.speed).toBeLessThanOrEqual(competitor.familyMember.maxSpeed);
+        });
+      });
+    });
+
+    describe('competitor sprites', () => {
+      it('creates sprites at the start position', () => {
+        const { scene } = setupTest();
+        const spriteCalls = (scene.add.sprite as jest.Mock).mock.calls;
+
+        // Find competitor sprite calls (not Rosie's)
+        const competitorCalls = spriteCalls.filter((call: unknown[]) =>
+          (call[2] as string).startsWith('competitor-')
+        );
+
+        expect(competitorCalls).toHaveLength(5);
+        competitorCalls.forEach((call) => {
+          expect(call[0]).toBe(TRACK_CONFIG.ROSIE_START_X);
+        });
+      });
+
+      it('generates colored circle textures for competitors', () => {
+        const { scene } = setupTest();
+        const makeGraphicsCalls = (scene.make.graphics as jest.Mock).mock.calls;
+
+        // Should have generated textures for competitors
+        expect(makeGraphicsCalls.length).toBeGreaterThanOrEqual(5);
+      });
+    });
+
+    describe('Rosie lane highlighting', () => {
+      it('lane 1 (index 0) should use pink color', () => {
+        const { scene } = setupTest();
+
+        // Get all the mock graphics objects that were created
+        const graphicsCalls = (scene.add.graphics as jest.Mock).mock.results as unknown[];
+
+        // Collect all fillStyle calls from all graphics objects
+        let hasPinkLane = false;
+        graphicsCalls.forEach((result: unknown) => {
+          const typedResult = result as { type: string; value: { fillStyle: jest.Mock } };
+          if (typedResult.type === 'return' && typedResult.value) {
+            const fillStyleCalls = typedResult.value.fillStyle.mock.calls;
+            if (fillStyleCalls.some((call: unknown[]) => call[0] === 0xffb6c1)) {
+              hasPinkLane = true;
+            }
+          }
+        });
+
+        expect(hasPinkLane).toBe(true);
+      });
     });
   });
 });

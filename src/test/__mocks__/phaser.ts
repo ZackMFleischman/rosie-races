@@ -68,9 +68,12 @@ const createMockCircle = () => ({
 const createMockSprite = () => ({
   x: 0,
   y: 0,
+  height: 60, // Default height for scaling calculations
+  width: 60,
   setScale: jest.fn().mockReturnThis(),
   setOrigin: jest.fn().mockReturnThis(),
   setTexture: jest.fn().mockReturnThis(),
+  destroy: jest.fn(),
 });
 
 // Mock Graphics for texture generation
@@ -164,9 +167,7 @@ export class Scene {
 
 export const Math = {
   FloatBetween: jest.fn((min: number, max: number) => (min + max) / 2),
-  Between: jest.fn((min: number, max: number) =>
-    globalThis.Math.floor((min + max) / 2)
-  ),
+  Between: jest.fn((min: number, max: number) => globalThis.Math.floor((min + max) / 2)),
   Clamp: jest.fn((value: number, min: number, max: number) =>
     globalThis.Math.min(globalThis.Math.max(value, min), max)
   ),

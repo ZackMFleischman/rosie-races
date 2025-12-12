@@ -297,15 +297,15 @@ Racing game for 4-year-old Rosie with math challenges!
 
 ### 5.2 Competitor System
 
-- [ ] **5 family members in lanes**
+- [x] **5 family members in lanes**
 
   > In RaceScene `create()`, iterate `familyMembers`, create sprite in each lane (lanes 2-6, Rosie in lane 1). Store in `competitors: Competitor[]` array.
 
-- [ ] **Random speed per racer**
+- [x] **Random speed per racer**
 
   > On race start, assign: `speed = Phaser.Math.FloatBetween(minSpeed, maxSpeed)`. This varies each race. Optionally adjust based on difficulty.
 
-- [ ] **Rosie's lane highlighted**
+- [x] **Rosie's lane highlighted**
   > Draw lane 1 with different color (light pink tint). Or add subtle glow/border around Rosie's lane. Make player's position visually obvious.
 
 ### 5.3 Competitor Movement
