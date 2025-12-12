@@ -469,9 +469,10 @@ Racing game for 4-year-old Rosie with math challenges!
 
 ### 9.1 Visual Polish
 
-- [ ] **Kid-friendly art style**
+- [x] **Kid-friendly art style**
 
   > Replace placeholder circles with photos of the peoples heads in question. Ask the user for the images you need e.g. like rosie-sprite.png
+  > **DONE**: Added sprite images for all family members (alexa/mommy, andrew/daddy, rick/grandpa, traci/gaga, lalo, zack). Sprites display in race lanes and on results screen.
 
 - [ ] **Particle effects (confetti, sparkles)**
 
