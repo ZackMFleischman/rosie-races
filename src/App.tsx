@@ -37,6 +37,12 @@ function AppContent() {
   // It only becomes enabled once gameState is 'racing'
   const isTapButtonDisabled = gameState === 'ready' || gameState === 'countdown';
 
+  // TAP button should bounce to attract attention when:
+  // - The race is active (gameState === 'racing')
+  // - No math problem is showing (currentProblem is null)
+  // This helps young children understand they should be pressing the button
+  const shouldTapButtonBounce = gameState === 'racing' && !currentProblem;
+
   // Show overlay before race starts (when "Tap to Start" is displayed in the game)
   const showPreRaceOverlay = gameState === 'ready';
 
@@ -149,7 +155,7 @@ function AppContent() {
             zIndex: 10,
           }}
         >
-          <TapButton onTap={handleTap} disabled={isTapButtonDisabled} small />
+          <TapButton onTap={handleTap} disabled={isTapButtonDisabled} small shouldBounce={shouldTapButtonBounce} />
         </Box>
 
         {/* Pre-race overlay */}
@@ -301,7 +307,7 @@ function AppContent() {
           flexShrink: 0,
         }}
       >
-        <TapButton onTap={handleTap} disabled={isTapButtonDisabled} />
+        <TapButton onTap={handleTap} disabled={isTapButtonDisabled} shouldBounce={shouldTapButtonBounce} />
       </Box>
 
       {/* Pre-race overlay - darkens screen until user taps "Tap to Start" */}
