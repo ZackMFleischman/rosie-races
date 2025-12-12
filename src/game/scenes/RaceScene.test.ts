@@ -360,14 +360,14 @@ describe('RaceScene', () => {
     });
 
     describe('competitor sprites', () => {
-      it('creates sprites at the start position', () => {
+      it('creates sprites at the start position using preloaded images', () => {
         const { scene } = setupTest();
         const spriteCalls = (scene.add.sprite as jest.Mock).mock.calls;
         const canvasWidth = 1024; // Mock canvas width
 
-        // Find competitor sprite calls (not Rosie's)
+        // Find competitor sprite calls (using sprite-{id} keys for preloaded images)
         const competitorCalls = spriteCalls.filter((call: unknown[]) =>
-          (call[2] as string).startsWith('competitor-')
+          (call[2] as string).startsWith('sprite-')
         );
 
         expect(competitorCalls).toHaveLength(5);
@@ -376,12 +376,15 @@ describe('RaceScene', () => {
         });
       });
 
-      it('generates colored circle textures for competitors', () => {
+      it('uses preloaded sprite images instead of generated textures', () => {
         const { scene } = setupTest();
-        const makeGraphicsCalls = (scene.make.graphics as jest.Mock).mock.calls;
+        const competitors = scene.getCompetitors();
 
-        // Should have generated textures for competitors
-        expect(makeGraphicsCalls.length).toBeGreaterThanOrEqual(5);
+        // Verify competitors have family members with sprite data
+        competitors.forEach((competitor) => {
+          expect(competitor.familyMember.sprite).toBeDefined();
+          expect(competitor.familyMember.sprite).toMatch(/\.png$/);
+        });
       });
     });
 

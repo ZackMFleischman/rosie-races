@@ -22,6 +22,7 @@ export interface FamilyMember {
   baseMinSpeed: number; // Base minimum speed before scaling (pixels per second)
   baseMaxSpeed: number; // Base maximum speed before scaling (pixels per second)
   role: string; // Family role description
+  sprite: string; // Sprite image filename (without path)
 }
 
 /** Computed min speed for a family member after applying scale and variance */
@@ -48,6 +49,7 @@ export const FAMILY_MEMBERS: FamilyMember[] = [
     baseMinSpeed: 35,
     baseMaxSpeed: 55,
     role: 'Mom',
+    sprite: 'alexa-sprite.png',
   },
   {
     id: 'daddy',
@@ -56,6 +58,7 @@ export const FAMILY_MEMBERS: FamilyMember[] = [
     baseMinSpeed: 40,
     baseMaxSpeed: 58,
     role: 'Dad',
+    sprite: 'andrew-sprite.png',
   },
   {
     id: 'uncle-zack',
@@ -64,6 +67,7 @@ export const FAMILY_MEMBERS: FamilyMember[] = [
     baseMinSpeed: 33,
     baseMaxSpeed: 51,
     role: 'Uncle',
+    sprite: 'zack-sprite.png',
   },
   {
     id: 'gaga',
@@ -72,6 +76,7 @@ export const FAMILY_MEMBERS: FamilyMember[] = [
     baseMinSpeed: 30,
     baseMaxSpeed: 48,
     role: 'Grandma',
+    sprite: 'traci-sprite.png',
   },
   {
     id: 'grandpa',
@@ -80,6 +85,7 @@ export const FAMILY_MEMBERS: FamilyMember[] = [
     baseMinSpeed: 27,
     baseMaxSpeed: 45,
     role: 'Grandpa',
+    sprite: 'rick-sprite.png',
   },
   {
     id: 'lalo',
@@ -88,6 +94,7 @@ export const FAMILY_MEMBERS: FamilyMember[] = [
     baseMinSpeed: 42,
     baseMaxSpeed: 60,
     role: 'Dog',
+    sprite: 'lalo-sprite.png',
   },
 ];
 

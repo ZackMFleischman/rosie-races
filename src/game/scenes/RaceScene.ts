@@ -13,6 +13,7 @@ import {
   getRandomRacers,
   getMinSpeed,
   getMaxSpeed,
+  FAMILY_MEMBERS,
   type FamilyMember,
 } from '../../data/familyMembers';
 
@@ -150,6 +151,13 @@ export class RaceScene extends Phaser.Scene {
     // Preload all audio assets
     const audioManager = AudioManager.getInstance();
     audioManager.preloadAudio(this);
+
+    // Preload ALL family member sprite images (so they're ready for race restarts)
+    FAMILY_MEMBERS.forEach((member) => {
+      const spriteKey = `sprite-${member.id}`;
+      const spriteUrl = `assets/${member.sprite}`;
+      this.load.image(spriteKey, spriteUrl);
+    });
 
     // Select random racers for this race
     this.selectedRacers = getRandomRacers(5);
@@ -697,12 +705,11 @@ export class RaceScene extends Phaser.Scene {
       const laneIndex = index + 1; // Lanes 1-5 (indices 1-5), Rosie is in lane 0
       const baseY = this.laneYPositions[laneIndex];
 
-      // Generate a texture for this competitor using their color
-      const textureKey = `competitor-${familyMember.id}`;
-      this.generateCompetitorTexture(textureKey, familyMember.color);
+      // Use the preloaded sprite image
+      const spriteKey = `sprite-${familyMember.id}`;
 
-      // Create the sprite
-      const sprite = this.add.sprite(this.rosieStartX, baseY, textureKey);
+      // Create the sprite using the loaded image
+      const sprite = this.add.sprite(this.rosieStartX, baseY, spriteKey);
 
       // Scale to match Rosie's size
       const targetHeight = TRACK_CONFIG.ROSIE_RADIUS * 2;
@@ -724,26 +731,6 @@ export class RaceScene extends Phaser.Scene {
         finishPosition: null,
       });
     });
-  }
-
-  /**
-   * Generate a colored circle texture for a competitor
-   */
-  private generateCompetitorTexture(key: string, color: number): void {
-    // Check if texture already exists
-    if (this.textures.exists(key)) {
-      return;
-    }
-
-    const graphics = this.make.graphics({ x: 0, y: 0 });
-    graphics.fillStyle(color, 1);
-    graphics.fillCircle(
-      TRACK_CONFIG.ROSIE_RADIUS,
-      TRACK_CONFIG.ROSIE_RADIUS,
-      TRACK_CONFIG.ROSIE_RADIUS
-    );
-    graphics.generateTexture(key, TRACK_CONFIG.ROSIE_RADIUS * 2, TRACK_CONFIG.ROSIE_RADIUS * 2);
-    graphics.destroy();
   }
 
   /**
@@ -1247,6 +1234,7 @@ export class RaceScene extends Phaser.Scene {
         finishTime: competitor.finishTime,
         position: competitor.finishPosition,
         isRosie: false,
+        avatar: `assets/${competitor.familyMember.sprite}`,
       };
 
       if (competitor.finishTime !== null) {
@@ -1287,6 +1275,7 @@ export class RaceScene extends Phaser.Scene {
         finishTime: competitor.finishTime!,
         position: competitor.finishPosition!,
         isRosie: false,
+        avatar: `assets/${competitor.familyMember.sprite}`,
       });
     });
 

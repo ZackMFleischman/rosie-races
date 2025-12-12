@@ -68,6 +68,30 @@ describe('familyMembers', () => {
       expect(memberRoles['grandpa']).toBe('Grandpa');
       expect(memberRoles['lalo']).toBe('Dog');
     });
+
+    it('should have sprite filenames for all members', () => {
+      FAMILY_MEMBERS.forEach((member: FamilyMember) => {
+        expect(member.sprite).toBeDefined();
+        expect(member.sprite).toMatch(/\.png$/);
+      });
+    });
+
+    it('should have correct sprite mappings', () => {
+      const memberSprites = FAMILY_MEMBERS.reduce(
+        (acc, m) => {
+          acc[m.id] = m.sprite;
+          return acc;
+        },
+        {} as Record<string, string>
+      );
+
+      expect(memberSprites['mommy']).toBe('alexa-sprite.png');
+      expect(memberSprites['daddy']).toBe('andrew-sprite.png');
+      expect(memberSprites['uncle-zack']).toBe('zack-sprite.png');
+      expect(memberSprites['gaga']).toBe('traci-sprite.png');
+      expect(memberSprites['grandpa']).toBe('rick-sprite.png');
+      expect(memberSprites['lalo']).toBe('lalo-sprite.png');
+    });
   });
 
   describe('getFamilyMemberById', () => {
