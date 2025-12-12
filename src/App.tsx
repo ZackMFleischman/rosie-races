@@ -5,6 +5,7 @@ import Typography from '@mui/material/Typography';
 import GameContainer from './components/GameContainer';
 import TapButton from './components/TapButton';
 import Timer from './components/Timer';
+import FinishedScreen from './components/FinishedScreen';
 import { GameProvider } from './context/GameContext';
 import { useGame } from './hooks/useGame';
 import { RaceScene } from './game/scenes/RaceScene';
@@ -14,7 +15,8 @@ import * as Phaser from 'phaser';
  * Inner app component that uses the game context
  */
 function AppContent() {
-  const { setGame, emitTap, isRacing } = useGame();
+  const { setGame, emitTap, emitRestart, isRacing, isFinished, finishTime } =
+    useGame();
 
   // Memoize game config to prevent recreation on re-renders
   const gameConfig = useMemo(
@@ -36,6 +38,11 @@ function AppContent() {
   const handleTap = useCallback(() => {
     emitTap();
   }, [emitTap]);
+
+  // Handle restart race
+  const handleRestart = useCallback(() => {
+    emitRestart();
+  }, [emitRestart]);
 
   return (
     <Box
@@ -124,6 +131,11 @@ function AppContent() {
       >
         <TapButton onTap={handleTap} />
       </Box>
+
+      {/* Finished screen overlay */}
+      {isFinished && finishTime !== null && (
+        <FinishedScreen finishTime={finishTime} onRestart={handleRestart} />
+      )}
     </Box>
   );
 }

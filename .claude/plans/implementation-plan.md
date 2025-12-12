@@ -153,15 +153,15 @@ Racing game for 4-year-old Rosie with math challenges!
 
 ### 2.4 Finish Detection
 
-- [ ] **Detect finish line crossing**
+- [x] **Detect finish line crossing**
 
   > In RaceScene `update()`, check `if (rosie.x >= FINISH_LINE_X && !hasFinished)`. Set `hasFinished = true`. Emit event: `this.game.events.emit('raceFinished', { time: elapsedTime })`. React listens and shows finish screen.
 
-- [ ] **"Finished!" screen with time**
+- [x] **"Finished!" screen with time**
 
   > Create `src/components/FinishedScreen.tsx`. Show on `raceFinished` event. Display: large "FINISHED!" text, final time, simple celebration (emoji confetti 🎉). Semi-transparent overlay over game.
 
-- [ ] **"Race Again" button**
+- [x] **"Race Again" button**
   > In FinishedScreen, add button that resets game state: `velocity = 0`, `rosie.x = START_X`, `hasFinished = false`, clears timer. Emit `restartRace` event. Style same as TAP button for consistency.
 
 **✅ Milestone:** Tap → Run → Finish → Restart
