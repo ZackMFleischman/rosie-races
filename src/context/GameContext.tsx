@@ -8,6 +8,7 @@ import {
 } from 'react';
 import * as Phaser from 'phaser';
 import { GAME_EVENTS, type MathAnswerPayload } from '../game/events';
+import { generateProblem, type MathProblem } from '../game/systems/MathGenerator';
 
 export interface GameContextValue {
   game: Phaser.Game | null;
@@ -17,6 +18,9 @@ export interface GameContextValue {
   isRacing: boolean;
   isFinished: boolean;
   finishTime: number | null;
+  // Math problem state
+  currentProblem: MathProblem | null;
+  submitMathAnswer: (correct: boolean, timeTaken: number) => void;
 }
 
 const GameContext = createContext<GameContextValue | null>(null);
@@ -35,6 +39,7 @@ export function GameProvider({ children }: GameProviderProps) {
   const [isFinished, setIsFinished] = useState(false);
   const [finishTime, setFinishTime] = useState<number | null>(null);
   const [gameVersion, setGameVersion] = useState(0);
+  const [currentProblem, setCurrentProblem] = useState<MathProblem | null>(null);
   const raceStartTimeRef = useRef<number | null>(null);
 
   const setGame = useCallback((game: Phaser.Game | null) => {
@@ -55,6 +60,17 @@ export function GameProvider({ children }: GameProviderProps) {
     }
   }, []);
 
+  const submitMathAnswer = useCallback(
+    (correct: boolean, timeTaken: number) => {
+      if (gameRef.current) {
+        const payload: MathAnswerPayload = { correct, timeTaken };
+        gameRef.current.events.emit(GAME_EVENTS.MATH_ANSWER_SUBMITTED, payload);
+      }
+      setCurrentProblem(null);
+    },
+    []
+  );
+
   // Listen for game events
   useEffect(() => {
     const game = gameRef.current;
@@ -65,6 +81,7 @@ export function GameProvider({ children }: GameProviderProps) {
       setIsRacing(true);
       setIsFinished(false);
       setFinishTime(null);
+      setCurrentProblem(null);
     };
 
     const handleRaceFinished = () => {
@@ -74,6 +91,7 @@ export function GameProvider({ children }: GameProviderProps) {
       }
       setIsRacing(false);
       setIsFinished(true);
+      setCurrentProblem(null);
     };
 
     const handleRestartRace = () => {
@@ -81,15 +99,13 @@ export function GameProvider({ children }: GameProviderProps) {
       setIsRacing(false);
       setIsFinished(false);
       setFinishTime(null);
+      setCurrentProblem(null);
     };
 
-    // Temporary: auto-answer math problems until Phase 3 is implemented
     const handleShowMathProblem = () => {
-      // Auto-skip checkpoints with a correct answer after a brief delay
-      setTimeout(() => {
-        const answer: MathAnswerPayload = { correct: true, timeTaken: 1000 };
-        game.events.emit(GAME_EVENTS.MATH_ANSWER_SUBMITTED, answer);
-      }, 500);
+      // Generate a new math problem and show modal
+      const problem = generateProblem();
+      setCurrentProblem(problem);
     };
 
     game.events.on(GAME_EVENTS.RACE_STARTED, handleRaceStarted);
@@ -115,6 +131,8 @@ export function GameProvider({ children }: GameProviderProps) {
     isRacing,
     isFinished,
     finishTime,
+    currentProblem,
+    submitMathAnswer,
   };
 
   return <GameContext.Provider value={value}>{children}</GameContext.Provider>;

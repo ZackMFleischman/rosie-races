@@ -6,6 +6,7 @@ import GameContainer from './components/GameContainer';
 import TapButton from './components/TapButton';
 import Timer from './components/Timer';
 import FinishedScreen from './components/FinishedScreen';
+import MathModal from './components/MathModal';
 import VolumeControl from './components/VolumeControl';
 import { GameProvider } from './context/GameContext';
 import { useGame } from './hooks/useGame';
@@ -16,8 +17,16 @@ import * as Phaser from 'phaser';
  * Inner app component that uses the game context
  */
 function AppContent() {
-  const { setGame, emitTap, emitRestart, isRacing, isFinished, finishTime } =
-    useGame();
+  const {
+    setGame,
+    emitTap,
+    emitRestart,
+    isRacing,
+    isFinished,
+    finishTime,
+    currentProblem,
+    submitMathAnswer,
+  } = useGame();
 
   // Memoize game config to prevent recreation on re-renders
   const gameConfig = useMemo(
@@ -135,6 +144,11 @@ function AppContent() {
       >
         <TapButton onTap={handleTap} />
       </Box>
+
+      {/* Math problem modal */}
+      {currentProblem && (
+        <MathModal problem={currentProblem} onAnswer={submitMathAnswer} />
+      )}
 
       {/* Finished screen overlay */}
       {isFinished && finishTime !== null && (

@@ -172,54 +172,54 @@ Racing game for 4-year-old Rosie with math challenges!
 
 ### 3.1 Checkpoint System
 
-- [ ] **2 checkpoints on track**
+- [x] **2 checkpoints on track**
 
   > Define checkpoint x-positions: `[300, 600]` (roughly 1/3 and 2/3 of track). Store in constant array. Checkpoints scale with difficulty later.
 
-- [ ] **Visual markers (flags/arches)**
+- [x] **Visual markers (flags/arches)**
 
   > Draw arches using `graphics.lineStyle()` + `arc()` or use simple vertical banners with `rectangle()`. Add alternating colors (red/white). Place "?" symbol on each checkpoint.
 
-- [ ] **Pause Rosie at checkpoint (timer keeps running)**
+- [x] **Pause Rosie at checkpoint (timer keeps running)**
   > When Rosie reaches checkpoint x: set `isPaused = true`, emit `showMathProblem` event with checkpoint index. In `update()`, skip movement when paused. Timer in React continues independently.
 
 ### 3.2 Math Problem Generator
 
-- [ ] **Configurable operations/maxNumber/numTerms**
+- [x] **Configurable operations/maxNumber/numTerms**
 
   > Create `src/game/systems/MathGenerator.ts`. Export interface `MathConfig { operations: Operation[], maxNumber: number, numTerms: number }`. Accept config in generator function.
 
-- [ ] **Generate fresh problem per checkpoint**
+- [x] **Generate fresh problem per checkpoint**
 
   > Function `generateProblem(config): { question: string, answer: number, choices: number[] }`. Pick random operation, random operands. For subtract, ensure `a >= b` (positive result). For multiply, use smaller numbers.
 
-- [ ] **4 multiple choice answers**
+- [x] **4 multiple choice answers**
   > Generate 3 wrong answers: `answer ± random(1,5)`, ensure unique and positive. Shuffle array of [correctAnswer, ...wrongAnswers]. Return shuffled choices array.
 
 ### 3.3 Math Modal UI
 
-- [ ] **Modal over game (timer visible!)**
+- [x] **Modal over game (timer visible!)**
 
   > Create `src/components/MathModal.tsx`. Use `position: fixed; top: 60px` (below timer). Semi-transparent background. Timer stays visible at top with higher z-index.
 
-- [ ] **Answer buttons at TOP (away from TAP button)**
+- [x] **Answer buttons at TOP (away from TAP button)**
 
   > Place 4 answer buttons in 2x2 grid at TOP of modal content. Large buttons (min 80px). Ensure minimum 200px gap between lowest answer button and TAP button location.
 
-- [ ] **Visual ✓/✗ feedback**
+- [x] **Visual ✓/✗ feedback**
   > On answer click, show result: green ✓ or red ✗ overlay on button. Brief delay (500ms) before closing modal. Use CSS animation for pop effect.
 
 ### 3.4 Answer Consequences
 
-- [ ] **Correct fast → big boost + celebration**
+- [x] **Correct fast → big boost + celebration**
 
   > Track time from modal open. If answered < 3 seconds: add large velocity boost (50), show "AWESOME! 🌟" text, trigger confetti particles.
 
-- [ ] **Correct slow → small boost**
+- [x] **Correct slow → small boost**
 
   > If answered 3-10 seconds: add small velocity boost (20), show "Good job! ✓" text. Resume race normally.
 
-- [ ] **Wrong → stumble + delay**
+- [x] **Wrong → stumble + delay**
   > On wrong answer: add 2 second pause before resuming, shake Rosie sprite, show "Oops! Try to beat it next time!" No velocity boost. Don't re-ask question—just continue.
 
 **✅ Milestone:** 2 checkpoints with math problems
