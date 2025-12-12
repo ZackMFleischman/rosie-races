@@ -50,10 +50,13 @@ const createMockGraphics = () => ({
   fillStyle: jest.fn().mockReturnThis(),
   fillRect: jest.fn().mockReturnThis(),
   fillRoundedRect: jest.fn().mockReturnThis(),
+  fillCircle: jest.fn().mockReturnThis(),
   lineStyle: jest.fn().mockReturnThis(),
   lineBetween: jest.fn().mockReturnThis(),
   strokeRect: jest.fn().mockReturnThis(),
   clear: jest.fn().mockReturnThis(),
+  generateTexture: jest.fn().mockReturnThis(),
+  destroy: jest.fn(),
 });
 
 // Mock Circle object
@@ -95,6 +98,14 @@ const createMockText = () => ({
   destroy: jest.fn(),
 });
 
+// Mock Particle Emitter
+const createMockParticleEmitter = () => ({
+  setDepth: jest.fn().mockReturnThis(),
+  emitParticleAt: jest.fn().mockReturnThis(),
+  stop: jest.fn().mockReturnThis(),
+  emitting: false,
+});
+
 export class Scene {
   key: string = '';
 
@@ -105,6 +116,7 @@ export class Scene {
     graphics: jest.fn().mockImplementation(() => createMockGraphics()),
     sprite: jest.fn().mockImplementation(() => createMockSprite()),
     image: jest.fn(),
+    particles: jest.fn().mockImplementation(() => createMockParticleEmitter()),
   };
   make = {
     graphics: jest.fn().mockImplementation(() => createMockMakeGraphics()),
