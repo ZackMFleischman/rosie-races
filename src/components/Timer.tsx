@@ -77,7 +77,8 @@ function Timer({ isRunning, onStart }: TimerProps) {
       sx={{
         position: 'fixed',
         top: { xs: 8, sm: 10 },
-        right: { xs: 12, sm: 20 },
+        left: '50%',
+        transform: 'translateX(-50%)',
         zIndex: 1000, // Stay above modals
         display: 'flex',
         alignItems: 'center',
