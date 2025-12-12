@@ -1,5 +1,6 @@
 import * as Phaser from 'phaser';
 import { GAME_EVENTS } from '../events';
+import rosieSpriteUrl from '../../assets/rosie-sprite.png';
 
 // Constants for track layout
 export const TRACK_CONFIG = {
@@ -46,9 +47,15 @@ export class RaceScene extends Phaser.Scene {
 
   // Animation state
   private rosieBaseY: number = 0; // Base Y position for bobbing animation
+  private rosieBaseScale: number = 1; // Base scale for the sprite
 
   constructor() {
     super({ key: 'RaceScene' });
+  }
+
+  preload(): void {
+    // Load Rosie's sprite image
+    this.load.image('rosie-sprite', rosieSpriteUrl);
   }
 
   create(): void {
@@ -58,9 +65,6 @@ export class RaceScene extends Phaser.Scene {
 
     // Set world bounds to match camera (fixed viewport)
     this.physics.world.setBounds(0, 0, this.scale.width, this.scale.height);
-
-    // Create Rosie's circle texture (if not already created)
-    this.createRosieTexture();
 
     // Draw the track background
     this.drawBackground();
@@ -160,7 +164,7 @@ export class RaceScene extends Phaser.Scene {
     if (this.rosie) {
       this.rosie.x = TRACK_CONFIG.ROSIE_START_X;
       this.rosie.y = this.rosieBaseY;
-      this.rosie.setScale(1);
+      this.rosie.setScale(this.rosieBaseScale);
     }
   };
 
@@ -323,34 +327,7 @@ export class RaceScene extends Phaser.Scene {
   }
 
   /**
-   * Create the circle texture for Rosie dynamically.
-   * This enables future sprite swap by using generateTexture().
-   */
-  private createRosieTexture(): void {
-    // Only create texture if it doesn't exist
-    if (this.textures.exists('rosie-circle')) {
-      return;
-    }
-
-    const graphics = this.make.graphics({ x: 0, y: 0 });
-    const radius = TRACK_CONFIG.ROSIE_RADIUS;
-    const diameter = radius * 2;
-
-    // Draw filled circle
-    graphics.fillStyle(TRACK_CONFIG.ROSIE_COLOR, 1);
-    graphics.fillCircle(radius, radius, radius);
-
-    // Draw white border
-    graphics.lineStyle(3, 0xffffff, 1);
-    graphics.strokeCircle(radius, radius, radius - 1.5);
-
-    // Generate texture from graphics
-    graphics.generateTexture('rosie-circle', diameter, diameter);
-    graphics.destroy();
-  }
-
-  /**
-   * Create the placeholder sprite for Rosie using the generated circle texture
+   * Create Rosie sprite using the loaded image
    */
   private createRosie(): void {
     // Rosie starts in lane 1 (index 0)
@@ -359,8 +336,14 @@ export class RaceScene extends Phaser.Scene {
     this.rosie = this.add.sprite(
       TRACK_CONFIG.ROSIE_START_X,
       this.rosieBaseY,
-      'rosie-circle'
+      'rosie-sprite'
     );
+
+    // Scale the sprite to fit nicely in the lane
+    // Target height is roughly 2x the radius (diameter) of the original circle
+    const targetHeight = TRACK_CONFIG.ROSIE_RADIUS * 2;
+    this.rosieBaseScale = targetHeight / this.rosie.height;
+    this.rosie.setScale(this.rosieBaseScale);
   }
 
   /**
@@ -380,14 +363,14 @@ export class RaceScene extends Phaser.Scene {
       const bobOffset = Math.sin(time * ANIMATION_CONFIG.BOB_FREQUENCY) * bobAmplitude;
       this.rosie.y = this.rosieBaseY + bobOffset;
 
-      // Apply subtle scale pulse for "running" feel
+      // Apply subtle scale pulse for "running" feel (relative to base scale)
       const scalePulse =
         1 + Math.sin(time * ANIMATION_CONFIG.SCALE_PULSE_FREQUENCY) * ANIMATION_CONFIG.SCALE_PULSE_AMOUNT;
-      this.rosie.setScale(scalePulse);
+      this.rosie.setScale(this.rosieBaseScale * scalePulse);
     } else {
       // Reset to base position when not moving
       this.rosie.y = this.rosieBaseY;
-      this.rosie.setScale(1);
+      this.rosie.setScale(this.rosieBaseScale);
     }
   }
 

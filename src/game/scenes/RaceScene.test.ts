@@ -62,21 +62,21 @@ describe('RaceScene', () => {
       expect(finishLabel?.[0]).toBe(974); // FINISH_LINE_X
     });
 
-    it('creates Rosie texture dynamically', () => {
-      const { scene } = setupTest();
-      // The texture should be created using make.graphics
-      expect(scene.make.graphics).toHaveBeenCalled();
-      // The texture should check if it already exists
-      expect(scene.textures.exists).toHaveBeenCalledWith('rosie-circle');
+    it('loads Rosie sprite in preload', () => {
+      const scene = new RaceScene();
+      // Call preload to load assets
+      scene.preload();
+      // The image should be loaded with 'rosie-sprite' key
+      expect(scene.load.image).toHaveBeenCalledWith('rosie-sprite', expect.any(String));
     });
 
-    it('creates Rosie as a sprite using generated texture', () => {
+    it('creates Rosie as a sprite using loaded image', () => {
       const { scene } = setupTest();
       const spriteCalls = (scene.add.sprite as jest.Mock).mock.calls;
 
-      // Rosie should be created as a sprite with 'rosie-circle' texture
+      // Rosie should be created as a sprite with 'rosie-sprite' texture
       const rosieCall = spriteCalls.find(
-        (call: unknown[]) => call[2] === 'rosie-circle'
+        (call: unknown[]) => call[2] === 'rosie-sprite'
       );
       expect(rosieCall).toBeDefined();
     });
@@ -87,7 +87,7 @@ describe('RaceScene', () => {
 
       // Find Rosie by texture name
       const rosieCall = spriteCalls.find(
-        (call: unknown[]) => call[2] === 'rosie-circle'
+        (call: unknown[]) => call[2] === 'rosie-sprite'
       );
 
       // Rosie should be at x=80 (ROSIE_START_X)
