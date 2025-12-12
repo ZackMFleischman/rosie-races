@@ -212,7 +212,7 @@ function MathModal({ problem, onAnswer, compact = false }: MathModalProps) {
                   feedback === 'wrong'
                     ? 'error.main'
                     : feedback === 'correct-fast'
-                      ? 'warning.main'
+                      ? '#d97706'
                       : 'success.main',
               }}
             >
@@ -365,7 +365,7 @@ function MathModal({ problem, onAnswer, compact = false }: MathModalProps) {
                 feedback === 'wrong'
                   ? 'error.main'
                   : feedback === 'correct-fast'
-                    ? 'warning.main'
+                    ? '#d97706'
                     : 'success.main',
               textAlign: 'center',
             }}

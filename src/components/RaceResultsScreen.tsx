@@ -285,7 +285,7 @@ function RaceResultsScreen({ results, onRestart, compact = false }: RaceResultsS
             sx={{
               fontWeight: 800,
               fontSize: { xs: '1.5rem', sm: '2rem' },
-              color: rosiePosition === 1 ? 'gold' : 'primary.main',
+              color: rosiePosition === 1 ? '#d97706' : 'primary.main',
               textAlign: 'center',
             }}
           >

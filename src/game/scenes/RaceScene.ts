@@ -33,9 +33,9 @@ interface Competitor {
 export const TRACK_CONFIG = {
   LANE_COUNT: 6,
   // Position ratios (percentage of canvas width)
-  START_LINE_RATIO: 0.12, //  from left
+  START_LINE_RATIO: 0.065, //  from left
   FINISH_LINE_RATIO: 0.85, // from left -  leaves space for TAP button overlay
-  ROSIE_START_RATIO: 0.06, // from left
+  ROSIE_START_RATIO: 0.03, // from left
   ROSIE_RADIUS: 22, // Smaller circles for better proportions on mobile
   ROSIE_COLOR: 0xff69b4, // Pink
 };
@@ -568,8 +568,8 @@ export class RaceScene extends Phaser.Scene {
 
     // Add labels with dark text and white stroke for visibility
     this.add
-      .text(this.startLineX, skyHeight - 15, 'START', {
-        fontSize: '14px',
+      .text(this.startLineX, skyHeight - 10, 'START', {
+        fontSize: '18px',
         color: '#1a1a1a',
         fontStyle: 'bold',
         stroke: '#ffffff',
@@ -578,8 +578,8 @@ export class RaceScene extends Phaser.Scene {
       .setOrigin(0.5, 1);
 
     this.add
-      .text(this.finishLineX, skyHeight - 15, 'FINISH', {
-        fontSize: '14px',
+      .text(this.finishLineX, skyHeight - 10, 'FINISH', {
+        fontSize: '18px',
         color: '#1a1a1a',
         fontStyle: 'bold',
         stroke: '#ffffff',
@@ -869,7 +869,7 @@ export class RaceScene extends Phaser.Scene {
   private createLeadIndicator(): void {
     // Position at the very top of the screen to avoid obscuring FINISH text
     this.leadIndicator = this.add
-      .text(this.scale.width - 10, 15, '1st: -', {
+      .text(this.scale.width - 10, 25, '1st: -', {
         fontSize: '18px',
         color: '#ffffff',
         fontStyle: 'bold',

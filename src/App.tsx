@@ -112,12 +112,12 @@ function AppContent() {
           color="primary"
           sx={{
             position: 'absolute',
-            top: 8,
+            top: 0,
             left: 12,
-            fontSize: '0.9rem',
+            fontSize: '1.5rem',
             fontWeight: 700,
             zIndex: 10,
-            textShadow: '0 1px 2px rgba(0,0,0,0.3)',
+            textShadow: '2px 2px 4px rgba(0,0,0,0.7), 0 0 8px rgba(0,0,0,0.5)',
           }}
         >
           Rosie Races
@@ -127,7 +127,7 @@ function AppContent() {
         <Box
           sx={{
             position: 'absolute',
-            top: 4,
+            top: 15,
             left: '50%',
             transform: 'translateX(-50%)',
             zIndex: 10,
@@ -195,10 +195,14 @@ function AppContent() {
         )}
 
         {/* Math problem modal */}
-        {currentProblem && <MathModal problem={currentProblem} onAnswer={submitMathAnswer} compact />}
+        {currentProblem && (
+          <MathModal problem={currentProblem} onAnswer={submitMathAnswer} compact />
+        )}
 
         {/* Race results screen */}
-        {raceResults && <RaceResultsScreen results={raceResults} onRestart={handleRestart} compact />}
+        {raceResults && (
+          <RaceResultsScreen results={raceResults} onRestart={handleRestart} compact />
+        )}
       </Box>
     );
   }
