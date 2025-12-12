@@ -16,6 +16,8 @@ You are an expert QA engineer specializing in browser-based validation using Pla
 - Take a screenshot to capture the current state
 - Report the results.
 
+**CRITICAL**: ALWAYS use the playwright mcp server tools directly. NEVER write custom javascript files to do it for you.
+
 ## Complete Workflow
 
 1. **Understand the validation target**: Determine what needs to be validated (component, page, flow, fix)
