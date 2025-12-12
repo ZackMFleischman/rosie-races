@@ -8,6 +8,8 @@ export interface TimerProps {
   isRunning: boolean;
   /** Callback when timer starts (optional) */
   onStart?: () => void;
+  /** When true, renders a more compact timer for phone landscape header */
+  compact?: boolean;
 }
 
 /**
@@ -15,7 +17,7 @@ export interface TimerProps {
  * Timer runs independently of game state and never pauses.
  * Uses requestAnimationFrame for smooth, high-precision updates.
  */
-function Timer({ isRunning, onStart }: TimerProps) {
+function Timer({ isRunning, onStart, compact = false }: TimerProps) {
   const [elapsedTime, setElapsedTime] = useState(0);
   const startTimeRef = useRef<number | null>(null);
   const animationFrameRef = useRef<number | null>(null);
@@ -66,9 +68,10 @@ function Timer({ isRunning, onStart }: TimerProps) {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        py: '8px',
+        py: compact ? 0 : { xs: '4px', sm: '8px' },
+        flexShrink: 0,
         // Fixed width container to prevent layout shift
-        minWidth: { xs: '120px', sm: '140px', md: '160px' },
+        minWidth: compact ? '80px' : { xs: '100px', sm: '140px', md: '160px' },
       }}
     >
       <Typography
@@ -78,7 +81,7 @@ function Timer({ isRunning, onStart }: TimerProps) {
           // Use monospace font for stable digit widths (no jiggling)
           fontFamily: '"Courier New", Courier, monospace',
           fontWeight: 700,
-          fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2rem' },
+          fontSize: compact ? '0.9rem' : { xs: '1.1rem', sm: '1.75rem', md: '2rem' },
           color: 'text.primary',
           // Text shadow for readability against any background
           textShadow: `

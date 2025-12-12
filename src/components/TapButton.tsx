@@ -5,6 +5,8 @@ import { useCallback, useState } from 'react';
 interface TapButtonProps {
   onTap: () => void;
   disabled?: boolean;
+  /** When true, renders a 50% smaller button for phone landscape layout */
+  small?: boolean;
 }
 
 /**
@@ -12,8 +14,13 @@ interface TapButtonProps {
  * Designed to be touch-friendly for young children (100px+ on mobile, 120px+ on larger screens).
  * Uses onPointerDown for instant response.
  */
-function TapButton({ onTap, disabled = false }: TapButtonProps) {
+function TapButton({ onTap, disabled = false, small = false }: TapButtonProps) {
   const [isPressed, setIsPressed] = useState(false);
+
+  // Size configurations
+  const buttonSize = small ? 80 : { xs: 100, sm: 200, md: 240 };
+  const minSize = small ? 80 : { xs: 100, sm: 200 };
+  const fontSize = small ? '1.2rem' : { xs: '1.5rem', sm: '3rem', md: '3.5rem' };
 
   const handlePointerDown = useCallback(
     (e: React.PointerEvent) => {
@@ -44,11 +51,12 @@ function TapButton({ onTap, disabled = false }: TapButtonProps) {
       disabled={disabled}
       data-testid="tap-button"
       sx={{
-        // Size - large and touch-friendly (doubled for easy tapping)
-        width: { xs: 200, sm: 240 },
-        height: { xs: 200, sm: 240 },
-        minWidth: 200,
-        minHeight: 200,
+        // Size - responsive for different screen sizes
+        // Uses small prop for phone landscape layout (50% smaller)
+        width: buttonSize,
+        height: buttonSize,
+        minWidth: minSize,
+        minHeight: minSize,
 
         // Shape
         borderRadius: '50%',
@@ -92,7 +100,7 @@ function TapButton({ onTap, disabled = false }: TapButtonProps) {
         component="span"
         sx={{
           fontWeight: 700,
-          fontSize: { xs: '3rem', sm: '3.5rem' },
+          fontSize: fontSize,
           color: 'inherit',
           pointerEvents: 'none', // Ensure clicks pass through to button
         }}

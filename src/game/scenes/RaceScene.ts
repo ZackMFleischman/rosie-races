@@ -98,6 +98,12 @@ export class RaceScene extends Phaser.Scene {
   private laneHeight: number = 0;
   private laneYPositions: number[] = [];
 
+  // Track positions (calculated proportionally in create() for responsive sizing)
+  private startLineX: number = 0;
+  private finishLineX: number = 0;
+  private rosieStartX: number = 0;
+  private checkpointPositions: number[] = [];
+
   // Game state
   private gameState: GameState = 'ready';
   private raceStartTime: number = 0; // Time when racing started (for finish time calculation)
@@ -149,12 +155,24 @@ export class RaceScene extends Phaser.Scene {
   }
 
   create(): void {
+    // Calculate track positions proportionally based on actual canvas width
+    // Ratios based on original 1024px design: start=0.12, finish=0.95, rosieStart=0.06
+    // Checkpoints at 1/3 and 2/3 of the track (between start and finish)
+    this.startLineX = this.scale.width * 0.12;
+    this.finishLineX = this.scale.width * 0.95;
+    this.rosieStartX = this.scale.width * 0.06;
+    const trackLength = this.finishLineX - this.startLineX;
+    this.checkpointPositions = [
+      this.startLineX + trackLength * 0.33,
+      this.startLineX + trackLength * 0.67,
+    ];
+
     // Calculate lane dimensions
     this.laneHeight = this.scale.height / TRACK_CONFIG.LANE_COUNT;
     this.calculateLanePositions();
 
     // Initialize checkpoint state
-    this.passedCheckpoints = CHECKPOINT_CONFIG.POSITIONS.map(() => false);
+    this.passedCheckpoints = this.checkpointPositions.map(() => false);
 
     // Set world bounds to match camera (fixed viewport)
     this.physics.world.setBounds(0, 0, this.scale.width, this.scale.height);
@@ -225,15 +243,15 @@ export class RaceScene extends Phaser.Scene {
       // Clamp position to track bounds (allow starting from left of start line)
       this.rosie.x = Phaser.Math.Clamp(
         this.rosie.x,
-        TRACK_CONFIG.ROSIE_START_X,
-        TRACK_CONFIG.FINISH_LINE_X
+        this.rosieStartX,
+        this.finishLineX
       );
 
       // Check for checkpoints
       this.checkForCheckpoint();
 
       // Check for finish line
-      if (this.rosie.x >= TRACK_CONFIG.FINISH_LINE_X && this.rosieFinishTime === null) {
+      if (this.rosie.x >= this.finishLineX && this.rosieFinishTime === null) {
         this.handleRosieFinish();
       }
     }
@@ -340,7 +358,7 @@ export class RaceScene extends Phaser.Scene {
     this.hasFinished = false;
     this.velocity = 0;
     this.isPaused = false;
-    this.passedCheckpoints = CHECKPOINT_CONFIG.POSITIONS.map(() => false);
+    this.passedCheckpoints = this.checkpointPositions.map(() => false);
     this.raceStartTime = 0;
 
     // Reset finish tracking
@@ -358,7 +376,7 @@ export class RaceScene extends Phaser.Scene {
     AudioManager.getInstance().stopMusic(false);
 
     if (this.rosie) {
-      this.rosie.x = TRACK_CONFIG.ROSIE_START_X;
+      this.rosie.x = this.rosieStartX;
       this.rosie.y = this.rosieBaseY;
       this.rosie.setScale(this.rosieBaseScale);
     }
@@ -381,7 +399,7 @@ export class RaceScene extends Phaser.Scene {
   private checkForCheckpoint(): void {
     if (!this.rosie) return;
 
-    CHECKPOINT_CONFIG.POSITIONS.forEach((checkpointX, index) => {
+    this.checkpointPositions.forEach((checkpointX, index) => {
       // Check if Rosie has just crossed this checkpoint
       if (!this.passedCheckpoints[index] && this.rosie!.x >= checkpointX) {
         this.passedCheckpoints[index] = true;
@@ -519,9 +537,9 @@ export class RaceScene extends Phaser.Scene {
     graphics.lineStyle(4, 0xffffff, 1);
     this.drawDashedLine(
       graphics,
-      TRACK_CONFIG.START_LINE_X,
+      this.startLineX,
       skyHeight,
-      TRACK_CONFIG.START_LINE_X,
+      this.startLineX,
       this.scale.height,
       10,
       5
@@ -531,9 +549,9 @@ export class RaceScene extends Phaser.Scene {
     graphics.lineStyle(4, 0x000000, 1);
     this.drawDashedLine(
       graphics,
-      TRACK_CONFIG.FINISH_LINE_X,
+      this.finishLineX,
       skyHeight,
-      TRACK_CONFIG.FINISH_LINE_X,
+      this.finishLineX,
       this.scale.height,
       10,
       5
@@ -541,7 +559,7 @@ export class RaceScene extends Phaser.Scene {
 
     // Add labels
     this.add
-      .text(TRACK_CONFIG.START_LINE_X, skyHeight - 15, 'START', {
+      .text(this.startLineX, skyHeight - 15, 'START', {
         fontSize: '16px',
         color: '#ffffff',
         fontStyle: 'bold',
@@ -549,7 +567,7 @@ export class RaceScene extends Phaser.Scene {
       .setOrigin(0.5, 1);
 
     this.add
-      .text(TRACK_CONFIG.FINISH_LINE_X, skyHeight - 15, 'FINISH', {
+      .text(this.finishLineX, skyHeight - 15, 'FINISH', {
         fontSize: '16px',
         color: '#ffffff',
         fontStyle: 'bold',
@@ -564,7 +582,7 @@ export class RaceScene extends Phaser.Scene {
     const graphics = this.add.graphics();
     const skyHeight = this.scale.height * 0.2;
 
-    CHECKPOINT_CONFIG.POSITIONS.forEach((checkpointX) => {
+    this.checkpointPositions.forEach((checkpointX) => {
       // Draw arch poles (vertical red/white striped banners)
       const poleWidth = 8;
       const stripeHeight = 15;
@@ -644,7 +662,7 @@ export class RaceScene extends Phaser.Scene {
     // Rosie starts in lane 1 (index 0)
     this.rosieBaseY = this.laneYPositions[0];
 
-    this.rosie = this.add.sprite(TRACK_CONFIG.ROSIE_START_X, this.rosieBaseY, 'rosie-sprite');
+    this.rosie = this.add.sprite(this.rosieStartX, this.rosieBaseY, 'rosie-sprite');
 
     // Scale the sprite to fit nicely in the lane
     // Target height is roughly 2x the radius (diameter) of the original circle
@@ -671,7 +689,7 @@ export class RaceScene extends Phaser.Scene {
       this.generateCompetitorTexture(textureKey, familyMember.color);
 
       // Create the sprite
-      const sprite = this.add.sprite(TRACK_CONFIG.ROSIE_START_X, baseY, textureKey);
+      const sprite = this.add.sprite(this.rosieStartX, baseY, textureKey);
 
       // Scale to match Rosie's size
       const targetHeight = TRACK_CONFIG.ROSIE_RADIUS * 2;
@@ -757,8 +775,8 @@ export class RaceScene extends Phaser.Scene {
       // Clamp to track bounds (allow starting from left of start line)
       competitor.sprite.x = Phaser.Math.Clamp(
         competitor.sprite.x,
-        TRACK_CONFIG.ROSIE_START_X,
-        TRACK_CONFIG.FINISH_LINE_X
+        this.rosieStartX,
+        this.finishLineX
       );
     });
   }
@@ -789,7 +807,7 @@ export class RaceScene extends Phaser.Scene {
   private createLaneLabels(): void {
     const skyHeight = this.scale.height * 0.2;
     const actualLaneHeight = (this.scale.height - skyHeight) / TRACK_CONFIG.LANE_COUNT;
-    const labelX = TRACK_CONFIG.START_LINE_X + 10; // Right of the starting line
+    const labelX = this.startLineX + 10; // Right of the starting line
 
     // Clear existing labels
     this.laneNameLabels.forEach((label) => label.destroy());
@@ -1133,7 +1151,7 @@ export class RaceScene extends Phaser.Scene {
       if (competitor.finishTime !== null) return;
 
       // Check if crossed finish line
-      if (competitor.sprite.x >= TRACK_CONFIG.FINISH_LINE_X) {
+      if (competitor.sprite.x >= this.finishLineX) {
         competitor.finishTime = performance.now() - this.raceStartTime;
         competitor.finishPosition = this.nextFinishPosition;
         this.nextFinishPosition++;

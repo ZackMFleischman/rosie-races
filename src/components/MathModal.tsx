@@ -14,6 +14,8 @@ export interface MathModalProps {
   problem: MathProblem;
   /** Callback when an answer is submitted */
   onAnswer: (correct: boolean, timeTaken: number) => void;
+  /** When true, renders a much smaller modal for phone landscape */
+  compact?: boolean;
 }
 
 type FeedbackState = 'none' | 'correct-fast' | 'correct-slow' | 'wrong';
@@ -34,7 +36,7 @@ function getProblemId(problem: MathProblem): string {
  * Shows visual feedback for correct/wrong answers.
  * Timer stays visible above this modal.
  */
-function MathModal({ problem, onAnswer }: MathModalProps) {
+function MathModal({ problem, onAnswer, compact = false }: MathModalProps) {
   const problemId = getProblemId(problem);
   const [state, setState] = useState<MathModalState>(() => ({
     problemId,
@@ -109,6 +111,120 @@ function MathModal({ problem, onAnswer }: MathModalProps) {
 
   const feedbackInfo = getFeedbackText();
 
+  // Compact layout for phone landscape - much smaller modal
+  if (compact) {
+    return (
+      <Box
+        data-testid="math-modal"
+        sx={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: 'rgba(0, 0, 0, 0.4)',
+          zIndex: 999,
+        }}
+      >
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 0.75,
+            p: 1.5,
+            borderRadius: 2,
+            backgroundColor: 'rgba(255, 255, 255, 1)',
+            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)',
+            maxWidth: '70%',
+            width: '280px',
+          }}
+        >
+          {/* Emoji + Question on same row */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Typography component="span" sx={{ fontSize: '1.2rem' }}>
+              🤔
+            </Typography>
+            <Typography
+              data-testid="math-question"
+              sx={{
+                fontWeight: 800,
+                fontSize: '1.1rem',
+                color: 'text.primary',
+                fontFamily: '"Courier New", Courier, monospace',
+              }}
+            >
+              {problem.question}
+            </Typography>
+          </Box>
+
+          {/* Answer buttons - 2x2 grid */}
+          <Grid container spacing={0.75} sx={{ maxWidth: '220px' }}>
+            {problem.choices.map((choice, index) => (
+              <Grid size={{ xs: 6 }} key={index}>
+                <Button
+                  variant="contained"
+                  color={getButtonColor(choice)}
+                  onClick={() => handleAnswerClick(choice)}
+                  disabled={feedback !== 'none'}
+                  data-testid={`answer-button-${index}`}
+                  data-choice={choice}
+                  sx={{
+                    width: '100%',
+                    py: 0.75,
+                    fontSize: '1rem',
+                    fontWeight: 700,
+                    borderRadius: 1.5,
+                    minHeight: '40px',
+                    boxShadow: 2,
+                    '&:active': { transform: 'scale(0.95)' },
+                  }}
+                >
+                  {choice}
+                </Button>
+              </Grid>
+            ))}
+          </Grid>
+
+          {/* Feedback text */}
+          <Box
+            data-testid="feedback-text"
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 0.5,
+              minHeight: '1rem',
+              visibility: feedback !== 'none' ? 'visible' : 'hidden',
+            }}
+          >
+            <Typography component="span" sx={{ fontSize: '0.7rem' }}>
+              {feedbackInfo.emoji}
+            </Typography>
+            <Typography
+              sx={{
+                fontWeight: 700,
+                fontSize: '0.65rem',
+                color:
+                  feedback === 'wrong'
+                    ? 'error.main'
+                    : feedback === 'correct-fast'
+                      ? 'warning.main'
+                      : 'success.main',
+              }}
+            >
+              {feedbackInfo.text}
+            </Typography>
+          </Box>
+        </Box>
+      </Box>
+    );
+  }
+
+  // Default layout for tablets and desktop
   return (
     <Box
       data-testid="math-modal"
@@ -121,8 +237,7 @@ function MathModal({ problem, onAnswer }: MathModalProps) {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'flex-start', // Anchor to top so modal doesn't shift when content changes
-        pt: { xs: '15vh', sm: '12vh' }, // Offset from top
+        justifyContent: 'center', // Center vertically to use available space
         backgroundColor: 'rgba(0, 0, 0, 0.25)', // Semi-transparent to see racers behind
         zIndex: 999, // Below timer (1000)
       }}
@@ -133,12 +248,12 @@ function MathModal({ problem, onAnswer }: MathModalProps) {
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          gap: { xs: 3, sm: 4 },
-          p: { xs: 4, sm: 5 },
+          gap: { xs: 2, sm: 4 },
+          p: { xs: 3, sm: 5 },
           borderRadius: 4,
-          backgroundColor: 'rgba(255, 255, 255, 0.75)', // Slightly more transparent but high contrast
+          backgroundColor: 'rgba(255, 255, 255, 1)',
           boxShadow: '0 12px 40px rgba(0, 0, 0, 0.4)',
-          maxWidth: { xs: '95%', sm: '550px' }, // Wider modal
+          maxWidth: { xs: '90%', sm: '550px' },
           width: '100%',
         }}
       >
@@ -146,7 +261,7 @@ function MathModal({ problem, onAnswer }: MathModalProps) {
         <Typography
           component="span"
           sx={{
-            fontSize: { xs: '3rem', sm: '4rem' }, // Bigger emoji
+            fontSize: { xs: '2.5rem', sm: '4rem' },
             lineHeight: 1,
           }}
         >
@@ -159,18 +274,18 @@ function MathModal({ problem, onAnswer }: MathModalProps) {
           data-testid="math-question"
           sx={{
             fontWeight: 800,
-            fontSize: { xs: '2.5rem', sm: '3.5rem', md: '4rem' }, // Bigger question
+            fontSize: { xs: '2rem', sm: '3.5rem', md: '4rem' },
             color: 'text.primary',
             textAlign: 'center',
             fontFamily: '"Courier New", Courier, monospace',
-            whiteSpace: 'nowrap', // Prevent long formulas from wrapping
+            whiteSpace: 'nowrap',
           }}
         >
           {problem.question}
         </Typography>
 
-        {/* Answer buttons - 2x2 grid at TOP of content */}
-        <Grid container spacing={3} sx={{ maxWidth: { xs: '350px', sm: '480px' } }}>
+        {/* Answer buttons - 2x2 grid */}
+        <Grid container spacing={{ xs: 2, sm: 3 }} sx={{ maxWidth: { xs: '320px', sm: '480px' } }}>
           {problem.choices.map((choice, index) => (
             <Grid size={{ xs: 6 }} key={index}>
               <Button
@@ -182,11 +297,11 @@ function MathModal({ problem, onAnswer }: MathModalProps) {
                 data-choice={choice}
                 sx={{
                   width: '100%',
-                  py: { xs: 2.5, sm: 3.5 }, // Taller buttons
-                  fontSize: { xs: '2rem', sm: '2.5rem' }, // Bigger text
+                  py: { xs: 2, sm: 3.5 },
+                  fontSize: { xs: '1.5rem', sm: '2.5rem' },
                   fontWeight: 700,
-                  borderRadius: 3,
-                  minHeight: { xs: '90px', sm: '110px' }, // Much larger touch targets
+                  borderRadius: { xs: 2, sm: 3 },
+                  minHeight: { xs: '70px', sm: '110px' },
                   boxShadow: 4,
                   '&:hover': {
                     boxShadow: 6,
@@ -196,7 +311,6 @@ function MathModal({ problem, onAnswer }: MathModalProps) {
                     transform: 'scale(0.95)',
                   },
                   transition: 'all 0.15s ease-in-out',
-                  // Show visual feedback
                   ...(selectedAnswer === choice &&
                     feedback === 'correct-fast' && {
                       animation: 'pulse 0.3s ease-in-out',
@@ -230,15 +344,14 @@ function MathModal({ problem, onAnswer }: MathModalProps) {
             alignItems: 'center',
             justifyContent: 'center',
             gap: 1,
-            mt: 1,
-            minHeight: { xs: '2.5rem', sm: '3rem' }, // Reserve space for feedback
+            minHeight: { xs: '2rem', sm: '3rem' },
             visibility: feedback !== 'none' ? 'visible' : 'hidden',
           }}
         >
           <Typography
             component="span"
             sx={{
-              fontSize: { xs: '1.5rem', sm: '2rem' },
+              fontSize: { xs: '1.2rem', sm: '2rem' },
             }}
           >
             {feedbackInfo.emoji}
@@ -247,6 +360,7 @@ function MathModal({ problem, onAnswer }: MathModalProps) {
             variant="h4"
             sx={{
               fontWeight: 700,
+              fontSize: { xs: '1rem', sm: '1.5rem' },
               color:
                 feedback === 'wrong'
                   ? 'error.main'

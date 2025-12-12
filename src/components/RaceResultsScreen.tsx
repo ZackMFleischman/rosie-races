@@ -9,6 +9,8 @@ export interface RaceResultsScreenProps {
   results: RacerResult[];
   /** Callback when Race Again button is clicked */
   onRestart: () => void;
+  /** When true, renders a compact 2-column layout for phone landscape */
+  compact?: boolean;
 }
 
 /**
@@ -57,7 +59,7 @@ function getCelebrationMessage(position: number): string {
  * Shows all racers in finish order with times and medals.
  * Supports partial results (some racers still racing).
  */
-function RaceResultsScreen({ results, onRestart }: RaceResultsScreenProps) {
+function RaceResultsScreen({ results, onRestart, compact = false }: RaceResultsScreenProps) {
   // Find Rosie's result
   const rosieResult = results.find((r) => r.isRosie);
   const rosiePosition = rosieResult?.position ?? 0;
@@ -65,6 +67,151 @@ function RaceResultsScreen({ results, onRestart }: RaceResultsScreenProps) {
   // Count finished racers - used directly for visibility (no state needed)
   const finishedCount = results.filter((r) => r.finishTime !== null).length;
 
+  // Compact result row component for phone landscape
+  const CompactResultRow = ({ result }: { result: RacerResult }) => {
+    const isFinished = result.finishTime !== null;
+    return (
+      <Box
+        data-testid={`result-row-${result.position ?? 'racing'}`}
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 0.5,
+          p: 0.5,
+          borderRadius: 1,
+          backgroundColor: result.isRosie ? 'rgba(255, 105, 180, 0.2)' : 'rgba(0, 0, 0, 0.05)',
+          border: result.isRosie ? '1px solid #ff69b4' : '1px solid transparent',
+        }}
+      >
+        <Typography sx={{ fontWeight: 700, fontSize: '0.65rem', minWidth: '20px', color: 'text.secondary' }}>
+          {result.position !== null ? getOrdinal(result.position) : '...'}
+        </Typography>
+        <Box
+          sx={{
+            width: 14,
+            height: 14,
+            borderRadius: '50%',
+            backgroundColor: `#${result.color.toString(16).padStart(6, '0')}`,
+            flexShrink: 0,
+          }}
+        />
+        <Typography
+          sx={{
+            fontWeight: result.isRosie ? 700 : 500,
+            fontSize: '0.6rem',
+            flex: 1,
+            color: result.isRosie ? 'primary.main' : 'text.primary',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {result.name}
+        </Typography>
+        <Typography
+          sx={{
+            fontFamily: 'monospace',
+            fontSize: '0.55rem',
+            color: 'text.secondary',
+          }}
+        >
+          {isFinished ? formatTime(result.finishTime!) : '...'}
+        </Typography>
+        {isFinished && result.position !== null && result.position <= 3 && (
+          <Typography sx={{ fontSize: '0.6rem' }}>{getMedal(result.position)}</Typography>
+        )}
+      </Box>
+    );
+  };
+
+  // Compact 2-column layout for phone landscape
+  if (compact) {
+    const leftColumn = results.slice(0, 3);
+    const rightColumn = results.slice(3, 6);
+
+    return (
+      <Box
+        data-testid="race-results-screen"
+        sx={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: 'rgba(0, 0, 0, 0.85)',
+          zIndex: 1100,
+        }}
+      >
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 0.5,
+            p: 1,
+            borderRadius: 2,
+            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+            boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3)',
+            maxWidth: '90%',
+            width: '380px',
+          }}
+        >
+          {/* Header */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <Typography sx={{ fontSize: '1rem' }}>{getMedal(rosiePosition)}</Typography>
+            <Typography
+              data-testid="celebration-message"
+              sx={{ fontWeight: 800, fontSize: '0.8rem', color: rosiePosition === 1 ? 'gold' : 'primary.main' }}
+            >
+              {getCelebrationMessage(rosiePosition)}
+            </Typography>
+          </Box>
+
+          {/* 2-column results grid */}
+          <Box sx={{ display: 'flex', gap: 1, width: '100%' }}>
+            {/* Left column (1-3) */}
+            <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 0.25 }}>
+              {leftColumn.map((result) => (
+                <CompactResultRow key={result.name} result={result} />
+              ))}
+            </Box>
+            {/* Right column (4-6) */}
+            <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 0.25 }}>
+              {rightColumn.map((result) => (
+                <CompactResultRow key={result.name} result={result} />
+              ))}
+            </Box>
+          </Box>
+
+          {/* Race Again button */}
+          <Button
+            variant="contained"
+            color="primary"
+            size="small"
+            onClick={onRestart}
+            data-testid="race-again-button"
+            sx={{
+              mt: 0.5,
+              px: 2,
+              py: 0.5,
+              fontSize: '0.7rem',
+              fontWeight: 700,
+              borderRadius: 1.5,
+              textTransform: 'none',
+              minHeight: '28px',
+            }}
+          >
+            Race Again
+          </Button>
+        </Box>
+      </Box>
+    );
+  }
+
+  // Default layout for tablets and desktop
   return (
     <Box
       data-testid="race-results-screen"
@@ -88,7 +235,7 @@ function RaceResultsScreen({ results, onRestart }: RaceResultsScreenProps) {
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          gap: { xs: 1.5, sm: 2 },
+          gap: { xs: 1, sm: 2 },
           p: { xs: 2, sm: 3 },
           borderRadius: 3,
           backgroundColor: 'rgba(255, 255, 255, 0.95)',
@@ -104,7 +251,7 @@ function RaceResultsScreen({ results, onRestart }: RaceResultsScreenProps) {
           <Typography
             component="span"
             sx={{
-              fontSize: { xs: '2.5rem', sm: '3rem' },
+              fontSize: { xs: '2rem', sm: '3rem' },
               lineHeight: 1,
             }}
           >
@@ -129,7 +276,7 @@ function RaceResultsScreen({ results, onRestart }: RaceResultsScreenProps) {
           variant="h4"
           sx={{
             fontWeight: 700,
-            fontSize: { xs: '1.2rem', sm: '1.4rem' },
+            fontSize: { xs: '1rem', sm: '1.4rem' },
             color: 'text.secondary',
             textTransform: 'uppercase',
             letterSpacing: '0.1em',
@@ -149,7 +296,7 @@ function RaceResultsScreen({ results, onRestart }: RaceResultsScreenProps) {
         >
           {results.map((result, index) => {
             const isFinished = result.finishTime !== null;
-            const isVisible = isFinished ? index < finishedCount : true; // Show still-racing racers
+            const isVisible = isFinished ? index < finishedCount : true;
             return (
               <Box
                 key={`${result.name}-${result.position ?? 'racing'}`}
@@ -216,7 +363,7 @@ function RaceResultsScreen({ results, onRestart }: RaceResultsScreenProps) {
                     fontFamily: '"Courier New", Courier, monospace',
                     fontWeight: 600,
                     fontSize: { xs: '0.9rem', sm: '1rem' },
-                    color: isFinished ? 'text.secondary' : 'text.secondary',
+                    color: 'text.secondary',
                     fontStyle: isFinished ? 'normal' : 'italic',
                   }}
                 >
@@ -241,8 +388,8 @@ function RaceResultsScreen({ results, onRestart }: RaceResultsScreenProps) {
           data-testid="race-again-button"
           sx={{
             mt: 2,
-            px: { xs: 4, sm: 6 },
-            py: { xs: 1.5, sm: 2 },
+            px: 6,
+            py: 2,
             fontSize: { xs: '1.1rem', sm: '1.3rem' },
             fontWeight: 700,
             borderRadius: 3,
@@ -256,8 +403,8 @@ function RaceResultsScreen({ results, onRestart }: RaceResultsScreenProps) {
               transform: 'scale(0.98)',
             },
             transition: 'all 0.15s ease-in-out',
-            minWidth: { xs: '150px', sm: '180px' },
-            minHeight: { xs: '48px', sm: '56px' },
+            minWidth: '180px',
+            minHeight: '56px',
           }}
         >
           Race Again
