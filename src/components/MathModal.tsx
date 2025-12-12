@@ -145,14 +145,14 @@ function MathModal({ problem, onAnswer, compact = false }: MathModalProps) {
         >
           {/* Emoji + Question on same row */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Typography component="span" sx={{ fontSize: '1.2rem' }}>
+            <Typography component="span" sx={{ fontSize: '1.3rem' }}>
               🤔
             </Typography>
             <Typography
               data-testid="math-question"
               sx={{
                 fontWeight: 800,
-                fontSize: '1.1rem',
+                fontSize: '1.3rem',
                 color: 'text.primary',
                 fontFamily: '"Courier New", Courier, monospace',
               }}
@@ -162,7 +162,7 @@ function MathModal({ problem, onAnswer, compact = false }: MathModalProps) {
           </Box>
 
           {/* Answer buttons - 2x2 grid */}
-          <Grid container spacing={0.75} sx={{ maxWidth: '220px' }}>
+          <Grid container spacing={0.75} sx={{ maxWidth: '220px', paddingTop: 1.5 }}>
             {problem.choices.map((choice, index) => (
               <Grid size={{ xs: 6 }} key={index}>
                 <Button

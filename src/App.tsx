@@ -78,7 +78,7 @@ function AppContent() {
     emitRestart();
   }, [emitRestart]);
 
-  // Phone landscape layout: horizontal with TAP button on right side of track
+  // Phone landscape layout: full-screen canvas with overlaid UI
   if (isPhoneLandscape) {
     return (
       <Box
@@ -86,77 +86,70 @@ function AppContent() {
           height: '100dvh',
           maxHeight: '100dvh',
           display: 'flex',
-          flexDirection: 'column',
-          bgcolor: 'background.default',
+          position: 'relative',
+          bgcolor: '#4CAF50', // Match canvas grass green background
           overflow: 'hidden',
         }}
       >
-        {/* Volume control - always visible in top-right corner */}
-        <VolumeControl />
-
-        {/* Header row: title left, timer center */}
+        {/* Full-screen game canvas */}
         <Box
-          component="header"
           sx={{
-            display: 'flex',
-            alignItems: 'center',
-            px: 1,
-            py: 0.25,
-            flexShrink: 0,
+            width: '100%',
+            height: '100%',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
           }}
         >
-          <Typography
-            variant="h6"
-            color="primary"
-            sx={{ fontSize: '0.9rem', fontWeight: 700 }}
-          >
-            Rosie Races
-          </Typography>
-          <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
-            <Timer isRunning={isRacing} compact />
-          </Box>
-          {/* Spacer to balance the title on left */}
-          <Box sx={{ width: '80px' }} />
+          <GameContainer config={gameConfigPhoneLandscape} onGameReady={handleGameReady} />
         </Box>
 
-        {/* Main content: game track + TAP button side by side */}
-        <Box
-          component="main"
+        {/* Overlay: Title in top-left */}
+        <Typography
+          variant="h6"
+          color="primary"
           sx={{
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'center',
-            px: 0.5,
-            py: 0,
-            minHeight: 0,
-            overflow: 'hidden',
-            gap: 0.5,
+            position: 'absolute',
+            top: 8,
+            left: 12,
+            fontSize: '0.9rem',
+            fontWeight: 700,
+            zIndex: 10,
+            textShadow: '0 1px 2px rgba(0,0,0,0.3)',
           }}
         >
-          {/* Game canvas - fills available space */}
-          <Box
-            sx={{
-              flex: 1,
-              height: '100%',
-              overflow: 'hidden',
-            }}
-          >
-            <GameContainer config={gameConfigPhoneLandscape} onGameReady={handleGameReady} />
-          </Box>
+          Rosie Races
+        </Typography>
 
-          {/* TAP button - on the right */}
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexShrink: 0,
-            }}
-          >
-            <TapButton onTap={handleTap} disabled={isTapButtonDisabled} small />
-          </Box>
+        {/* Overlay: Timer in top-center */}
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 4,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 10,
+          }}
+        >
+          <Timer isRunning={isRacing} compact />
+        </Box>
+
+        {/* Overlay: Volume control in bottom-right */}
+        <VolumeControl bottomRight />
+
+        {/* Overlay: TAP button on the right */}
+        <Box
+          sx={{
+            position: 'absolute',
+            right: 12,
+            top: '50%',
+            transform: 'translateY(-50%)',
+            zIndex: 10,
+          }}
+        >
+          <TapButton onTap={handleTap} disabled={isTapButtonDisabled} small />
         </Box>
 
         {/* Pre-race overlay */}

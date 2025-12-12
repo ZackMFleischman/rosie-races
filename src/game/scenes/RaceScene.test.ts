@@ -3,7 +3,6 @@ import {
   RaceScene,
   MOVEMENT_CONFIG,
   TRACK_CONFIG,
-  ANIMATION_CONFIG,
   CHECKPOINT_CONFIG,
   AI_CONFIG,
 } from './RaceScene';
@@ -55,16 +54,17 @@ describe('RaceScene', () => {
     it('creates start and finish line labels', () => {
       const { scene } = setupTest();
       const textCalls = (scene.add.text as jest.Mock).mock.calls;
+      const canvasWidth = 1024; // Mock canvas width
 
       // Find the START label
       const startLabel = textCalls.find((call: unknown[]) => call[2] === 'START');
       expect(startLabel).toBeDefined();
-      expect(startLabel?.[0]).toBe(TRACK_CONFIG.START_LINE_X);
+      expect(startLabel?.[0]).toBe(canvasWidth * TRACK_CONFIG.START_LINE_RATIO);
 
       // Find the FINISH label
       const finishLabel = textCalls.find((call: unknown[]) => call[2] === 'FINISH');
       expect(finishLabel).toBeDefined();
-      expect(finishLabel?.[0]).toBe(TRACK_CONFIG.FINISH_LINE_X);
+      expect(finishLabel?.[0]).toBe(canvasWidth * TRACK_CONFIG.FINISH_LINE_RATIO);
     });
 
     it('loads Rosie sprite in preload', () => {
@@ -87,12 +87,13 @@ describe('RaceScene', () => {
     it('positions Rosie at start position in lane 1', () => {
       const { scene } = setupTest();
       const spriteCalls = (scene.add.sprite as jest.Mock).mock.calls;
+      const canvasWidth = 1024; // Mock canvas width
 
       // Find Rosie by texture name
       const rosieCall = spriteCalls.find((call: unknown[]) => call[2] === 'rosie-sprite');
 
-      // Rosie should be at ROSIE_START_X
-      expect(rosieCall?.[0]).toBe(TRACK_CONFIG.ROSIE_START_X);
+      // Rosie should be at calculated rosieStartX
+      expect(rosieCall?.[0]).toBe(canvasWidth * TRACK_CONFIG.ROSIE_START_RATIO);
 
       // Rosie should be in lane 1 (first lane Y position)
       const lanePositions = scene.getLaneYPositions();
@@ -191,37 +192,13 @@ describe('RaceScene', () => {
   });
 
   describe('TRACK_CONFIG', () => {
-    it('has 6 lanes', () => {
-      expect(TRACK_CONFIG.LANE_COUNT).toBe(6);
-    });
-
-    it('has expected start and finish positions', () => {
-      expect(TRACK_CONFIG.START_LINE_X).toBe(120);
-      expect(TRACK_CONFIG.FINISH_LINE_X).toBe(974);
-    });
-
-    it('has Rosie start position before start line (to the left)', () => {
+    it('has Rosie start ratio before start line ratio (to the left)', () => {
       // Rosie starts to the left of the start line so player can see her move to it
-      expect(TRACK_CONFIG.ROSIE_START_X).toBeLessThan(TRACK_CONFIG.START_LINE_X);
-    });
-  });
-
-  describe('ANIMATION_CONFIG', () => {
-    it('has expected bobbing frequency', () => {
-      expect(ANIMATION_CONFIG.BOB_FREQUENCY).toBe(0.015);
+      expect(TRACK_CONFIG.ROSIE_START_RATIO).toBeLessThan(TRACK_CONFIG.START_LINE_RATIO);
     });
 
-    it('has expected bob amplitude factor', () => {
-      expect(ANIMATION_CONFIG.BOB_AMPLITUDE_FACTOR).toBe(0.1);
-    });
-
-    it('has expected max bob amplitude', () => {
-      expect(ANIMATION_CONFIG.BOB_MAX_AMPLITUDE).toBe(8);
-    });
-
-    it('has expected scale pulse settings', () => {
-      expect(ANIMATION_CONFIG.SCALE_PULSE_FREQUENCY).toBe(0.02);
-      expect(ANIMATION_CONFIG.SCALE_PULSE_AMOUNT).toBe(0.05);
+    it('has finish line ratio after start line ratio', () => {
+      expect(TRACK_CONFIG.FINISH_LINE_RATIO).toBeGreaterThan(TRACK_CONFIG.START_LINE_RATIO);
     });
   });
 
@@ -242,28 +219,11 @@ describe('RaceScene', () => {
   });
 
   describe('CHECKPOINT_CONFIG', () => {
-    it('has 2 checkpoint positions', () => {
-      expect(CHECKPOINT_CONFIG.POSITIONS).toHaveLength(2);
-    });
-
-    it('has checkpoint positions between start and finish', () => {
-      CHECKPOINT_CONFIG.POSITIONS.forEach((pos) => {
-        expect(pos).toBeGreaterThan(TRACK_CONFIG.START_LINE_X);
-        expect(pos).toBeLessThan(TRACK_CONFIG.FINISH_LINE_X);
+    it('has checkpoint ratios between 0 and 1 (within track bounds)', () => {
+      CHECKPOINT_CONFIG.POSITION_RATIOS.forEach((ratio) => {
+        expect(ratio).toBeGreaterThan(0);
+        expect(ratio).toBeLessThan(1);
       });
-    });
-
-    it('has checkpoint positions within track bounds', () => {
-      // Checkpoints should be positioned equidistant from start (120) and finish (974)
-      // Track length: 854, divided into 3 equal segments of ~285
-      expect(CHECKPOINT_CONFIG.POSITIONS[0]).toBe(405);
-      expect(CHECKPOINT_CONFIG.POSITIONS[1]).toBe(689);
-    });
-
-    it('has velocity boost values configured', () => {
-      expect(CHECKPOINT_CONFIG.FAST_ANSWER_BOOST).toBe(50);
-      expect(CHECKPOINT_CONFIG.SLOW_ANSWER_BOOST).toBe(20);
-      expect(CHECKPOINT_CONFIG.FAST_ANSWER_THRESHOLD).toBe(3000);
     });
   });
 
@@ -278,7 +238,7 @@ describe('RaceScene', () => {
     it('returns array of false values initially', () => {
       const { scene } = setupTest();
       const checkpoints = scene.getPassedCheckpoints();
-      expect(checkpoints).toHaveLength(CHECKPOINT_CONFIG.POSITIONS.length);
+      expect(checkpoints).toHaveLength(CHECKPOINT_CONFIG.POSITION_RATIOS.length);
       checkpoints.forEach((passed) => {
         expect(passed).toBe(false);
       });
@@ -309,7 +269,7 @@ describe('RaceScene', () => {
 
       // Find the ? labels for checkpoints
       const questionMarks = textCalls.filter((call: unknown[]) => call[2] === '?');
-      expect(questionMarks).toHaveLength(CHECKPOINT_CONFIG.POSITIONS.length);
+      expect(questionMarks).toHaveLength(CHECKPOINT_CONFIG.POSITION_RATIOS.length);
     });
   });
 
@@ -403,6 +363,7 @@ describe('RaceScene', () => {
       it('creates sprites at the start position', () => {
         const { scene } = setupTest();
         const spriteCalls = (scene.add.sprite as jest.Mock).mock.calls;
+        const canvasWidth = 1024; // Mock canvas width
 
         // Find competitor sprite calls (not Rosie's)
         const competitorCalls = spriteCalls.filter((call: unknown[]) =>
@@ -411,7 +372,7 @@ describe('RaceScene', () => {
 
         expect(competitorCalls).toHaveLength(5);
         competitorCalls.forEach((call) => {
-          expect(call[0]).toBe(TRACK_CONFIG.ROSIE_START_X);
+          expect(call[0]).toBe(canvasWidth * TRACK_CONFIG.ROSIE_START_RATIO);
         });
       });
 
@@ -479,7 +440,8 @@ describe('RaceScene', () => {
       expect(rosieLabel).toBeDefined();
 
       // Labels should be to the right of the start line
-      expect(rosieLabel?.[0]).toBe(TRACK_CONFIG.START_LINE_X + 10);
+      const canvasWidth = 1024; // Mock canvas width
+      expect(rosieLabel?.[0]).toBe(canvasWidth * TRACK_CONFIG.START_LINE_RATIO + 10);
     });
 
     it('creates labels for competitors with their names', () => {

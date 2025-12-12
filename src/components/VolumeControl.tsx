@@ -49,6 +49,8 @@ const SpeakerButton = styled(IconButton)(({ theme }) => ({
 
 export interface VolumeControlProps {
   audioManager?: AudioManager;
+  /** Position the button at the bottom-right instead of top-right */
+  bottomRight?: boolean;
 }
 
 /**
@@ -60,7 +62,7 @@ export interface VolumeControlProps {
  * - Double-tap or long-press to toggle mute
  * - Volume persisted to localStorage via AudioManager
  */
-export function VolumeControl({ audioManager }: VolumeControlProps) {
+export function VolumeControl({ audioManager, bottomRight = false }: VolumeControlProps) {
   const manager = audioManager ?? AudioManager.getInstance();
 
   // Local state for UI updates
@@ -128,6 +130,7 @@ export function VolumeControl({ audioManager }: VolumeControlProps) {
         onDoubleClick={handleSpeakerDoubleClick}
         aria-label={muted || volume === 0 ? 'Unmute audio' : 'Mute audio'}
         size="large"
+        sx={bottomRight ? { top: 'auto', bottom: 8 } : undefined}
       >
         {getSpeakerIcon()}
       </SpeakerButton>
@@ -138,11 +141,11 @@ export function VolumeControl({ audioManager }: VolumeControlProps) {
         anchorEl={anchorEl}
         onClose={handleClose}
         anchorOrigin={{
-          vertical: 'bottom',
+          vertical: bottomRight ? 'top' : 'bottom',
           horizontal: 'center',
         }}
         transformOrigin={{
-          vertical: 'top',
+          vertical: bottomRight ? 'bottom' : 'top',
           horizontal: 'center',
         }}
         slotProps={{

@@ -45,6 +45,7 @@ export interface RacerResult {
   finishTime: number | null;
   position: number | null;
   isRosie: boolean;
+  avatar?: string; // Optional avatar image URL
 }
 
 /**

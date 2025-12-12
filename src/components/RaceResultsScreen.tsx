@@ -76,29 +76,46 @@ function RaceResultsScreen({ results, onRestart, compact = false }: RaceResultsS
         sx={{
           display: 'flex',
           alignItems: 'center',
-          gap: 0.5,
-          p: 0.5,
+          gap: 0.75,
+          p: 0.75,
           borderRadius: 1,
           backgroundColor: result.isRosie ? 'rgba(255, 105, 180, 0.2)' : 'rgba(0, 0, 0, 0.05)',
           border: result.isRosie ? '1px solid #ff69b4' : '1px solid transparent',
         }}
       >
-        <Typography sx={{ fontWeight: 700, fontSize: '0.65rem', minWidth: '20px', color: 'text.secondary' }}>
+        <Typography
+          sx={{ fontWeight: 700, fontSize: '0.8rem', minWidth: '24px', color: 'text.secondary' }}
+        >
           {result.position !== null ? getOrdinal(result.position) : '...'}
         </Typography>
-        <Box
-          sx={{
-            width: 14,
-            height: 14,
-            borderRadius: '50%',
-            backgroundColor: `#${result.color.toString(16).padStart(6, '0')}`,
-            flexShrink: 0,
-          }}
-        />
+        {result.avatar ? (
+          <Box
+            component="img"
+            src={result.avatar}
+            alt={result.name}
+            sx={{
+              width: 24,
+              height: 24,
+              borderRadius: '50%',
+              objectFit: 'cover',
+              flexShrink: 0,
+            }}
+          />
+        ) : (
+          <Box
+            sx={{
+              width: 18,
+              height: 18,
+              borderRadius: '50%',
+              backgroundColor: `#${result.color.toString(16).padStart(6, '0')}`,
+              flexShrink: 0,
+            }}
+          />
+        )}
         <Typography
           sx={{
             fontWeight: result.isRosie ? 700 : 500,
-            fontSize: '0.6rem',
+            fontSize: '0.75rem',
             flex: 1,
             color: result.isRosie ? 'primary.main' : 'text.primary',
             overflow: 'hidden',
@@ -111,14 +128,14 @@ function RaceResultsScreen({ results, onRestart, compact = false }: RaceResultsS
         <Typography
           sx={{
             fontFamily: 'monospace',
-            fontSize: '0.55rem',
+            fontSize: '0.7rem',
             color: 'text.secondary',
           }}
         >
           {isFinished ? formatTime(result.finishTime!) : '...'}
         </Typography>
         {isFinished && result.position !== null && result.position <= 3 && (
-          <Typography sx={{ fontSize: '0.6rem' }}>{getMedal(result.position)}</Typography>
+          <Typography sx={{ fontSize: '0.75rem' }}>{getMedal(result.position)}</Typography>
         )}
       </Box>
     );
@@ -150,21 +167,26 @@ function RaceResultsScreen({ results, onRestart, compact = false }: RaceResultsS
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: 0.5,
-            p: 1,
+            gap: 1,
+            p: 1.5,
             borderRadius: 2,
             backgroundColor: 'rgba(255, 255, 255, 0.95)',
             boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3)',
             maxWidth: '90%',
-            width: '380px',
+            width: '440px',
           }}
         >
           {/* Header */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-            <Typography sx={{ fontSize: '1rem' }}>{getMedal(rosiePosition)}</Typography>
+            <Typography sx={{ fontSize: '1.2rem' }}>{getMedal(rosiePosition)}</Typography>
             <Typography
               data-testid="celebration-message"
-              sx={{ fontWeight: 800, fontSize: '0.8rem', color: rosiePosition === 1 ? 'gold' : 'primary.main' }}
+              sx={{
+                fontWeight: 800,
+                fontSize: '1.5rem',
+                color: rosiePosition === 1 ? '#d97706' : 'primary.main', // Amber instead of gold for contrast
+                textShadow: rosiePosition === 1 ? '0 1px 0 rgba(0,0,0,0.2)' : 'none',
+              }}
             >
               {getCelebrationMessage(rosiePosition)}
             </Typography>
@@ -190,18 +212,18 @@ function RaceResultsScreen({ results, onRestart, compact = false }: RaceResultsS
           <Button
             variant="contained"
             color="primary"
-            size="small"
+            size="medium"
             onClick={onRestart}
             data-testid="race-again-button"
             sx={{
-              mt: 0.5,
-              px: 2,
-              py: 0.5,
-              fontSize: '0.7rem',
+              mt: 1,
+              px: 3,
+              py: 1,
+              fontSize: '0.9rem',
               fontWeight: 700,
-              borderRadius: 1.5,
+              borderRadius: 2,
               textTransform: 'none',
-              minHeight: '28px',
+              minHeight: '36px',
             }}
           >
             Race Again
@@ -333,16 +355,31 @@ function RaceResultsScreen({ results, onRestart, compact = false }: RaceResultsS
                   {result.position !== null ? getOrdinal(result.position) : '...'}
                 </Typography>
 
-                {/* Avatar circle */}
-                <Box
-                  sx={{
-                    width: 32,
-                    height: 32,
-                    borderRadius: '50%',
-                    backgroundColor: `#${result.color.toString(16).padStart(6, '0')}`,
-                    flexShrink: 0,
-                  }}
-                />
+                {/* Avatar */}
+                {result.avatar ? (
+                  <Box
+                    component="img"
+                    src={result.avatar}
+                    alt={result.name}
+                    sx={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: '50%',
+                      objectFit: 'cover',
+                      flexShrink: 0,
+                    }}
+                  />
+                ) : (
+                  <Box
+                    sx={{
+                      width: 32,
+                      height: 32,
+                      borderRadius: '50%',
+                      backgroundColor: `#${result.color.toString(16).padStart(6, '0')}`,
+                      flexShrink: 0,
+                    }}
+                  />
+                )}
 
                 {/* Name */}
                 <Typography

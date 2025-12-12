@@ -81,7 +81,7 @@ function Timer({ isRunning, onStart, compact = false }: TimerProps) {
           // Use monospace font for stable digit widths (no jiggling)
           fontFamily: '"Courier New", Courier, monospace',
           fontWeight: 700,
-          fontSize: compact ? '0.9rem' : { xs: '1.1rem', sm: '1.75rem', md: '2rem' },
+          fontSize: compact ? '1.1rem' : { xs: '1.1rem', sm: '1.75rem', md: '2rem' },
           color: 'text.primary',
           // Text shadow for readability against any background
           textShadow: `

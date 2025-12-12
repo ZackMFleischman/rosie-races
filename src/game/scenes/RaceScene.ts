@@ -32,18 +32,19 @@ interface Competitor {
 // Constants for track layout
 export const TRACK_CONFIG = {
   LANE_COUNT: 6,
-  START_LINE_X: 120,
-  FINISH_LINE_X: 974,
-  ROSIE_START_X: 60, // Starts to the left of the start line
-  ROSIE_RADIUS: 38, // 25% larger than original 30
+  // Position ratios (percentage of canvas width)
+  START_LINE_RATIO: 0.12, //  from left
+  FINISH_LINE_RATIO: 0.85, // from left -  leaves space for TAP button overlay
+  ROSIE_START_RATIO: 0.06, // from left
+  ROSIE_RADIUS: 22, // Smaller circles for better proportions on mobile
   ROSIE_COLOR: 0xff69b4, // Pink
 };
 
 // Constants for checkpoints
-// Positions are calculated to be equidistant from start (120) and finish (974)
-// Track length: 974 - 120 = 854, divided into 3 equal segments of ~285
+// Positions are calculated dynamically as fractions of track length (between start and finish)
 export const CHECKPOINT_CONFIG = {
-  POSITIONS: [405, 689], // X positions for checkpoints (equidistant: 1/3 and 2/3 of track)
+  // Checkpoint positions as ratios of track length (0 = start line, 1 = finish line)
+  POSITION_RATIOS: [1 / 3, 2 / 3], // 1/3 and 2/3 of the way through the track
   ARCH_HEIGHT: 60, // Height of the checkpoint arch
   ARCH_WIDTH: 30, // Width of the arch
   COLORS: {
@@ -155,17 +156,15 @@ export class RaceScene extends Phaser.Scene {
   }
 
   create(): void {
-    // Calculate track positions proportionally based on actual canvas width
-    // Ratios based on original 1024px design: start=0.12, finish=0.95, rosieStart=0.06
-    // Checkpoints at 1/3 and 2/3 of the track (between start and finish)
-    this.startLineX = this.scale.width * 0.12;
-    this.finishLineX = this.scale.width * 0.95;
-    this.rosieStartX = this.scale.width * 0.06;
+    // Calculate track positions proportionally based on actual canvas width using config ratios
+    this.startLineX = this.scale.width * TRACK_CONFIG.START_LINE_RATIO;
+    this.finishLineX = this.scale.width * TRACK_CONFIG.FINISH_LINE_RATIO;
+    this.rosieStartX = this.scale.width * TRACK_CONFIG.ROSIE_START_RATIO;
     const trackLength = this.finishLineX - this.startLineX;
-    this.checkpointPositions = [
-      this.startLineX + trackLength * 0.33,
-      this.startLineX + trackLength * 0.67,
-    ];
+    // Calculate checkpoint positions using config ratios
+    this.checkpointPositions = CHECKPOINT_CONFIG.POSITION_RATIOS.map(
+      (ratio) => this.startLineX + trackLength * ratio
+    );
 
     // Calculate lane dimensions
     this.laneHeight = this.scale.height / TRACK_CONFIG.LANE_COUNT;
@@ -241,11 +240,7 @@ export class RaceScene extends Phaser.Scene {
       this.rosie.x += this.velocity * deltaSeconds;
 
       // Clamp position to track bounds (allow starting from left of start line)
-      this.rosie.x = Phaser.Math.Clamp(
-        this.rosie.x,
-        this.rosieStartX,
-        this.finishLineX
-      );
+      this.rosie.x = Phaser.Math.Clamp(this.rosie.x, this.rosieStartX, this.finishLineX);
 
       // Check for checkpoints
       this.checkForCheckpoint();
@@ -557,20 +552,24 @@ export class RaceScene extends Phaser.Scene {
       5
     );
 
-    // Add labels
+    // Add labels with dark text and white stroke for visibility
     this.add
       .text(this.startLineX, skyHeight - 15, 'START', {
-        fontSize: '16px',
-        color: '#ffffff',
+        fontSize: '14px',
+        color: '#1a1a1a',
         fontStyle: 'bold',
+        stroke: '#ffffff',
+        strokeThickness: 3,
       })
       .setOrigin(0.5, 1);
 
     this.add
       .text(this.finishLineX, skyHeight - 15, 'FINISH', {
-        fontSize: '16px',
-        color: '#ffffff',
+        fontSize: '14px',
+        color: '#1a1a1a',
         fontStyle: 'bold',
+        stroke: '#ffffff',
+        strokeThickness: 3,
       })
       .setOrigin(0.5, 1);
   }
@@ -699,10 +698,7 @@ export class RaceScene extends Phaser.Scene {
       sprite.setDepth(15);
 
       // Assign random speed within the family member's range (using scaled speeds)
-      const speed = Phaser.Math.FloatBetween(
-        getMinSpeed(familyMember),
-        getMaxSpeed(familyMember)
-      );
+      const speed = Phaser.Math.FloatBetween(getMinSpeed(familyMember), getMaxSpeed(familyMember));
 
       this.competitors.push({
         sprite,
@@ -1226,6 +1222,7 @@ export class RaceScene extends Phaser.Scene {
       finishTime: this.rosieFinishTime,
       position: this.rosieFinishPosition,
       isRosie: true,
+      avatar: rosieSpriteUrl,
     });
 
     // Add competitor results
@@ -1265,6 +1262,7 @@ export class RaceScene extends Phaser.Scene {
       finishTime: this.rosieFinishTime!,
       position: this.rosieFinishPosition!,
       isRosie: true,
+      avatar: rosieSpriteUrl,
     });
 
     // Add competitor results
