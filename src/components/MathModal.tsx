@@ -163,6 +163,7 @@ function MathModal({ problem, onAnswer }: MathModalProps) {
             color: 'text.primary',
             textAlign: 'center',
             fontFamily: '"Courier New", Courier, monospace',
+            whiteSpace: 'nowrap', // Prevent long formulas from wrapping
           }}
         >
           {problem.question}

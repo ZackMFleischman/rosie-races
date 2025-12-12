@@ -1,4 +1,3 @@
-import { useState, useEffect, useRef } from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
@@ -63,21 +62,8 @@ function RaceResultsScreen({ results, onRestart }: RaceResultsScreenProps) {
   const rosieResult = results.find((r) => r.isRosie);
   const rosiePosition = rosieResult?.position ?? 0;
 
-  // Count finished racers
+  // Count finished racers - used directly for visibility (no state needed)
   const finishedCount = results.filter((r) => r.finishTime !== null).length;
-
-  // Track visible results - show all finished racers immediately
-  const [visibleCount, setVisibleCount] = useState<number>(finishedCount);
-  const lastFinishedCountRef = useRef(finishedCount);
-
-  // Update visible count when more racers finish
-  useEffect(() => {
-    if (finishedCount > lastFinishedCountRef.current) {
-      // New racer finished - animate them in
-      setVisibleCount(finishedCount);
-      lastFinishedCountRef.current = finishedCount;
-    }
-  }, [finishedCount]);
 
   return (
     <Box
@@ -163,7 +149,7 @@ function RaceResultsScreen({ results, onRestart }: RaceResultsScreenProps) {
         >
           {results.map((result, index) => {
             const isFinished = result.finishTime !== null;
-            const isVisible = isFinished ? index < visibleCount : true; // Show still-racing racers
+            const isVisible = isFinished ? index < finishedCount : true; // Show still-racing racers
             return (
               <Box
                 key={`${result.name}-${result.position ?? 'racing'}`}
@@ -230,7 +216,7 @@ function RaceResultsScreen({ results, onRestart }: RaceResultsScreenProps) {
                     fontFamily: '"Courier New", Courier, monospace',
                     fontWeight: 600,
                     fontSize: { xs: '0.9rem', sm: '1rem' },
-                    color: isFinished ? 'text.secondary' : 'warning.main',
+                    color: isFinished ? 'text.secondary' : 'text.secondary',
                     fontStyle: isFinished ? 'normal' : 'italic',
                   }}
                 >

@@ -1,6 +1,11 @@
 import * as Phaser from 'phaser';
 import { GAME_EVENTS } from '../events';
-import type { MathAnswerPayload, GameState, RacerResult, RaceResultsUpdatedPayload } from '../events';
+import type {
+  MathAnswerPayload,
+  GameState,
+  RacerResult,
+  RaceResultsUpdatedPayload,
+} from '../events';
 // Assets in public/ - use relative path for correct base URL resolution
 const rosieSpriteUrl = 'assets/rosie-sprite.png';
 import { AudioManager, AUDIO_KEYS } from '../systems/AudioManager';
@@ -308,8 +313,9 @@ export class RaceScene extends Phaser.Scene {
     this.hasFinished = true;
     this.velocity = 0;
 
-    // Play finish celebration sound
+    // Stop race music and play finish celebration sound
     const audioManager = AudioManager.getInstance();
+    audioManager.stopMusic(true); // Stop race music immediately when Rosie finishes
     audioManager.playSFX(AUDIO_KEYS.FINISH);
 
     // Emit race finished event for React (legacy support for timer)
