@@ -3,6 +3,7 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Grid';
+import LinearProgress from '@mui/material/LinearProgress';
 import { type MathProblem } from '../game/systems/MathGenerator';
 
 // Time thresholds (in ms) for response feedback
@@ -219,6 +220,37 @@ function MathModal({ problem, onAnswer, compact = false }: MathModalProps) {
               {feedbackInfo.text}
             </Typography>
           </Box>
+
+          {/* Countdown progress bar for wrong answers */}
+          {feedback === 'wrong' && (
+            <Box
+              key={`countdown-compact-${problemId}`}
+              data-testid="wrong-answer-countdown"
+              sx={{
+                width: '100%',
+                maxWidth: '200px',
+              }}
+            >
+              <LinearProgress
+                variant="determinate"
+                value={100}
+                sx={{
+                  height: 4,
+                  borderRadius: 2,
+                  backgroundColor: 'grey.300',
+                  '& .MuiLinearProgress-bar': {
+                    backgroundColor: 'error.main',
+                    borderRadius: 2,
+                    animation: `countdown ${WRONG_ANSWER_DELAY}ms linear forwards`,
+                  },
+                  '@keyframes countdown': {
+                    '0%': { transform: 'translateX(0)' },
+                    '100%': { transform: 'translateX(-100%)' },
+                  },
+                }}
+              />
+            </Box>
+          )}
         </Box>
       </Box>
     );
@@ -373,6 +405,37 @@ function MathModal({ problem, onAnswer, compact = false }: MathModalProps) {
             {feedbackInfo.text}
           </Typography>
         </Box>
+
+        {/* Countdown progress bar for wrong answers */}
+        {feedback === 'wrong' && (
+          <Box
+            key={`countdown-${problemId}`}
+            data-testid="wrong-answer-countdown"
+            sx={{
+              width: '100%',
+              maxWidth: { xs: '280px', sm: '400px' },
+            }}
+          >
+            <LinearProgress
+              variant="determinate"
+              value={100}
+              sx={{
+                height: { xs: 6, sm: 8 },
+                borderRadius: 4,
+                backgroundColor: 'grey.300',
+                '& .MuiLinearProgress-bar': {
+                  backgroundColor: 'error.main',
+                  borderRadius: 4,
+                  animation: `countdown ${WRONG_ANSWER_DELAY}ms linear forwards`,
+                },
+                '@keyframes countdown': {
+                  '0%': { transform: 'translateX(0)' },
+                  '100%': { transform: 'translateX(-100%)' },
+                },
+              }}
+            />
+          </Box>
+        )}
       </Box>
     </Box>
   );
