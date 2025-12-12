@@ -1,6 +1,14 @@
 import { createContext, useCallback, useRef, useState, useEffect, type ReactNode } from 'react';
 import * as Phaser from 'phaser';
-import { GAME_EVENTS, type MathAnswerPayload } from '../game/events';
+import {
+  GAME_EVENTS,
+  type MathAnswerPayload,
+  type GameState,
+  type RacerResult,
+  type GameStatePayload,
+  type CountdownPayload,
+  type AllRacersFinishedPayload,
+} from '../game/events';
 import { generateProblem, type MathProblem } from '../game/systems/MathGenerator';
 
 export interface GameContextValue {
@@ -14,6 +22,10 @@ export interface GameContextValue {
   // Math problem state
   currentProblem: MathProblem | null;
   submitMathAnswer: (correct: boolean, timeTaken: number) => void;
+  // Game state for Phase 6
+  gameState: GameState;
+  countdownValue: number | null;
+  raceResults: RacerResult[] | null;
 }
 
 const GameContext = createContext<GameContextValue | null>(null);
@@ -34,6 +46,10 @@ export function GameProvider({ children }: GameProviderProps) {
   const [gameVersion, setGameVersion] = useState(0);
   const [currentProblem, setCurrentProblem] = useState<MathProblem | null>(null);
   const raceStartTimeRef = useRef<number | null>(null);
+  // Phase 6 state
+  const [gameState, setGameState] = useState<GameState>('ready');
+  const [countdownValue, setCountdownValue] = useState<number | null>(null);
+  const [raceResults, setRaceResults] = useState<RacerResult[] | null>(null);
 
   const setGame = useCallback((game: Phaser.Game | null) => {
     gameRef.current = game;
@@ -72,6 +88,7 @@ export function GameProvider({ children }: GameProviderProps) {
       setIsFinished(false);
       setFinishTime(null);
       setCurrentProblem(null);
+      setCountdownValue(null);
     };
 
     const handleRaceFinished = () => {
@@ -90,6 +107,9 @@ export function GameProvider({ children }: GameProviderProps) {
       setIsFinished(false);
       setFinishTime(null);
       setCurrentProblem(null);
+      setGameState('ready');
+      setCountdownValue(null);
+      setRaceResults(null);
     };
 
     const handleShowMathProblem = () => {
@@ -98,16 +118,34 @@ export function GameProvider({ children }: GameProviderProps) {
       setCurrentProblem(problem);
     };
 
+    const handleGameStateChanged = (payload: GameStatePayload) => {
+      setGameState(payload.state);
+    };
+
+    const handleCountdownTick = (payload: CountdownPayload) => {
+      setCountdownValue(payload.count);
+    };
+
+    const handleAllRacersFinished = (payload: AllRacersFinishedPayload) => {
+      setRaceResults(payload.results);
+    };
+
     game.events.on(GAME_EVENTS.RACE_STARTED, handleRaceStarted);
     game.events.on(GAME_EVENTS.RACE_FINISHED, handleRaceFinished);
     game.events.on(GAME_EVENTS.RESTART_RACE, handleRestartRace);
     game.events.on(GAME_EVENTS.SHOW_MATH_PROBLEM, handleShowMathProblem);
+    game.events.on(GAME_EVENTS.GAME_STATE_CHANGED, handleGameStateChanged);
+    game.events.on(GAME_EVENTS.COUNTDOWN_TICK, handleCountdownTick);
+    game.events.on(GAME_EVENTS.ALL_RACERS_FINISHED, handleAllRacersFinished);
 
     return () => {
       game.events.off(GAME_EVENTS.RACE_STARTED, handleRaceStarted);
       game.events.off(GAME_EVENTS.RACE_FINISHED, handleRaceFinished);
       game.events.off(GAME_EVENTS.RESTART_RACE, handleRestartRace);
       game.events.off(GAME_EVENTS.SHOW_MATH_PROBLEM, handleShowMathProblem);
+      game.events.off(GAME_EVENTS.GAME_STATE_CHANGED, handleGameStateChanged);
+      game.events.off(GAME_EVENTS.COUNTDOWN_TICK, handleCountdownTick);
+      game.events.off(GAME_EVENTS.ALL_RACERS_FINISHED, handleAllRacersFinished);
     };
   }, [gameVersion]);
 
@@ -123,6 +161,10 @@ export function GameProvider({ children }: GameProviderProps) {
     finishTime,
     currentProblem,
     submitMathAnswer,
+    // Phase 6 state
+    gameState,
+    countdownValue,
+    raceResults,
   };
 
   return <GameContext.Provider value={value}>{children}</GameContext.Provider>;

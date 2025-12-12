@@ -6,6 +6,7 @@ import GameContainer from './components/GameContainer';
 import TapButton from './components/TapButton';
 import Timer from './components/Timer';
 import FinishedScreen from './components/FinishedScreen';
+import RaceResultsScreen from './components/RaceResultsScreen';
 import MathModal from './components/MathModal';
 import VolumeControl from './components/VolumeControl';
 import { GameProvider } from './context/GameContext';
@@ -26,6 +27,7 @@ function AppContent() {
     finishTime,
     currentProblem,
     submitMathAnswer,
+    raceResults,
   } = useGame();
 
   // Memoize game config to prevent recreation on re-renders
@@ -148,8 +150,11 @@ function AppContent() {
       {/* Math problem modal */}
       {currentProblem && <MathModal problem={currentProblem} onAnswer={submitMathAnswer} />}
 
-      {/* Finished screen overlay */}
-      {isFinished && finishTime !== null && (
+      {/* Race results screen - shown when all racers have finished */}
+      {raceResults && <RaceResultsScreen results={raceResults} onRestart={handleRestart} />}
+
+      {/* Fallback finished screen - shown when only Rosie has finished but results not ready */}
+      {isFinished && finishTime !== null && !raceResults && (
         <FinishedScreen finishTime={finishTime} onRestart={handleRestart} />
       )}
     </Box>

@@ -59,12 +59,12 @@ describe('RaceScene', () => {
       // Find the START label
       const startLabel = textCalls.find((call: unknown[]) => call[2] === 'START');
       expect(startLabel).toBeDefined();
-      expect(startLabel?.[0]).toBe(50); // START_LINE_X
+      expect(startLabel?.[0]).toBe(TRACK_CONFIG.START_LINE_X);
 
       // Find the FINISH label
       const finishLabel = textCalls.find((call: unknown[]) => call[2] === 'FINISH');
       expect(finishLabel).toBeDefined();
-      expect(finishLabel?.[0]).toBe(974); // FINISH_LINE_X
+      expect(finishLabel?.[0]).toBe(TRACK_CONFIG.FINISH_LINE_X);
     });
 
     it('loads Rosie sprite in preload', () => {
@@ -91,8 +91,8 @@ describe('RaceScene', () => {
       // Find Rosie by texture name
       const rosieCall = spriteCalls.find((call: unknown[]) => call[2] === 'rosie-sprite');
 
-      // Rosie should be at x=80 (ROSIE_START_X)
-      expect(rosieCall?.[0]).toBe(80);
+      // Rosie should be at ROSIE_START_X
+      expect(rosieCall?.[0]).toBe(TRACK_CONFIG.ROSIE_START_X);
 
       // Rosie should be in lane 1 (first lane Y position)
       const lanePositions = scene.getLaneYPositions();
@@ -196,12 +196,13 @@ describe('RaceScene', () => {
     });
 
     it('has expected start and finish positions', () => {
-      expect(TRACK_CONFIG.START_LINE_X).toBe(50);
+      expect(TRACK_CONFIG.START_LINE_X).toBe(120);
       expect(TRACK_CONFIG.FINISH_LINE_X).toBe(974);
     });
 
-    it('has Rosie start position after start line', () => {
-      expect(TRACK_CONFIG.ROSIE_START_X).toBeGreaterThan(TRACK_CONFIG.START_LINE_X);
+    it('has Rosie start position before start line (to the left)', () => {
+      // Rosie starts to the left of the start line so player can see her move to it
+      expect(TRACK_CONFIG.ROSIE_START_X).toBeLessThan(TRACK_CONFIG.START_LINE_X);
     });
   });
 
@@ -252,16 +253,11 @@ describe('RaceScene', () => {
       });
     });
 
-    it('has checkpoint positions roughly at 1/3 and 2/3 of track', () => {
-      const trackLength = TRACK_CONFIG.FINISH_LINE_X - TRACK_CONFIG.START_LINE_X;
-      expect(CHECKPOINT_CONFIG.POSITIONS[0]).toBeCloseTo(
-        TRACK_CONFIG.START_LINE_X + trackLength * 0.27,
-        -1
-      );
-      expect(CHECKPOINT_CONFIG.POSITIONS[1]).toBeCloseTo(
-        TRACK_CONFIG.START_LINE_X + trackLength * 0.6,
-        -1
-      );
+    it('has checkpoint positions within track bounds', () => {
+      // Checkpoints should be positioned between start and finish
+      // The exact positions (300, 600) are design choices, not derived from track length
+      expect(CHECKPOINT_CONFIG.POSITIONS[0]).toBe(300);
+      expect(CHECKPOINT_CONFIG.POSITIONS[1]).toBe(600);
     });
 
     it('has velocity boost values configured', () => {
@@ -482,8 +478,8 @@ describe('RaceScene', () => {
       const rosieLabel = textCalls.find((call: unknown[]) => call[2] === 'Rosie');
       expect(rosieLabel).toBeDefined();
 
-      // Labels should be on the left side (x = 10)
-      expect(rosieLabel?.[0]).toBe(10);
+      // Labels should be to the right of the start line
+      expect(rosieLabel?.[0]).toBe(TRACK_CONFIG.START_LINE_X + 10);
     });
 
     it('creates labels for competitors with their names', () => {

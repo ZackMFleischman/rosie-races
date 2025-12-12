@@ -342,49 +342,49 @@ Racing game for 4-year-old Rosie with math challenges!
 
 ### 6.1 Race States
 
-- [ ] **Pre-Race: racers at start**
+- [x] **Pre-Race: racers at start**
 
   > Add `gameState: 'ready' | 'countdown' | 'racing' | 'finished'`. In 'ready', show racers at start line, display "TAP TO START" prompt.
 
-- [ ] **Countdown: 3...2...1...GO! (with sounds)**
+- [x] **Countdown: 3...2...1...GO! (with sounds)**
 
   > On first tap, enter 'countdown'. Display large numbers. Play beep each second. After "GO!" (with gunshot sound), enter 'racing' state. Use Phaser time events for delays.
 
-- [ ] **Racing: main gameplay**
+- [x] **Racing: main gameplay**
 
   > In 'racing', TAP button works, timer runs, racers move. This is the current Phase 2 implementation.
 
-- [ ] **Finished: celebration**
+- [x] **Finished: celebration**
   > When any racer finishes, record their time. When ALL finish OR Rosie finishes, show results. Track each racer's finish order.
 
 ### 6.2 Position Tracking
 
-- [ ] **Real-time position (1st, 2nd...)**
+- [x] **Real-time position (1st, 2nd...)**
 
   > Create function `getPositions(): RacerPosition[]`. Sort all racers by x descending. Return array with `{ racer, position }`. Call in `update()`.
 
-- [ ] **Position display during race**
+- [x] **Position display during race**
 
   > Show Rosie's current position: "Position: 3rd" in UI. Update every frame. Use ordinal formatting (1st, 2nd, 3rd, 4th...).
 
-- [ ] **Final position on finish**
+- [x] **Final position on finish**
   > Store `finishOrder: string[]` array. When racer crosses finish, append to array if not already present. Rosie's final position = her index + 1.
 
 ### 6.3 Race Results Screen
 
-- [ ] **Mario Kart-style finish order**
+- [x] **Mario Kart-style finish order**
 
   > Show all 6 racers in order (1st at top). Animate entries appearing one by one (0.5s delay each). Show position number, name, avatar.
 
-- [ ] **Finish times for all**
+- [x] **Finish times for all**
 
   > Display time next to each racer. AI times calculated from their speed and distance. Format as MM:SS.
 
-- [ ] **Medal for Rosie (🥇🥈🥉)**
+- [x] **Medal for Rosie (🥇🥈🥉)**
 
   > If Rosie is 1st: gold medal + "WINNER!" text. 2nd: silver + "Great job!". 3rd: bronze + "Good effort!". 4th+: participation ribbon + "Keep trying!".
 
-- [ ] **"Race Again" button**
+- [x] **"Race Again" button**
   > Same as Phase 2 but now resets all racers, assigns new random speeds, clears finish order.
 
 **✅ Milestone:** Full race with results

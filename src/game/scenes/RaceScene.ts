@@ -1,6 +1,10 @@
 import * as Phaser from 'phaser';
 import { GAME_EVENTS } from '../events';
-import type { MathAnswerPayload } from '../events';
+import type {
+  MathAnswerPayload,
+  GameState,
+  RacerResult,
+} from '../events';
 import rosieSpriteUrl from '../../assets/rosie-sprite.png';
 import { AudioManager, AUDIO_KEYS } from '../systems/AudioManager';
 import { getRandomRacers, type FamilyMember } from '../../data/familyMembers';
@@ -14,6 +18,8 @@ interface Competitor {
   speed: number; // Current speed (pixels per second)
   baseY: number; // Base Y position for bobbing animation
   lastSpeedChangeTime: number; // Time when speed was last varied (ms)
+  finishTime: number | null; // Time when crossed finish line (ms since race start)
+  finishPosition: number | null; // Position when finished (1st, 2nd, etc.)
 }
 
 // Constants for track layout
@@ -64,6 +70,12 @@ export const AI_CONFIG = {
   SPEED_VARIATION_AMOUNT: 5, // Max speed change per variation (+/-)
 };
 
+// Constants for countdown
+export const COUNTDOWN_CONFIG = {
+  START_COUNT: 3, // Start from 3
+  INTERVAL_MS: 1000, // 1 second between counts
+};
+
 /**
  * RaceScene - Main gameplay scene for the racing game.
  * Features:
@@ -77,10 +89,19 @@ export class RaceScene extends Phaser.Scene {
   private laneHeight: number = 0;
   private laneYPositions: number[] = [];
 
+  // Game state
+  private gameState: GameState = 'ready';
+  private raceStartTime: number = 0; // Time when racing started (for finish time calculation)
+
   // Movement state
   private velocity: number = 0;
   private hasStarted: boolean = false;
   private hasFinished: boolean = false;
+
+  // Rosie finish tracking
+  private rosieFinishTime: number | null = null;
+  private rosieFinishPosition: number | null = null;
+  private nextFinishPosition: number = 1; // Next position to assign
 
   // Animation state
   private rosieBaseY: number = 0; // Base Y position for bobbing animation
@@ -97,6 +118,11 @@ export class RaceScene extends Phaser.Scene {
   // UI elements
   private laneNameLabels: Phaser.GameObjects.Text[] = [];
   private leadIndicator: Phaser.GameObjects.Text | null = null;
+  private tapToStartText: Phaser.GameObjects.Text | null = null;
+  private countdownText: Phaser.GameObjects.Text | null = null;
+
+  // Countdown state
+  private countdownTimer: Phaser.Time.TimerEvent | null = null;
 
   constructor() {
     super({ key: 'RaceScene' });
@@ -153,17 +179,27 @@ export class RaceScene extends Phaser.Scene {
     // Add lead indicator
     this.createLeadIndicator();
 
+    // Add "TAP TO START" prompt
+    this.createTapToStartText();
+
     // Listen for tap events from React
     this.setupTapListener();
+
+    // Emit initial game state
+    this.emitGameState();
   }
 
   update(time: number, delta: number): void {
-    if (this.hasFinished) return;
+    // Only process updates during racing or paused (checkpoint) states
+    if (this.gameState !== 'racing' && this.gameState !== 'paused') return;
 
     const deltaSeconds = delta / 1000;
 
-    // Update AI competitors (they move even when Rosie is paused)
+    // Update AI competitors (they move even when Rosie is paused at checkpoint)
     this.updateCompetitors(time, deltaSeconds);
+
+    // Check for AI competitors crossing finish line
+    this.checkCompetitorFinishes();
 
     if (this.isPaused) return; // Don't move Rosie while paused at checkpoint
 
@@ -190,8 +226,8 @@ export class RaceScene extends Phaser.Scene {
       this.checkForCheckpoint();
 
       // Check for finish line
-      if (this.rosie.x >= TRACK_CONFIG.FINISH_LINE_X) {
-        this.handleFinish();
+      if (this.rosie.x >= TRACK_CONFIG.FINISH_LINE_X && this.rosieFinishTime === null) {
+        this.handleRosieFinish();
       }
     }
 
@@ -200,6 +236,9 @@ export class RaceScene extends Phaser.Scene {
 
     // Update lead indicator to show current positions
     this.updateLeadIndicator();
+
+    // Check if all racers have finished
+    this.checkAllRacersFinished();
   }
 
   /**
@@ -227,42 +266,56 @@ export class RaceScene extends Phaser.Scene {
   }
 
   /**
-   * Handle tap event - increase velocity
+   * Handle tap event - manages game states and increases velocity
    */
   private handleTap = (): void => {
-    if (this.hasFinished) return;
-    if (this.isPaused) return; // Don't respond to taps while paused at checkpoint
-
-    // Play tap sound
-    AudioManager.getInstance().playSFX(AUDIO_KEYS.TAP);
-
-    // Emit race started on first tap
-    if (!this.hasStarted) {
-      this.hasStarted = true;
-      this.game.events.emit(GAME_EVENTS.RACE_STARTED);
-      // Start race music
-      AudioManager.getInstance().playMusic(AUDIO_KEYS.RACE_MUSIC);
+    // In 'ready' state, start countdown on first tap
+    if (this.gameState === 'ready') {
+      this.startCountdown();
+      return;
     }
 
-    // Add velocity boost
-    this.velocity += MOVEMENT_CONFIG.TAP_VELOCITY_BOOST;
+    // During countdown, ignore taps
+    if (this.gameState === 'countdown') {
+      return;
+    }
 
-    // Cap at maximum velocity
-    this.velocity = Math.min(this.velocity, MOVEMENT_CONFIG.MAX_VELOCITY);
+    // In finished state, ignore taps
+    if (this.gameState === 'finished' || this.hasFinished) {
+      return;
+    }
+
+    // During racing but paused at checkpoint, ignore taps
+    if (this.isPaused) {
+      return;
+    }
+
+    // In 'racing' state, handle normal tap movement
+    if (this.gameState === 'racing') {
+      // Add velocity boost
+      this.velocity += MOVEMENT_CONFIG.TAP_VELOCITY_BOOST;
+
+      // Cap at maximum velocity
+      this.velocity = Math.min(this.velocity, MOVEMENT_CONFIG.MAX_VELOCITY);
+    }
   };
 
   /**
-   * Handle race finish
+   * Handle Rosie crossing the finish line
    */
-  private handleFinish(): void {
+  private handleRosieFinish(): void {
+    // Record Rosie's finish time and position
+    this.rosieFinishTime = performance.now() - this.raceStartTime;
+    this.rosieFinishPosition = this.nextFinishPosition;
+    this.nextFinishPosition++;
     this.hasFinished = true;
     this.velocity = 0;
 
-    // Stop race music and play finish celebration sound
+    // Play finish celebration sound
     const audioManager = AudioManager.getInstance();
-    audioManager.stopMusic(true);
     audioManager.playSFX(AUDIO_KEYS.FINISH);
 
+    // Emit race finished event for React (legacy support for timer)
     this.game.events.emit(GAME_EVENTS.RACE_FINISHED);
   }
 
@@ -270,11 +323,25 @@ export class RaceScene extends Phaser.Scene {
    * Handle race restart
    */
   private handleRestart = (): void => {
+    // Reset game state
+    this.gameState = 'ready';
     this.hasStarted = false;
     this.hasFinished = false;
     this.velocity = 0;
     this.isPaused = false;
     this.passedCheckpoints = CHECKPOINT_CONFIG.POSITIONS.map(() => false);
+    this.raceStartTime = 0;
+
+    // Reset finish tracking
+    this.rosieFinishTime = null;
+    this.rosieFinishPosition = null;
+    this.nextFinishPosition = 1;
+
+    // Cancel any running countdown
+    if (this.countdownTimer) {
+      this.countdownTimer.destroy();
+      this.countdownTimer = null;
+    }
 
     // Stop any playing music when restarting
     AudioManager.getInstance().stopMusic(false);
@@ -287,6 +354,19 @@ export class RaceScene extends Phaser.Scene {
 
     // Reset competitors and select new random racers
     this.resetCompetitors();
+
+    // Show "TAP TO START" again
+    if (this.tapToStartText) {
+      this.tapToStartText.setVisible(true);
+    }
+
+    // Hide countdown text
+    if (this.countdownText) {
+      this.countdownText.setVisible(false);
+    }
+
+    // Emit state change
+    this.emitGameState();
   };
 
   /**
@@ -601,6 +681,8 @@ export class RaceScene extends Phaser.Scene {
         speed,
         baseY,
         lastSpeedChangeTime: 0, // Will be set when race starts
+        finishTime: null,
+        finishPosition: null,
       });
     });
   }
@@ -631,8 +713,8 @@ export class RaceScene extends Phaser.Scene {
    */
   private updateCompetitors(time: number, deltaSeconds: number): void {
     this.competitors.forEach((competitor) => {
-      // Only move if the race has started
-      if (!this.hasStarted) return;
+      // Skip if this competitor has already finished
+      if (competitor.finishTime !== null) return;
 
       // Initialize lastSpeedChangeTime on first update
       if (competitor.lastSpeedChangeTime === 0) {
@@ -902,6 +984,238 @@ export class RaceScene extends Phaser.Scene {
    */
   getSelectedRacers(): FamilyMember[] {
     return [...this.selectedRacers];
+  }
+
+  /**
+   * Get current game state (for external access/testing)
+   */
+  getGameState(): GameState {
+    return this.gameState;
+  }
+
+  // ==================== Game State Management ====================
+
+  /**
+   * Emit current game state to React
+   */
+  private emitGameState(): void {
+    this.game.events.emit(GAME_EVENTS.GAME_STATE_CHANGED, { state: this.gameState });
+  }
+
+  /**
+   * Set game state and emit change event
+   */
+  private setGameState(newState: GameState): void {
+    this.gameState = newState;
+    this.emitGameState();
+  }
+
+  /**
+   * Create "TAP TO START" text in the center of the screen
+   */
+  private createTapToStartText(): void {
+    this.tapToStartText = this.add
+      .text(this.scale.width / 2, this.scale.height / 2, 'TAP TO START!', {
+        fontSize: '48px',
+        color: '#ffffff',
+        fontStyle: 'bold',
+        backgroundColor: '#ff69b4',
+        padding: { x: 24, y: 16 },
+      })
+      .setOrigin(0.5, 0.5)
+      .setDepth(100);
+
+    // Add subtle pulsing animation
+    this.tweens.add({
+      targets: this.tapToStartText,
+      scale: { from: 1, to: 1.05 },
+      duration: 500,
+      yoyo: true,
+      repeat: -1,
+      ease: 'Sine.easeInOut',
+    });
+  }
+
+  /**
+   * Start the countdown sequence
+   */
+  private startCountdown(): void {
+    // Hide "TAP TO START" text
+    if (this.tapToStartText) {
+      this.tapToStartText.setVisible(false);
+    }
+
+    // Set state to countdown
+    this.setGameState('countdown');
+
+    // Create countdown text
+    this.countdownText = this.add
+      .text(this.scale.width / 2, this.scale.height / 2, '3', {
+        fontSize: '120px',
+        color: '#ffffff',
+        fontStyle: 'bold',
+      })
+      .setOrigin(0.5, 0.5)
+      .setDepth(100)
+      .setStroke('#333333', 8);
+
+    // Start countdown from 3
+    let count = COUNTDOWN_CONFIG.START_COUNT;
+    const audioManager = AudioManager.getInstance();
+
+    // Play first beep
+    audioManager.playSFX(AUDIO_KEYS.COUNTDOWN);
+    this.game.events.emit(GAME_EVENTS.COUNTDOWN_TICK, { count });
+
+    // Animate the countdown number
+    this.animateCountdownNumber();
+
+    // Set up timer for subsequent counts
+    this.countdownTimer = this.time.addEvent({
+      delay: COUNTDOWN_CONFIG.INTERVAL_MS,
+      callback: () => {
+        count--;
+
+        if (count > 0) {
+          // Update countdown text
+          if (this.countdownText) {
+            this.countdownText.setText(count.toString());
+            this.animateCountdownNumber();
+          }
+          // Play beep
+          audioManager.playSFX(AUDIO_KEYS.COUNTDOWN);
+          this.game.events.emit(GAME_EVENTS.COUNTDOWN_TICK, { count });
+        } else if (count === 0) {
+          // Show "GO!"
+          if (this.countdownText) {
+            this.countdownText.setText('GO!');
+            this.countdownText.setFontSize(100);
+            this.countdownText.setColor('#00ff00');
+            this.animateCountdownNumber();
+          }
+          // Play GO sound (using countdown sound - a different beep would be ideal)
+          audioManager.playSFX(AUDIO_KEYS.COUNTDOWN);
+          this.game.events.emit(GAME_EVENTS.COUNTDOWN_TICK, { count: 0 });
+
+          // Start the race after a brief moment
+          this.time.delayedCall(500, () => {
+            this.startRacing();
+          });
+        }
+      },
+      repeat: COUNTDOWN_CONFIG.START_COUNT,
+    });
+  }
+
+  /**
+   * Animate countdown number with a pop effect
+   */
+  private animateCountdownNumber(): void {
+    if (!this.countdownText) return;
+
+    this.countdownText.setScale(1.5);
+    this.tweens.add({
+      targets: this.countdownText,
+      scale: 1,
+      duration: 200,
+      ease: 'Back.easeOut',
+    });
+  }
+
+  /**
+   * Start the racing phase after countdown
+   */
+  private startRacing(): void {
+    // Hide countdown text
+    if (this.countdownText) {
+      this.countdownText.setVisible(false);
+    }
+
+    // Set state to racing
+    this.setGameState('racing');
+    this.hasStarted = true;
+    this.raceStartTime = performance.now();
+
+    // Emit race started event for React timer
+    this.game.events.emit(GAME_EVENTS.RACE_STARTED);
+
+    // Start race music
+    AudioManager.getInstance().playMusic(AUDIO_KEYS.RACE_MUSIC);
+  }
+
+  // ==================== Finish Tracking ====================
+
+  /**
+   * Check if any AI competitors have crossed the finish line
+   */
+  private checkCompetitorFinishes(): void {
+    this.competitors.forEach((competitor) => {
+      // Skip if already finished
+      if (competitor.finishTime !== null) return;
+
+      // Check if crossed finish line
+      if (competitor.sprite.x >= TRACK_CONFIG.FINISH_LINE_X) {
+        competitor.finishTime = performance.now() - this.raceStartTime;
+        competitor.finishPosition = this.nextFinishPosition;
+        this.nextFinishPosition++;
+      }
+    });
+  }
+
+  /**
+   * Check if all racers have finished and emit results
+   */
+  private checkAllRacersFinished(): void {
+    // Check if Rosie has finished
+    if (this.rosieFinishTime === null) return;
+
+    // Check if all competitors have finished
+    const allCompetitorsFinished = this.competitors.every((c) => c.finishTime !== null);
+    if (!allCompetitorsFinished) return;
+
+    // All racers have finished - compile results
+    const results = this.compileRaceResults();
+
+    // Set game state to finished
+    this.setGameState('finished');
+
+    // Stop race music
+    AudioManager.getInstance().stopMusic(true);
+
+    // Emit results to React
+    this.game.events.emit(GAME_EVENTS.ALL_RACERS_FINISHED, { results });
+  }
+
+  /**
+   * Compile final race results sorted by position
+   */
+  private compileRaceResults(): RacerResult[] {
+    const results: RacerResult[] = [];
+
+    // Add Rosie's result
+    results.push({
+      name: 'Rosie',
+      color: TRACK_CONFIG.ROSIE_COLOR,
+      finishTime: this.rosieFinishTime!,
+      position: this.rosieFinishPosition!,
+      isRosie: true,
+    });
+
+    // Add competitor results
+    this.competitors.forEach((competitor) => {
+      results.push({
+        name: competitor.familyMember.name,
+        color: competitor.familyMember.color,
+        finishTime: competitor.finishTime!,
+        position: competitor.finishPosition!,
+        isRosie: false,
+      });
+    });
+
+    // Sort by position
+    results.sort((a, b) => a.position - b.position);
+
+    return results;
   }
 }
 
