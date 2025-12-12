@@ -19,9 +19,9 @@ interface Competitor {
 // Constants for track layout
 export const TRACK_CONFIG = {
   LANE_COUNT: 6,
-  START_LINE_X: 50,
+  START_LINE_X: 120,
   FINISH_LINE_X: 974,
-  ROSIE_START_X: 80,
+  ROSIE_START_X: 60, // Starts to the left of the start line
   ROSIE_RADIUS: 30,
   ROSIE_COLOR: 0xff69b4, // Pink
 };
@@ -179,10 +179,10 @@ export class RaceScene extends Phaser.Scene {
     if (this.rosie && this.velocity > 0) {
       this.rosie.x += this.velocity * deltaSeconds;
 
-      // Clamp position to track bounds
+      // Clamp position to track bounds (allow starting from left of start line)
       this.rosie.x = Phaser.Math.Clamp(
         this.rosie.x,
-        TRACK_CONFIG.START_LINE_X,
+        TRACK_CONFIG.ROSIE_START_X,
         TRACK_CONFIG.FINISH_LINE_X
       );
 
@@ -563,6 +563,8 @@ export class RaceScene extends Phaser.Scene {
     const targetHeight = TRACK_CONFIG.ROSIE_RADIUS * 2;
     this.rosieBaseScale = targetHeight / this.rosie.height;
     this.rosie.setScale(this.rosieBaseScale);
+    // Render on top of lane labels (depth 10)
+    this.rosie.setDepth(15);
   }
 
   /**
@@ -587,6 +589,8 @@ export class RaceScene extends Phaser.Scene {
       const targetHeight = TRACK_CONFIG.ROSIE_RADIUS * 2;
       const scale = targetHeight / sprite.height;
       sprite.setScale(scale);
+      // Render on top of lane labels (depth 10)
+      sprite.setDepth(15);
 
       // Assign random speed within the family member's range
       const speed = Phaser.Math.FloatBetween(familyMember.minSpeed, familyMember.maxSpeed);
@@ -657,10 +661,10 @@ export class RaceScene extends Phaser.Scene {
       // Move at current speed
       competitor.sprite.x += competitor.speed * deltaSeconds;
 
-      // Clamp to track bounds
+      // Clamp to track bounds (allow starting from left of start line)
       competitor.sprite.x = Phaser.Math.Clamp(
         competitor.sprite.x,
-        TRACK_CONFIG.START_LINE_X,
+        TRACK_CONFIG.ROSIE_START_X,
         TRACK_CONFIG.FINISH_LINE_X
       );
     });
@@ -687,12 +691,12 @@ export class RaceScene extends Phaser.Scene {
   }
 
   /**
-   * Create lane name labels on the left side of each lane
+   * Create lane name labels to the right of the starting line
    */
   private createLaneLabels(): void {
     const skyHeight = this.scale.height * 0.2;
     const actualLaneHeight = (this.scale.height - skyHeight) / TRACK_CONFIG.LANE_COUNT;
-    const labelX = 10; // Left margin
+    const labelX = TRACK_CONFIG.START_LINE_X + 10; // Right of the starting line
 
     // Clear existing labels
     this.laneNameLabels.forEach((label) => label.destroy());
@@ -742,9 +746,9 @@ export class RaceScene extends Phaser.Scene {
    * Create the lead indicator text at the top of the screen
    */
   private createLeadIndicator(): void {
-    const skyHeight = this.scale.height * 0.2;
+    // Position at the very top of the screen to avoid obscuring FINISH text
     this.leadIndicator = this.add
-      .text(this.scale.width - 10, skyHeight - 40, '1st: -', {
+      .text(this.scale.width - 10, 15, '1st: -', {
         fontSize: '18px',
         color: '#ffffff',
         fontStyle: 'bold',

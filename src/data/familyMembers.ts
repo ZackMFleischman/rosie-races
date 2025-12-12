@@ -21,48 +21,48 @@ export const FAMILY_MEMBERS: FamilyMember[] = [
     id: 'mommy',
     name: 'Mommy',
     color: 0x4a90d9, // Blue
-    minSpeed: 60,
-    maxSpeed: 90,
+    minSpeed: 35,
+    maxSpeed: 55,
     role: 'Mom',
   },
   {
     id: 'daddy',
     name: 'Daddy',
     color: 0x2ecc71, // Green
-    minSpeed: 65,
-    maxSpeed: 95,
+    minSpeed: 40,
+    maxSpeed: 58,
     role: 'Dad',
   },
   {
     id: 'uncle-zack',
     name: 'Uncle Zack',
     color: 0xe67e22, // Orange
-    minSpeed: 55,
-    maxSpeed: 85,
+    minSpeed: 33,
+    maxSpeed: 51,
     role: 'Uncle',
   },
   {
     id: 'gaga',
     name: 'Gaga',
     color: 0x9b59b6, // Purple
-    minSpeed: 50,
-    maxSpeed: 80,
+    minSpeed: 30,
+    maxSpeed: 48,
     role: 'Grandma',
   },
   {
     id: 'grandpa',
     name: 'Grandpa',
     color: 0xe74c3c, // Red
-    minSpeed: 45,
-    maxSpeed: 75,
+    minSpeed: 27,
+    maxSpeed: 45,
     role: 'Grandpa',
   },
   {
     id: 'lalo',
     name: 'Lalo',
     color: 0xf1c40f, // Yellow/Gold (for the dog)
-    minSpeed: 70,
-    maxSpeed: 100,
+    minSpeed: 42,
+    maxSpeed: 60,
     role: 'Dog',
   },
 ];
