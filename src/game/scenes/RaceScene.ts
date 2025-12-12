@@ -540,17 +540,31 @@ export class RaceScene extends Phaser.Scene {
       5
     );
 
-    // Finish line - checkered pattern
-    graphics.lineStyle(4, 0x000000, 1);
-    this.drawDashedLine(
-      graphics,
-      this.finishLineX,
-      skyHeight,
-      this.finishLineX,
-      this.scale.height,
-      10,
-      5
-    );
+    // Finish line - proper checkerboard pattern like a racing flag
+    const checkerWidth = 24; // Total width of the checkered strip
+    const squareSize = 12; // Size of each checker square
+    const finishStartY = skyHeight;
+    const finishEndY = this.scale.height;
+    const finishStartX = this.finishLineX - checkerWidth / 2;
+
+    // Draw checkerboard pattern
+    const rows = Math.ceil((finishEndY - finishStartY) / squareSize);
+    const cols = Math.ceil(checkerWidth / squareSize);
+
+    for (let row = 0; row < rows; row++) {
+      for (let col = 0; col < cols; col++) {
+        // Alternate colors in checkerboard pattern
+        const isBlack = (row + col) % 2 === 0;
+        graphics.fillStyle(isBlack ? 0x000000 : 0xffffff, 1);
+
+        const x = finishStartX + col * squareSize;
+        const y = finishStartY + row * squareSize;
+        // Clamp height for the last row if it extends beyond canvas
+        const height = Math.min(squareSize, finishEndY - y);
+
+        graphics.fillRect(x, y, squareSize, height);
+      }
+    }
 
     // Add labels with dark text and white stroke for visibility
     this.add
