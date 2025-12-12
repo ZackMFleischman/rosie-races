@@ -1,28 +1,13 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
+import { formatTime } from '../utils/formatTime';
 
 export interface TimerProps {
   /** Whether the timer is running */
   isRunning: boolean;
   /** Callback when timer starts (optional) */
   onStart?: () => void;
-}
-
-/**
- * Formats elapsed time in milliseconds to MM:SS.ms format
- */
-export function formatTime(elapsedMs: number): string {
-  const totalSeconds = Math.floor(elapsedMs / 1000);
-  const minutes = Math.floor(totalSeconds / 60);
-  const seconds = totalSeconds % 60;
-  const milliseconds = Math.floor((elapsedMs % 1000) / 10); // Show centiseconds
-
-  const paddedMinutes = minutes.toString().padStart(2, '0');
-  const paddedSeconds = seconds.toString().padStart(2, '0');
-  const paddedMs = milliseconds.toString().padStart(2, '0');
-
-  return `${paddedMinutes}:${paddedSeconds}.${paddedMs}`;
 }
 
 /**
@@ -34,32 +19,34 @@ function Timer({ isRunning, onStart }: TimerProps) {
   const [elapsedTime, setElapsedTime] = useState(0);
   const startTimeRef = useRef<number | null>(null);
   const animationFrameRef = useRef<number | null>(null);
-  const hasStartedRef = useRef(false);
-
-  const updateTimer = useCallback(() => {
-    if (startTimeRef.current !== null) {
-      const now = performance.now();
-      setElapsedTime(now - startTimeRef.current);
-    }
-    animationFrameRef.current = requestAnimationFrame(updateTimer);
-  }, []);
+  const onStartCalledRef = useRef(false);
 
   useEffect(() => {
-    if (isRunning && !hasStartedRef.current) {
-      // Start the timer
-      startTimeRef.current = performance.now();
-      hasStartedRef.current = true;
+    if (isRunning) {
+      if (startTimeRef.current === null) {
+        startTimeRef.current = performance.now();
+        if (!onStartCalledRef.current) {
+          onStartCalledRef.current = true;
+          onStart?.();
+        }
+      }
+
+      const updateTimer = () => {
+        if (startTimeRef.current !== null) {
+          setElapsedTime(performance.now() - startTimeRef.current);
+        }
+        animationFrameRef.current = requestAnimationFrame(updateTimer);
+      };
       animationFrameRef.current = requestAnimationFrame(updateTimer);
-      onStart?.();
-    } else if (!isRunning && hasStartedRef.current) {
-      // Reset timer when race resets
+    } else {
+      // When not running, cancel any animation frame
       if (animationFrameRef.current !== null) {
         cancelAnimationFrame(animationFrameRef.current);
         animationFrameRef.current = null;
       }
+      // Reset refs (don't call setState synchronously here)
       startTimeRef.current = null;
-      hasStartedRef.current = false;
-      setElapsedTime(0);
+      onStartCalledRef.current = false;
     }
 
     return () => {
@@ -67,9 +54,10 @@ function Timer({ isRunning, onStart }: TimerProps) {
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [isRunning, updateTimer, onStart]);
+  }, [isRunning, onStart]);
 
-  const displayTime = formatTime(elapsedTime);
+  // Derive display time - show 0 when not running (avoids setState in effect)
+  const displayTime = formatTime(isRunning ? elapsedTime : 0);
 
   return (
     <Box

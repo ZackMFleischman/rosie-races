@@ -18,22 +18,47 @@ export interface MathModalProps {
 
 type FeedbackState = 'none' | 'correct-fast' | 'correct-slow' | 'wrong';
 
+interface MathModalState {
+  problemId: string;
+  feedback: FeedbackState;
+  selectedAnswer: number | null;
+}
+
+// Create a stable ID for the problem
+function getProblemId(problem: MathProblem): string {
+  return `${problem.question}-${problem.answer}`;
+}
+
 /**
  * MathModal - Displays a math problem with multiple choice answers.
  * Shows visual feedback for correct/wrong answers.
  * Timer stays visible above this modal.
  */
 function MathModal({ problem, onAnswer }: MathModalProps) {
-  const [feedback, setFeedback] = useState<FeedbackState>('none');
-  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
-  const startTimeRef = useRef<number>(performance.now());
+  const problemId = getProblemId(problem);
+  const [state, setState] = useState<MathModalState>(() => ({
+    problemId,
+    feedback: 'none',
+    selectedAnswer: null,
+  }));
+  const startTimeRef = useRef<number>(0);
 
-  // Reset start time when problem changes
+  // Reset state when problem changes (derived state during render pattern)
+  // Note: We don't call performance.now() here - that happens in the effect below
+  if (state.problemId !== problemId) {
+    setState({
+      problemId,
+      feedback: 'none',
+      selectedAnswer: null,
+    });
+  }
+
+  // Set start time in an effect (impure functions are allowed in effects)
   useEffect(() => {
     startTimeRef.current = performance.now();
-    setFeedback('none');
-    setSelectedAnswer(null);
-  }, [problem]);
+  }, [problemId]);
+
+  const { feedback, selectedAnswer } = state;
 
   const handleAnswerClick = useCallback(
     (choice: number) => {
@@ -41,18 +66,17 @@ function MathModal({ problem, onAnswer }: MathModalProps) {
 
       const timeTaken = performance.now() - startTimeRef.current;
       const isCorrect = choice === problem.answer;
-      setSelectedAnswer(choice);
 
       if (isCorrect) {
         const feedbackType = timeTaken < FAST_ANSWER_THRESHOLD ? 'correct-fast' : 'correct-slow';
-        setFeedback(feedbackType);
+        setState((prev) => ({ ...prev, feedback: feedbackType, selectedAnswer: choice }));
 
         // Brief delay before closing
         setTimeout(() => {
           onAnswer(true, timeTaken);
         }, 500);
       } else {
-        setFeedback('wrong');
+        setState((prev) => ({ ...prev, feedback: 'wrong', selectedAnswer: choice }));
 
         // Longer delay for wrong answers (stumble effect)
         setTimeout(() => {

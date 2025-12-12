@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
-import { formatTime } from './Timer';
+import { formatTime } from '../utils/formatTime';
 import type { RacerResult } from '../game/events';
 
 export interface RaceResultsScreenProps {

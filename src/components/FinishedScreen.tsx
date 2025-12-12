@@ -1,7 +1,7 @@
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
-import { formatTime } from './Timer';
+import { formatTime } from '../utils/formatTime';
 
 export interface FinishedScreenProps {
   /** Final race time in milliseconds */

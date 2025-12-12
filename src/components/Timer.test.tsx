@@ -2,7 +2,8 @@ import { jest } from '@jest/globals';
 import { render, screen, act } from '@testing-library/react';
 import { ThemeProvider } from '@mui/material/styles';
 import theme from '../theme';
-import Timer, { formatTime } from './Timer';
+import Timer from './Timer';
+import { formatTime } from '../utils/formatTime';
 
 describe('Timer', () => {
   interface SetupOptions {
