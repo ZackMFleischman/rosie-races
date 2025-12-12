@@ -31,10 +31,11 @@ React (UI Layer) ←→ GameContext (Event Bridge) ←→ Phaser (Game Engine)
 
 ## Development Commands
 
+To run tests: Call the `test-runner` agent, with a fallback to `npm run tests`
+
 ```bash
 npm run dev      # Start dev server (localhost:5173)
 npm run build    # TypeScript check + production build
-npm run test     # Run Jest tests (uses experimental ESM)
 npm run lint     # ESLint check
 npm run format   # Prettier format src/
 npm run serena   # Start serena server to use with serena mcp server.
