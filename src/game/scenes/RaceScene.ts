@@ -1,6 +1,6 @@
 import * as Phaser from 'phaser';
 import { GAME_EVENTS } from '../events';
-import type { MathAnswerPayload, GameState, RacerResult } from '../events';
+import type { MathAnswerPayload, GameState, RacerResult, RaceResultsUpdatedPayload } from '../events';
 // Assets in public/ - use relative path for correct base URL resolution
 const rosieSpriteUrl = 'assets/rosie-sprite.png';
 import { AudioManager, AUDIO_KEYS } from '../systems/AudioManager';
@@ -314,6 +314,9 @@ export class RaceScene extends Phaser.Scene {
 
     // Emit race finished event for React (legacy support for timer)
     this.game.events.emit(GAME_EVENTS.RACE_FINISHED);
+
+    // Emit current race results (Rosie finished, show results screen immediately)
+    this.emitRaceResultsUpdate();
   }
 
   /**
@@ -1108,6 +1111,7 @@ export class RaceScene extends Phaser.Scene {
    * Check if any AI competitors have crossed the finish line
    */
   private checkCompetitorFinishes(): void {
+    let anyFinished = false;
     this.competitors.forEach((competitor) => {
       // Skip if already finished
       if (competitor.finishTime !== null) return;
@@ -1117,8 +1121,14 @@ export class RaceScene extends Phaser.Scene {
         competitor.finishTime = performance.now() - this.raceStartTime;
         competitor.finishPosition = this.nextFinishPosition;
         this.nextFinishPosition++;
+        anyFinished = true;
       }
     });
+
+    // If Rosie has finished and a competitor just finished, update results
+    if (anyFinished && this.rosieFinishTime !== null) {
+      this.emitRaceResultsUpdate();
+    }
   }
 
   /**
@@ -1146,7 +1156,70 @@ export class RaceScene extends Phaser.Scene {
   }
 
   /**
-   * Compile final race results sorted by position
+   * Emit current race results to React
+   * Called when Rosie finishes and when each competitor finishes
+   */
+  private emitRaceResultsUpdate(): void {
+    const results = this.compileCurrentRaceResults();
+    const allFinished = this.competitors.every((c) => c.finishTime !== null);
+
+    const payload: RaceResultsUpdatedPayload = {
+      results,
+      allFinished,
+    };
+
+    this.game.events.emit(GAME_EVENTS.RACE_RESULTS_UPDATED, payload);
+
+    // If all finished, also set game state and stop music
+    if (allFinished) {
+      this.setGameState('finished');
+      AudioManager.getInstance().stopMusic(true);
+    }
+  }
+
+  /**
+   * Compile current race results including unfinished racers
+   * Finished racers are sorted by position, unfinished racers are at the end
+   */
+  private compileCurrentRaceResults(): RacerResult[] {
+    const finished: RacerResult[] = [];
+    const stillRacing: RacerResult[] = [];
+
+    // Add Rosie's result (she must be finished if this is called)
+    finished.push({
+      name: 'Rosie',
+      color: TRACK_CONFIG.ROSIE_COLOR,
+      finishTime: this.rosieFinishTime,
+      position: this.rosieFinishPosition,
+      isRosie: true,
+    });
+
+    // Add competitor results
+    this.competitors.forEach((competitor) => {
+      const result: RacerResult = {
+        name: competitor.familyMember.name,
+        color: competitor.familyMember.color,
+        finishTime: competitor.finishTime,
+        position: competitor.finishPosition,
+        isRosie: false,
+      };
+
+      if (competitor.finishTime !== null) {
+        finished.push(result);
+      } else {
+        stillRacing.push(result);
+      }
+    });
+
+    // Sort finished racers by position
+    finished.sort((a, b) => (a.position ?? 999) - (b.position ?? 999));
+
+    // Append still-racing racers at the end
+    return [...finished, ...stillRacing];
+  }
+
+  /**
+   * Compile final race results sorted by position (legacy - used by ALL_RACERS_FINISHED)
    */
   private compileRaceResults(): RacerResult[] {
     const results: RacerResult[] = [];
@@ -1172,7 +1245,7 @@ export class RaceScene extends Phaser.Scene {
     });
 
     // Sort by position
-    results.sort((a, b) => a.position - b.position);
+    results.sort((a, b) => (a.position ?? 999) - (b.position ?? 999));
 
     return results;
   }

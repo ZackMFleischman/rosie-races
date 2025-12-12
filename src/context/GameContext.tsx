@@ -8,6 +8,7 @@ import {
   type GameStatePayload,
   type CountdownPayload,
   type AllRacersFinishedPayload,
+  type RaceResultsUpdatedPayload,
 } from '../game/events';
 import { generateProblem, type MathProblem } from '../game/systems/MathGenerator';
 
@@ -130,6 +131,10 @@ export function GameProvider({ children }: GameProviderProps) {
       setRaceResults(payload.results);
     };
 
+    const handleRaceResultsUpdated = (payload: RaceResultsUpdatedPayload) => {
+      setRaceResults(payload.results);
+    };
+
     game.events.on(GAME_EVENTS.RACE_STARTED, handleRaceStarted);
     game.events.on(GAME_EVENTS.RACE_FINISHED, handleRaceFinished);
     game.events.on(GAME_EVENTS.RESTART_RACE, handleRestartRace);
@@ -137,6 +142,7 @@ export function GameProvider({ children }: GameProviderProps) {
     game.events.on(GAME_EVENTS.GAME_STATE_CHANGED, handleGameStateChanged);
     game.events.on(GAME_EVENTS.COUNTDOWN_TICK, handleCountdownTick);
     game.events.on(GAME_EVENTS.ALL_RACERS_FINISHED, handleAllRacersFinished);
+    game.events.on(GAME_EVENTS.RACE_RESULTS_UPDATED, handleRaceResultsUpdated);
 
     return () => {
       game.events.off(GAME_EVENTS.RACE_STARTED, handleRaceStarted);
@@ -146,6 +152,7 @@ export function GameProvider({ children }: GameProviderProps) {
       game.events.off(GAME_EVENTS.GAME_STATE_CHANGED, handleGameStateChanged);
       game.events.off(GAME_EVENTS.COUNTDOWN_TICK, handleCountdownTick);
       game.events.off(GAME_EVENTS.ALL_RACERS_FINISHED, handleAllRacersFinished);
+      game.events.off(GAME_EVENTS.RACE_RESULTS_UPDATED, handleRaceResultsUpdated);
     };
   }, [gameVersion]);
 

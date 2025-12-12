@@ -56,34 +56,28 @@ function getCelebrationMessage(position: number): string {
 /**
  * RaceResultsScreen - Mario Kart-style race results overlay.
  * Shows all racers in finish order with times and medals.
+ * Supports partial results (some racers still racing).
  */
 function RaceResultsScreen({ results, onRestart }: RaceResultsScreenProps) {
   // Find Rosie's result
   const rosieResult = results.find((r) => r.isRosie);
   const rosiePosition = rosieResult?.position ?? 0;
 
-  // Track visible results with ref to avoid lint warning about setState in effect
-  const [visibleCount, setVisibleCount] = useState<number>(0);
-  const resultsRef = useRef(results);
+  // Count finished racers
+  const finishedCount = results.filter((r) => r.finishTime !== null).length;
 
-  // Animate results appearing one by one
+  // Track visible results - show all finished racers immediately
+  const [visibleCount, setVisibleCount] = useState<number>(finishedCount);
+  const lastFinishedCountRef = useRef(finishedCount);
+
+  // Update visible count when more racers finish
   useEffect(() => {
-    // Reset when results change
-    if (resultsRef.current !== results) {
-      resultsRef.current = results;
-      // Use timeout to avoid synchronous setState in effect
-      const resetTimer = setTimeout(() => setVisibleCount(1), 300);
-      return () => clearTimeout(resetTimer);
+    if (finishedCount > lastFinishedCountRef.current) {
+      // New racer finished - animate them in
+      setVisibleCount(finishedCount);
+      lastFinishedCountRef.current = finishedCount;
     }
-
-    // Continue animation
-    if (visibleCount > 0 && visibleCount < results.length) {
-      const timer = setTimeout(() => {
-        setVisibleCount((prev) => prev + 1);
-      }, 400);
-      return () => clearTimeout(timer);
-    }
-  }, [visibleCount, results]);
+  }, [finishedCount]);
 
   return (
     <Box
@@ -168,11 +162,12 @@ function RaceResultsScreen({ results, onRestart }: RaceResultsScreenProps) {
           }}
         >
           {results.map((result, index) => {
-            const isVisible = index < visibleCount;
+            const isFinished = result.finishTime !== null;
+            const isVisible = isFinished ? index < visibleCount : true; // Show still-racing racers
             return (
               <Box
-                key={`${result.name}-${result.position}`}
-                data-testid={`result-row-${result.position}`}
+                key={`${result.name}-${result.position ?? 'racing'}`}
+                data-testid={`result-row-${result.position ?? 'racing'}`}
                 sx={{
                   display: 'flex',
                   alignItems: 'center',
@@ -181,9 +176,11 @@ function RaceResultsScreen({ results, onRestart }: RaceResultsScreenProps) {
                   borderRadius: 2,
                   backgroundColor: result.isRosie
                     ? 'rgba(255, 105, 180, 0.2)'
-                    : 'rgba(0, 0, 0, 0.05)',
+                    : !isFinished
+                      ? 'rgba(0, 0, 0, 0.02)'
+                      : 'rgba(0, 0, 0, 0.05)',
                   border: result.isRosie ? '2px solid #ff69b4' : '1px solid transparent',
-                  opacity: isVisible ? 1 : 0,
+                  opacity: isVisible ? (isFinished ? 1 : 0.6) : 0,
                   transform: isVisible ? 'translateX(0)' : 'translateX(-20px)',
                   transition: 'all 0.3s ease-out',
                 }}
@@ -194,10 +191,13 @@ function RaceResultsScreen({ results, onRestart }: RaceResultsScreenProps) {
                     fontWeight: 700,
                     fontSize: { xs: '1rem', sm: '1.1rem' },
                     minWidth: '36px',
-                    color: result.position <= 3 ? 'primary.main' : 'text.secondary',
+                    color:
+                      result.position !== null && result.position <= 3
+                        ? 'primary.main'
+                        : 'text.secondary',
                   }}
                 >
-                  {getOrdinal(result.position)}
+                  {result.position !== null ? getOrdinal(result.position) : '...'}
                 </Typography>
 
                 {/* Avatar circle */}
@@ -224,20 +224,21 @@ function RaceResultsScreen({ results, onRestart }: RaceResultsScreenProps) {
                   {result.isRosie && ' ⭐'}
                 </Typography>
 
-                {/* Time */}
+                {/* Time or Racing indicator */}
                 <Typography
                   sx={{
                     fontFamily: '"Courier New", Courier, monospace',
                     fontWeight: 600,
                     fontSize: { xs: '0.9rem', sm: '1rem' },
-                    color: 'text.secondary',
+                    color: isFinished ? 'text.secondary' : 'warning.main',
+                    fontStyle: isFinished ? 'normal' : 'italic',
                   }}
                 >
-                  {formatTime(result.finishTime)}
+                  {isFinished ? formatTime(result.finishTime!) : 'Racing...'}
                 </Typography>
 
-                {/* Medal for top 3 */}
-                {result.position <= 3 && (
+                {/* Medal for top 3 (only if finished) */}
+                {isFinished && result.position !== null && result.position <= 3 && (
                   <Typography sx={{ fontSize: '1.2rem' }}>{getMedal(result.position)}</Typography>
                 )}
               </Box>

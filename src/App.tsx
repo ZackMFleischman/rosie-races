@@ -5,7 +5,6 @@ import Typography from '@mui/material/Typography';
 import GameContainer from './components/GameContainer';
 import TapButton from './components/TapButton';
 import Timer from './components/Timer';
-import FinishedScreen from './components/FinishedScreen';
 import RaceResultsScreen from './components/RaceResultsScreen';
 import MathModal from './components/MathModal';
 import VolumeControl from './components/VolumeControl';
@@ -23,8 +22,6 @@ function AppContent() {
     emitTap,
     emitRestart,
     isRacing,
-    isFinished,
-    finishTime,
     currentProblem,
     submitMathAnswer,
     raceResults,
@@ -157,29 +154,25 @@ function AppContent() {
 
       {/* Pre-race overlay - darkens screen until user taps "Tap to Start" */}
       {showPreRaceOverlay && (
-        <>
-          <Box
-            sx={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              bgcolor: 'rgba(0, 0, 0, 0.5)',
-              zIndex: 1100, // Above most content but below the Tap to Start button
-              pointerEvents: 'none',
-            }}
-          />
-          {/* Tap to Start button - above the overlay */}
+        <Box
+          sx={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            bgcolor: 'rgba(0, 0, 0, 0.5)',
+            zIndex: 1100,
+          }}
+        >
+          {/* Tap to Start button - centered via flexbox */}
           <Box
             component="button"
             onClick={handleTap}
             sx={{
-              position: 'fixed',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              zIndex: 1200, // Above the overlay
               bgcolor: 'primary.main',
               color: 'primary.contrastText',
               border: 'none',
@@ -190,42 +183,37 @@ function AppContent() {
               fontWeight: 700,
               cursor: 'pointer',
               boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
-              // Pulsing animation
+              // Pulsing animation using scale only (no translate)
               animation: 'pulse 1s ease-in-out infinite',
               '@keyframes pulse': {
                 '0%, 100%': {
-                  transform: 'translate(-50%, -50%) scale(1)',
+                  transform: 'scale(1)',
                 },
                 '50%': {
-                  transform: 'translate(-50%, -50%) scale(1.05)',
+                  transform: 'scale(1.05)',
                 },
               },
               '&:hover': {
                 bgcolor: 'primary.dark',
                 animation: 'none',
-                transform: 'translate(-50%, -50%) scale(1.08)',
+                transform: 'scale(1.08)',
               },
               '&:active': {
                 animation: 'none',
-                transform: 'translate(-50%, -50%) scale(0.95)',
+                transform: 'scale(0.95)',
               },
             }}
           >
             Tap to Start!
           </Box>
-        </>
+        </Box>
       )}
 
       {/* Math problem modal */}
       {currentProblem && <MathModal problem={currentProblem} onAnswer={submitMathAnswer} />}
 
-      {/* Race results screen - shown when all racers have finished */}
+      {/* Race results screen - shown when Rosie finishes (updates as others finish) */}
       {raceResults && <RaceResultsScreen results={raceResults} onRestart={handleRestart} />}
-
-      {/* Fallback finished screen - shown when only Rosie has finished but results not ready */}
-      {isFinished && finishTime !== null && !raceResults && (
-        <FinishedScreen finishTime={finishTime} onRestart={handleRestart} />
-      )}
     </Box>
   );
 }

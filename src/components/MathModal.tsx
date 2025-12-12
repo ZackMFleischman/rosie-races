@@ -121,7 +121,8 @@ function MathModal({ problem, onAnswer }: MathModalProps) {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'center', // Center the modal so it doesn't cover the timer
+        justifyContent: 'flex-start', // Anchor to top so modal doesn't shift when content changes
+        pt: { xs: '15vh', sm: '12vh' }, // Offset from top
         backgroundColor: 'rgba(0, 0, 0, 0.25)', // Semi-transparent to see racers behind
         zIndex: 999, // Below timer (1000)
       }}
@@ -220,42 +221,43 @@ function MathModal({ problem, onAnswer }: MathModalProps) {
           ))}
         </Grid>
 
-        {/* Feedback text */}
-        {feedback !== 'none' && (
-          <Box
-            data-testid="feedback-text"
+        {/* Feedback text - always rendered to reserve space, visibility controlled */}
+        <Box
+          data-testid="feedback-text"
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 1,
+            mt: 1,
+            minHeight: { xs: '2.5rem', sm: '3rem' }, // Reserve space for feedback
+            visibility: feedback !== 'none' ? 'visible' : 'hidden',
+          }}
+        >
+          <Typography
+            component="span"
             sx={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 1,
-              mt: 1,
+              fontSize: { xs: '1.5rem', sm: '2rem' },
             }}
           >
-            <Typography
-              component="span"
-              sx={{
-                fontSize: { xs: '1.5rem', sm: '2rem' },
-              }}
-            >
-              {feedbackInfo.emoji}
-            </Typography>
-            <Typography
-              variant="h4"
-              sx={{
-                fontWeight: 700,
-                color:
-                  feedback === 'wrong'
-                    ? 'error.main'
-                    : feedback === 'correct-fast'
-                      ? 'warning.main'
-                      : 'success.main',
-                textAlign: 'center',
-              }}
-            >
-              {feedbackInfo.text}
-            </Typography>
-          </Box>
-        )}
+            {feedbackInfo.emoji}
+          </Typography>
+          <Typography
+            variant="h4"
+            sx={{
+              fontWeight: 700,
+              color:
+                feedback === 'wrong'
+                  ? 'error.main'
+                  : feedback === 'correct-fast'
+                    ? 'warning.main'
+                    : 'success.main',
+              textAlign: 'center',
+            }}
+          >
+            {feedbackInfo.text}
+          </Typography>
+        </Box>
       </Box>
     </Box>
   );

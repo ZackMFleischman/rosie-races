@@ -279,8 +279,9 @@ describe('MathModal', () => {
         expect(button).not.toBeDisabled();
       });
 
-      // Feedback should be hidden
-      expect(screen.queryByTestId('feedback-text')).not.toBeInTheDocument();
+      // Feedback should be hidden (element exists but has visibility: hidden)
+      const feedbackText = screen.getByTestId('feedback-text');
+      expect(feedbackText).toHaveStyle({ visibility: 'hidden' });
     });
   });
 });

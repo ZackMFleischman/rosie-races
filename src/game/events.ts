@@ -18,6 +18,7 @@ export const GAME_EVENTS = {
   GAME_STATE_CHANGED: 'gameStateChanged',
   COUNTDOWN_TICK: 'countdownTick',
   ALL_RACERS_FINISHED: 'allRacersFinished',
+  RACE_RESULTS_UPDATED: 'raceResultsUpdated',
 } as const;
 
 /**
@@ -36,12 +37,13 @@ export interface CountdownPayload {
 
 /**
  * Racer finish result for results screen
+ * finishTime and position are null if the racer hasn't finished yet
  */
 export interface RacerResult {
   name: string;
   color: number;
-  finishTime: number;
-  position: number;
+  finishTime: number | null;
+  position: number | null;
   isRosie: boolean;
 }
 
@@ -50,6 +52,14 @@ export interface RacerResult {
  */
 export interface AllRacersFinishedPayload {
   results: RacerResult[];
+}
+
+/**
+ * Payload for race results updated event (emitted as each racer finishes)
+ */
+export interface RaceResultsUpdatedPayload {
+  results: RacerResult[];
+  allFinished: boolean;
 }
 
 /**
