@@ -75,14 +75,10 @@ function Timer({ isRunning, onStart }: TimerProps) {
     <Box
       data-testid="timer"
       sx={{
-        position: 'fixed',
-        top: { xs: 8, sm: 10 },
-        left: '50%',
-        transform: 'translateX(-50%)',
-        zIndex: 1000, // Stay above modals
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
+        py: '8px',
         // Fixed width container to prevent layout shift
         minWidth: { xs: '120px', sm: '140px', md: '160px' },
       }}

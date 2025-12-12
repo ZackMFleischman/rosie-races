@@ -44,11 +44,11 @@ function TapButton({ onTap, disabled = false }: TapButtonProps) {
       disabled={disabled}
       data-testid="tap-button"
       sx={{
-        // Size - large and touch-friendly
-        width: { xs: 100, sm: 120 },
-        height: { xs: 100, sm: 120 },
-        minWidth: 100,
-        minHeight: 100,
+        // Size - large and touch-friendly (doubled for easy tapping)
+        width: { xs: 200, sm: 240 },
+        height: { xs: 200, sm: 240 },
+        minWidth: 200,
+        minHeight: 200,
 
         // Shape
         borderRadius: '50%',
@@ -92,7 +92,7 @@ function TapButton({ onTap, disabled = false }: TapButtonProps) {
         component="span"
         sx={{
           fontWeight: 700,
-          fontSize: { xs: '1.5rem', sm: '1.75rem' },
+          fontSize: { xs: '3rem', sm: '3.5rem' },
           color: 'inherit',
           pointerEvents: 'none', // Ensure clicks pass through to button
         }}

@@ -66,10 +66,7 @@ function AppContent() {
       {/* Volume control - always visible in top-right corner */}
       <VolumeControl />
 
-      {/* Timer - always visible at top, never pauses */}
-      <Timer isRunning={isRacing} />
-
-      {/* Header area - will contain timer and volume control */}
+      {/* Header area - title */}
       <Box
         component="header"
         sx={{
@@ -90,6 +87,9 @@ function AppContent() {
           Rosie Races
         </Typography>
       </Box>
+
+      {/* Timer - positioned above gameplay area */}
+      <Timer isRunning={isRacing} />
 
       {/* Main game area - contains Phaser canvas */}
       <Box
