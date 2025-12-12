@@ -310,15 +310,15 @@ Racing game for 4-year-old Rosie with math challenges!
 
 ### 5.3 Competitor Movement
 
-- [ ] **AI moves at varying speeds**
+- [x] **AI moves at varying speeds**
 
   > In `update()`, for each competitor: `comp.x += comp.speed * (delta / 1000)`. Simple linear movement, no acceleration.
 
-- [ ] **Speed variations for realism**
+- [x] **Speed variations for realism**
 
   > Add subtle speed fluctuation: `comp.speed += Phaser.Math.FloatBetween(-5, 5)` occasionally (every ~2 seconds). Clamp within min/max bounds.
 
-- [ ] **AI doesn't stop for checkpoints**
+- [x] **AI doesn't stop for checkpoints**
   > Competitors ignore checkpoint x-positions. Only Rosie pauses for math. This gives Rosie a disadvantage balanced by boost potential.
 
 ### 5.4 Visual Polish

@@ -13,6 +13,7 @@ interface Competitor {
   familyMember: FamilyMember;
   speed: number; // Current speed (pixels per second)
   baseY: number; // Base Y position for bobbing animation
+  lastSpeedChangeTime: number; // Time when speed was last varied (ms)
 }
 
 // Constants for track layout
@@ -55,6 +56,12 @@ export const ANIMATION_CONFIG = {
   BOB_MAX_AMPLITUDE: 8, // Maximum bobbing amplitude in pixels
   SCALE_PULSE_FREQUENCY: 0.02, // How fast the scale pulses
   SCALE_PULSE_AMOUNT: 0.05, // How much the scale changes
+};
+
+// Constants for AI competitor behavior
+export const AI_CONFIG = {
+  SPEED_VARIATION_INTERVAL: 2000, // Time between speed changes (ms)
+  SPEED_VARIATION_AMOUNT: 5, // Max speed change per variation (+/-)
 };
 
 /**
@@ -146,7 +153,7 @@ export class RaceScene extends Phaser.Scene {
     const deltaSeconds = delta / 1000;
 
     // Update AI competitors (they move even when Rosie is paused)
-    this.updateCompetitors(deltaSeconds);
+    this.updateCompetitors(time, deltaSeconds);
 
     if (this.isPaused) return; // Don't move Rosie while paused at checkpoint
 
@@ -576,6 +583,7 @@ export class RaceScene extends Phaser.Scene {
         familyMember,
         speed,
         baseY,
+        lastSpeedChangeTime: 0, // Will be set when race starts
       });
     });
   }
@@ -601,14 +609,39 @@ export class RaceScene extends Phaser.Scene {
   }
 
   /**
-   * Update AI competitors' movement (they move at constant speed, don't stop for checkpoints)
+   * Update AI competitors' movement with realistic speed variations
+   * AI competitors don't stop for checkpoints - they race continuously
    */
-  private updateCompetitors(deltaSeconds: number): void {
+  private updateCompetitors(time: number, deltaSeconds: number): void {
     this.competitors.forEach((competitor) => {
       // Only move if the race has started
       if (!this.hasStarted) return;
 
-      // Move at constant speed
+      // Initialize lastSpeedChangeTime on first update
+      if (competitor.lastSpeedChangeTime === 0) {
+        competitor.lastSpeedChangeTime = time;
+      }
+
+      // Apply speed variation every SPEED_VARIATION_INTERVAL ms for realism
+      if (time - competitor.lastSpeedChangeTime >= AI_CONFIG.SPEED_VARIATION_INTERVAL) {
+        competitor.lastSpeedChangeTime = time;
+
+        // Add random speed fluctuation
+        const variation = Phaser.Math.FloatBetween(
+          -AI_CONFIG.SPEED_VARIATION_AMOUNT,
+          AI_CONFIG.SPEED_VARIATION_AMOUNT
+        );
+        competitor.speed += variation;
+
+        // Clamp speed within the family member's min/max bounds
+        competitor.speed = Phaser.Math.Clamp(
+          competitor.speed,
+          competitor.familyMember.minSpeed,
+          competitor.familyMember.maxSpeed
+        );
+      }
+
+      // Move at current speed
       competitor.sprite.x += competitor.speed * deltaSeconds;
 
       // Clamp to track bounds

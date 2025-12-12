@@ -5,6 +5,7 @@ import {
   TRACK_CONFIG,
   ANIMATION_CONFIG,
   CHECKPOINT_CONFIG,
+  AI_CONFIG,
 } from './RaceScene';
 import { FAMILY_MEMBERS } from '../../data/familyMembers';
 
@@ -448,6 +449,27 @@ describe('RaceScene', () => {
 
         expect(hasPinkLane).toBe(true);
       });
+    });
+
+    describe('competitor movement', () => {
+      it('each competitor has lastSpeedChangeTime initialized to 0', () => {
+        const { scene } = setupTest();
+        const competitors = scene.getCompetitors();
+
+        competitors.forEach((competitor) => {
+          expect(competitor.lastSpeedChangeTime).toBe(0);
+        });
+      });
+    });
+  });
+
+  describe('AI_CONFIG', () => {
+    it('has expected speed variation interval (2 seconds)', () => {
+      expect(AI_CONFIG.SPEED_VARIATION_INTERVAL).toBe(2000);
+    });
+
+    it('has expected speed variation amount', () => {
+      expect(AI_CONFIG.SPEED_VARIATION_AMOUNT).toBe(5);
     });
   });
 });
