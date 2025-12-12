@@ -47,7 +47,7 @@ export const FAMILY_MEMBERS: FamilyMember[] = [
     name: 'Mommy',
     color: 0x4a90d9, // Blue
     baseMinSpeed: 35,
-    baseMaxSpeed: 55,
+    baseMaxSpeed: 58,
     role: 'Mom',
     sprite: 'alexa-sprite.png',
   },
@@ -64,8 +64,8 @@ export const FAMILY_MEMBERS: FamilyMember[] = [
     id: 'uncle-zack',
     name: 'Uncle Zack',
     color: 0xe67e22, // Orange
-    baseMinSpeed: 33,
-    baseMaxSpeed: 51,
+    baseMinSpeed: 35,
+    baseMaxSpeed: 55,
     role: 'Uncle',
     sprite: 'zack-sprite.png',
   },
@@ -73,8 +73,8 @@ export const FAMILY_MEMBERS: FamilyMember[] = [
     id: 'gaga',
     name: 'Gaga',
     color: 0x9b59b6, // Purple
-    baseMinSpeed: 30,
-    baseMaxSpeed: 48,
+    baseMinSpeed: 35,
+    baseMaxSpeed: 55,
     role: 'Grandma',
     sprite: 'traci-sprite.png',
   },
@@ -82,8 +82,8 @@ export const FAMILY_MEMBERS: FamilyMember[] = [
     id: 'grandpa',
     name: 'Grandpa',
     color: 0xe74c3c, // Red
-    baseMinSpeed: 27,
-    baseMaxSpeed: 45,
+    baseMinSpeed: 35,
+    baseMaxSpeed: 55,
     role: 'Grandpa',
     sprite: 'rick-sprite.png',
   },
@@ -91,7 +91,7 @@ export const FAMILY_MEMBERS: FamilyMember[] = [
     id: 'lalo',
     name: 'Lalo',
     color: 0xf1c40f, // Yellow/Gold (for the dog)
-    baseMinSpeed: 42,
+    baseMinSpeed: 40,
     baseMaxSpeed: 60,
     role: 'Dog',
     sprite: 'lalo-sprite.png',
