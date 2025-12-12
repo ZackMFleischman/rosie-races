@@ -39,6 +39,15 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Restructure for /rosie-races/ path
+        run: |
+          mkdir -p dist-final/rosie-races
+          mv dist/* dist-final/rosie-races/
+          cp public/index-redirect.html dist-final/index.html
+          cp public/CNAME dist-final/CNAME
+          rm -rf dist
+          mv dist-final dist
+
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
