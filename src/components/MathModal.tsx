@@ -90,7 +90,7 @@ function MathModal({ problem, onAnswer }: MathModalProps) {
       data-testid="math-modal"
       sx={{
         position: 'fixed',
-        top: '60px', // Below timer
+        top: 0,
         left: 0,
         right: 0,
         bottom: 0,
@@ -100,7 +100,7 @@ function MathModal({ problem, onAnswer }: MathModalProps) {
         justifyContent: 'flex-start',
         backgroundColor: 'rgba(0, 0, 0, 0.7)',
         zIndex: 999, // Below timer (1000)
-        pt: { xs: 2, sm: 4 },
+        pt: { xs: 8, sm: 10 }, // Account for timer at top
       }}
     >
       {/* Math problem card */}
