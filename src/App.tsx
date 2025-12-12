@@ -1,6 +1,5 @@
 import { useMemo, useCallback } from 'react';
 import Box from '@mui/material/Box';
-import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import GameContainer from './components/GameContainer';
@@ -13,6 +12,32 @@ import { GameProvider } from './context/GameContext';
 import { useGame } from './hooks/useGame';
 import { RaceScene } from './game/scenes/RaceScene';
 import * as Phaser from 'phaser';
+
+function RotationPrompt() {
+  return (
+    <Box
+      className="app-viewport"
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        bgcolor: '#4CAF50',
+      }}
+    >
+      <Typography
+        variant="h5"
+        sx={{
+          color: '#fff',
+          textAlign: 'center',
+          px: 3,
+          textShadow: '0 2px 6px rgba(0,0,0,0.35)',
+        }}
+      >
+        Please rotate your device to landscape mode to play Rosie Races.
+      </Typography>
+    </Box>
+  );
+}
 
 /**
  * Inner app component that uses the game context
@@ -29,44 +54,76 @@ function AppContent() {
     gameState,
   } = useGame();
 
-  // Detect iPhone landscape mode (height <= 500px and width > height)
-  // This triggers the horizontal layout with TAP button on the right
-  const isPhoneLandscape = useMediaQuery('(max-height: 500px) and (orientation: landscape)');
+  const phoneQueryMatch = useMediaQuery('(max-width: 850px)');
+  const orientationQueryMatch = useMediaQuery('(orientation: landscape)', {
+    defaultMatches: true,
+    noSsr: true,
+  });
 
-  // TAP button should be disabled during ready and countdown states
-  // It only becomes enabled once gameState is 'racing'
+  const fallbackLandscape =
+    typeof window !== 'undefined' ? window.innerWidth >= window.innerHeight : true;
+  const isLandscape = orientationQueryMatch || fallbackLandscape;
+
+  const fallbackPhone = typeof window !== 'undefined' ? window.innerWidth <= 850 : false;
+  const isPhone = phoneQueryMatch || fallbackPhone;
+  const isPhoneLandscape = isPhone && isLandscape;
+
+  const srOnlyStyles = {
+    position: 'absolute' as const,
+    width: 1,
+    height: 1,
+    padding: 0,
+    margin: -1,
+    overflow: 'hidden',
+    clip: 'rect(0 0 0 0)',
+    whiteSpace: 'nowrap' as const,
+    border: 0,
+  };
+
   const isTapButtonDisabled = gameState === 'ready' || gameState === 'countdown';
-
-  // TAP button should bounce to attract attention when:
-  // - The race is active (gameState === 'racing')
-  // - No math problem is showing (currentProblem is null)
-  // This helps young children understand they should be pressing the button
   const shouldTapButtonBounce = gameState === 'racing' && !currentProblem;
-
-  // Show overlay before race starts (when "Tap to Start" is displayed in the game)
   const showPreRaceOverlay = gameState === 'ready';
 
-  // Memoize game config to prevent recreation on re-renders
-  const gameConfig = useMemo(
+  const phoneGameConfig = useMemo(
     () => ({
       scene: [RaceScene],
-    }),
-    []
-  );
-
-  // Phone landscape config - uses RESIZE mode to fill available space
-  const gameConfigPhoneLandscape = useMemo(
-    () => ({
-      scene: [RaceScene],
+      backgroundColor: '#4CAF50',
       scale: {
         mode: Phaser.Scale.RESIZE,
         autoCenter: Phaser.Scale.CENTER_BOTH,
+      },
+      physics: {
+        default: 'arcade',
+        arcade: {
+          gravity: { x: 0, y: 0 },
+          debug: false,
+        },
       },
     }),
     []
   );
 
-  // Handle game ready - store reference in context
+  const fitGameConfig = useMemo(
+    () => ({
+      scene: [RaceScene],
+      backgroundColor: '#4CAF50',
+      scale: {
+        mode: Phaser.Scale.FIT,
+        autoCenter: Phaser.Scale.CENTER_BOTH,
+        width: 1280,
+        height: 720,
+      },
+      physics: {
+        default: 'arcade',
+        arcade: {
+          gravity: { x: 0, y: 0 },
+          debug: false,
+        },
+      },
+    }),
+    []
+  );
+
   const handleGameReady = useCallback(
     (game: Phaser.Game) => {
       setGame(game);
@@ -74,45 +131,48 @@ function AppContent() {
     [setGame]
   );
 
-  // Handle tap button press
   const handleTap = useCallback(() => {
     emitTap();
   }, [emitTap]);
 
-  // Handle restart race
   const handleRestart = useCallback(() => {
     emitRestart();
   }, [emitRestart]);
 
-  // Phone landscape layout: full-screen canvas with overlaid UI
+  if (!isLandscape) {
+    return <RotationPrompt />;
+  }
+
   if (isPhoneLandscape) {
     return (
       <Box
+        className="app-viewport"
         sx={{
-          height: '100dvh',
-          maxHeight: '100dvh',
           display: 'flex',
           position: 'relative',
-          bgcolor: '#4CAF50', // Match canvas grass green background
-          overflow: 'hidden',
+          bgcolor: '#4CAF50',
         }}
       >
-        {/* Full-screen game canvas */}
+        <Box component="header" sx={srOnlyStyles}>
+          <Typography variant="h6">Rosie Races header landmark</Typography>
+        </Box>
+
+        <Box component="footer" sx={srOnlyStyles}>
+          <Typography variant="body2">Footer</Typography>
+        </Box>
+
+        <Box component="main" sx={{ position: 'absolute', inset: 0 }}>
         <Box
           sx={{
             width: '100%',
             height: '100%',
             position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
+            inset: 0,
           }}
         >
-          <GameContainer config={gameConfigPhoneLandscape} onGameReady={handleGameReady} />
+          <GameContainer config={phoneGameConfig} onGameReady={handleGameReady} />
         </Box>
 
-        {/* Overlay: Title in top-left */}
         <Typography
           variant="h6"
           color="primary"
@@ -129,7 +189,6 @@ function AppContent() {
           Rosie Races
         </Typography>
 
-        {/* Overlay: Timer in top-center */}
         <Box
           sx={{
             position: 'absolute',
@@ -142,10 +201,8 @@ function AppContent() {
           <Timer isRunning={isRacing} compact />
         </Box>
 
-        {/* Overlay: Volume control in bottom-right */}
         <VolumeControl bottomRight />
 
-        {/* Overlay: TAP button on the right */}
         <Box
           sx={{
             position: 'absolute',
@@ -158,15 +215,11 @@ function AppContent() {
           <TapButton onTap={handleTap} disabled={isTapButtonDisabled} small shouldBounce={shouldTapButtonBounce} />
         </Box>
 
-        {/* Pre-race overlay */}
         {showPreRaceOverlay && (
           <Box
             sx={{
               position: 'fixed',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
+              inset: 0,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -200,125 +253,106 @@ function AppContent() {
           </Box>
         )}
 
-        {/* Math problem modal */}
-        {currentProblem && (
-          <MathModal problem={currentProblem} onAnswer={submitMathAnswer} compact />
-        )}
-
-        {/* Race results screen */}
-        {raceResults && (
-          <RaceResultsScreen results={raceResults} onRestart={handleRestart} compact />
-        )}
+        {currentProblem && <MathModal problem={currentProblem} onAnswer={submitMathAnswer} compact />}
+        {raceResults && <RaceResultsScreen results={raceResults} onRestart={handleRestart} compact />}
+        </Box>
       </Box>
     );
   }
 
-  // Default layout for tablets and desktop (vertical stack)
   return (
     <Box
+      className="app-viewport"
       sx={{
-        height: '100dvh',
-        maxHeight: '100dvh',
         display: 'flex',
         flexDirection: 'column',
-        bgcolor: 'background.default',
-        overflow: 'hidden', // Prevent scrolling
+        bgcolor: '#4CAF50',
       }}
     >
-      {/* Volume control - always visible in top-right corner */}
       <VolumeControl />
 
-      {/* Header area - title */}
-      <Box
-        component="header"
-        sx={{
-          py: { xs: 0.5, sm: 2 },
-          px: { xs: 2, sm: 3 },
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          flexShrink: 0,
-        }}
-      >
-        <Typography
-          variant="h4"
-          color="primary"
-          sx={{
-            fontSize: { xs: '1.2rem', sm: '2rem', md: '2.25rem' },
-          }}
-        >
-          Rosie Races
-        </Typography>
+      <Box component="header" sx={srOnlyStyles}>
+        <Typography variant="h6">Rosie Races header landmark</Typography>
       </Box>
 
-      {/* Timer - positioned above gameplay area */}
-      <Timer isRunning={isRacing} />
-
-      {/* Main game area - contains Phaser canvas */}
       <Box
         component="main"
         sx={{
           flex: 1,
+          width: '100%',
           display: 'flex',
-          flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
+          position: 'relative',
           px: { xs: 1, sm: 2 },
-          py: { xs: 0.5, sm: 2 },
-          minHeight: 0, // Allows flex child to shrink
-          overflow: 'hidden',
+          pb: { xs: 2, sm: 3 },
         }}
       >
-        <Container
-          maxWidth="lg"
+        <Box
           sx={{
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
+            width: 'min(100%, 1280px)',
+            aspectRatio: '16 / 9',
+            position: 'relative',
+            borderRadius: 2,
+            overflow: 'hidden',
+            boxShadow: 3,
+            bgcolor: '#4CAF50',
           }}
         >
-          {/* Game canvas container */}
+          <GameContainer config={fitGameConfig} onGameReady={handleGameReady} />
+
           <Box
             sx={{
-              width: '100%',
-              maxWidth: { xs: '100%', sm: 600, md: 800, lg: 1024 },
-              aspectRatio: '4/3',
-              borderRadius: 2,
-              overflow: 'hidden',
-              boxShadow: 3,
+              position: 'absolute',
+              inset: 0,
+              pointerEvents: 'none',
             }}
           >
-            <GameContainer config={gameConfig} onGameReady={handleGameReady} />
+            <Typography
+              variant="h4"
+              color="primary"
+              sx={{
+                position: 'absolute',
+                top: 12,
+                left: 16,
+                fontWeight: 700,
+                textShadow: '2px 2px 4px rgba(0,0,0,0.7), 0 0 8px rgba(0,0,0,0.5)',
+              }}
+            >
+              Rosie Races
+            </Typography>
+
+            <Box
+              sx={{
+                position: 'absolute',
+                top: 16,
+                left: '50%',
+                transform: 'translateX(-50%)',
+              }}
+            >
+              <Timer isRunning={isRacing} />
+            </Box>
+
+            <Box
+              sx={{
+                position: 'absolute',
+                bottom: 24,
+                left: '50%',
+                transform: 'translateX(-50%)',
+                pointerEvents: 'auto',
+              }}
+            >
+              <TapButton onTap={handleTap} disabled={isTapButtonDisabled} shouldBounce={shouldTapButtonBounce} />
+            </Box>
           </Box>
-        </Container>
+        </Box>
       </Box>
 
-      {/* Footer area - TAP button */}
-      <Box
-        component="footer"
-        sx={{
-          py: { xs: 1, sm: 3 },
-          px: { xs: 2, sm: 3 },
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          flexShrink: 0,
-        }}
-      >
-        <TapButton onTap={handleTap} disabled={isTapButtonDisabled} shouldBounce={shouldTapButtonBounce} />
-      </Box>
-
-      {/* Pre-race overlay - darkens screen until user taps "Tap to Start" */}
       {showPreRaceOverlay && (
         <Box
           sx={{
             position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
+            inset: 0,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -326,7 +360,6 @@ function AppContent() {
             zIndex: 1100,
           }}
         >
-          {/* Tap to Start button - centered via flexbox */}
           <Box
             component="button"
             onClick={handleTap}
@@ -341,7 +374,6 @@ function AppContent() {
               fontWeight: 700,
               cursor: 'pointer',
               boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
-              // Pulsing animation using scale only (no translate)
               animation: 'pulse 1s ease-in-out infinite',
               '@keyframes pulse': {
                 '0%, 100%': {
@@ -367,10 +399,11 @@ function AppContent() {
         </Box>
       )}
 
-      {/* Math problem modal */}
-      {currentProblem && <MathModal problem={currentProblem} onAnswer={submitMathAnswer} />}
+      <Box component="footer" sx={srOnlyStyles}>
+        <Typography variant="body2">Footer</Typography>
+      </Box>
 
-      {/* Race results screen - shown when Rosie finishes (updates as others finish) */}
+      {currentProblem && <MathModal problem={currentProblem} onAnswer={submitMathAnswer} />}
       {raceResults && <RaceResultsScreen results={raceResults} onRestart={handleRestart} />}
     </Box>
   );

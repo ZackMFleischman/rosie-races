@@ -4,12 +4,28 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/icon-192.png" />
     <link rel="manifest" href="/manifest.json" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"
+    />
     <!-- iOS PWA meta tags for fullscreen -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <link rel="apple-touch-icon" href="/icon-192.png" />
     <title>Rosie Races</title>
+    <script>
+      (() => {
+        const setVH = () => {
+          const height = (window.visualViewport?.height || window.innerHeight) * 0.01;
+          document.documentElement.style.setProperty('--vh', `${height}px`);
+        };
+
+        setVH();
+        window.addEventListener('resize', setVH);
+        window.visualViewport?.addEventListener('resize', setVH);
+        window.visualViewport?.addEventListener('scroll', setVH);
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

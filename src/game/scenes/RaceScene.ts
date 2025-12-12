@@ -177,6 +177,8 @@ export class RaceScene extends Phaser.Scene {
   // Sparkle trail effect
   private sparkleEmitter: Phaser.GameObjects.Particles.ParticleEmitter | null = null;
 
+  private scaleSupportsEvents: boolean = false;
+
   constructor() {
     super({ key: 'RaceScene' });
   }
@@ -201,6 +203,12 @@ export class RaceScene extends Phaser.Scene {
   }
 
   create(): void {
+    this.scaleSupportsEvents = typeof this.scale.on === 'function';
+
+    if (this.scaleSupportsEvents) {
+      this.scale.on('resize', this.handleResize, this);
+    }
+
     // Calculate track positions proportionally based on actual canvas width using config ratios
     this.startLineX = this.scale.width * TRACK_CONFIG.START_LINE_RATIO;
     this.finishLineX = this.scale.width * TRACK_CONFIG.FINISH_LINE_RATIO;
@@ -309,6 +317,13 @@ export class RaceScene extends Phaser.Scene {
     this.checkAllRacersFinished();
   }
 
+  private handleResize = (gameSize: Phaser.Structs.Size): void => {
+    const { width, height } = gameSize;
+
+    this.scale.resize(width, height);
+    this.scene.restart();
+  };
+
   /**
    * Set up listener for tap events from React
    */
@@ -318,6 +333,9 @@ export class RaceScene extends Phaser.Scene {
     // Clean up listener when scene is destroyed
     this.events.on('shutdown', () => {
       this.game.events.off(GAME_EVENTS.TAP, this.handleTap, this);
+      if (this.scaleSupportsEvents) {
+        this.scale.off('resize', this.handleResize, this);
+      }
     });
 
     // Also listen for restart events
