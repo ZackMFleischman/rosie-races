@@ -284,8 +284,9 @@ function RaceResultsScreen({ results, onRestart, compact = false }: RaceResultsS
             data-testid="celebration-message"
             sx={{
               fontWeight: 800,
-              fontSize: { xs: '1.5rem', sm: '2rem' },
+              fontSize: { xs: '1.5rem', sm: '1.8rem' },
               color: rosiePosition === 1 ? '#d97706' : 'primary.main',
+              marginBottom: -2.0,
               textAlign: 'center',
             }}
           >
@@ -424,7 +425,7 @@ function RaceResultsScreen({ results, onRestart, compact = false }: RaceResultsS
           onClick={onRestart}
           data-testid="race-again-button"
           sx={{
-            mt: 2,
+            mt: 0.5,
             px: 6,
             py: 2,
             fontSize: { xs: '1.1rem', sm: '1.3rem' },

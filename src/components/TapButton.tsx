@@ -18,9 +18,9 @@ function TapButton({ onTap, disabled = false, small = false }: TapButtonProps) {
   const [isPressed, setIsPressed] = useState(false);
 
   // Size configurations
-  const buttonSize = small ? 80 : { xs: 100, sm: 200, md: 240 };
-  const minSize = small ? 80 : { xs: 100, sm: 200 };
-  const fontSize = small ? '1.2rem' : { xs: '1.5rem', sm: '3rem', md: '3.5rem' };
+  const buttonSize = small ? 80 : { xs: 80, sm: 100, md: 100 };
+  const minSize = small ? 80 : { xs: 80, sm: 100 };
+  const fontSize = small ? '1.2rem' : { xs: '1.5rem', sm: '1.85rem', md: '2.2rem' };
 
   const handlePointerDown = useCallback(
     (e: React.PointerEvent) => {
