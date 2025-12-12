@@ -4,6 +4,8 @@ import {
   getFamilyMemberById,
   getFamilyMemberIds,
   getRandomRacers,
+  getMinSpeed,
+  getMaxSpeed,
 } from './familyMembers';
 
 describe('familyMembers', () => {
@@ -34,10 +36,19 @@ describe('familyMembers', () => {
       expect(uniqueColors.size).toBe(FAMILY_MEMBERS.length);
     });
 
-    it('should have valid speed ranges for all members', () => {
+    it('should have valid base speed ranges for all members', () => {
       FAMILY_MEMBERS.forEach((member: FamilyMember) => {
-        expect(member.minSpeed).toBeGreaterThan(0);
-        expect(member.maxSpeed).toBeGreaterThan(member.minSpeed);
+        expect(member.baseMinSpeed).toBeGreaterThan(0);
+        expect(member.baseMaxSpeed).toBeGreaterThan(member.baseMinSpeed);
+      });
+    });
+
+    it('should have computed speeds within valid ranges', () => {
+      FAMILY_MEMBERS.forEach((member: FamilyMember) => {
+        const minSpeed = getMinSpeed(member);
+        const maxSpeed = getMaxSpeed(member);
+        expect(minSpeed).toBeGreaterThan(0);
+        expect(maxSpeed).toBeGreaterThan(minSpeed);
       });
     });
 

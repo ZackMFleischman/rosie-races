@@ -7,7 +7,7 @@ import {
   CHECKPOINT_CONFIG,
   AI_CONFIG,
 } from './RaceScene';
-import { FAMILY_MEMBERS } from '../../data/familyMembers';
+import { FAMILY_MEMBERS, getMinSpeed, getMaxSpeed } from '../../data/familyMembers';
 
 describe('RaceScene', () => {
   const setupTest = () => {
@@ -393,8 +393,8 @@ describe('RaceScene', () => {
         const competitors = scene.getCompetitors();
 
         competitors.forEach((competitor) => {
-          expect(competitor.speed).toBeGreaterThanOrEqual(competitor.familyMember.minSpeed);
-          expect(competitor.speed).toBeLessThanOrEqual(competitor.familyMember.maxSpeed);
+          expect(competitor.speed).toBeGreaterThanOrEqual(getMinSpeed(competitor.familyMember));
+          expect(competitor.speed).toBeLessThanOrEqual(getMaxSpeed(competitor.familyMember));
         });
       });
     });

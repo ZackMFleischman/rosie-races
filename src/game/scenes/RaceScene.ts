@@ -9,7 +9,12 @@ import type {
 // Assets in public/ - use relative path for correct base URL resolution
 const rosieSpriteUrl = 'assets/rosie-sprite.png';
 import { AudioManager, AUDIO_KEYS } from '../systems/AudioManager';
-import { getRandomRacers, type FamilyMember } from '../../data/familyMembers';
+import {
+  getRandomRacers,
+  getMinSpeed,
+  getMaxSpeed,
+  type FamilyMember,
+} from '../../data/familyMembers';
 
 /**
  * Competitor state for AI racers
@@ -615,7 +620,8 @@ export class RaceScene extends Phaser.Scene {
     gapLength: number
   ): void {
     const totalLength = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
-    const dashCount = Math.floor(totalLength / (dashLength + gapLength));
+    // Use ceil to ensure the line extends all the way to the end point
+    const dashCount = Math.ceil(totalLength / (dashLength + gapLength));
     const dx = (x2 - x1) / totalLength;
     const dy = (y2 - y1) / totalLength;
 
@@ -623,8 +629,9 @@ export class RaceScene extends Phaser.Scene {
       const startOffset = i * (dashLength + gapLength);
       const startX = x1 + dx * startOffset;
       const startY = y1 + dy * startOffset;
-      const endX = startX + dx * dashLength;
-      const endY = startY + dy * dashLength;
+      // Clamp the end point so the last dash doesn't overshoot
+      const endX = Math.min(startX + dx * dashLength, x2);
+      const endY = Math.min(startY + dy * dashLength, y2);
 
       graphics.lineBetween(startX, startY, endX, endY);
     }
@@ -673,8 +680,11 @@ export class RaceScene extends Phaser.Scene {
       // Render on top of lane labels (depth 10)
       sprite.setDepth(15);
 
-      // Assign random speed within the family member's range
-      const speed = Phaser.Math.FloatBetween(familyMember.minSpeed, familyMember.maxSpeed);
+      // Assign random speed within the family member's range (using scaled speeds)
+      const speed = Phaser.Math.FloatBetween(
+        getMinSpeed(familyMember),
+        getMaxSpeed(familyMember)
+      );
 
       this.competitors.push({
         sprite,
@@ -733,11 +743,11 @@ export class RaceScene extends Phaser.Scene {
         );
         competitor.speed += variation;
 
-        // Clamp speed within the family member's min/max bounds
+        // Clamp speed within the family member's min/max bounds (using scaled speeds)
         competitor.speed = Phaser.Math.Clamp(
           competitor.speed,
-          competitor.familyMember.minSpeed,
-          competitor.familyMember.maxSpeed
+          getMinSpeed(competitor.familyMember),
+          getMaxSpeed(competitor.familyMember)
         );
       }
 
