@@ -24,13 +24,15 @@ export const TRACK_CONFIG = {
   START_LINE_X: 120,
   FINISH_LINE_X: 974,
   ROSIE_START_X: 60, // Starts to the left of the start line
-  ROSIE_RADIUS: 30,
+  ROSIE_RADIUS: 38, // 25% larger than original 30
   ROSIE_COLOR: 0xff69b4, // Pink
 };
 
 // Constants for checkpoints
+// Positions are calculated to be equidistant from start (120) and finish (974)
+// Track length: 974 - 120 = 854, divided into 3 equal segments of ~285
 export const CHECKPOINT_CONFIG = {
-  POSITIONS: [300, 600], // X positions for checkpoints (roughly 1/3 and 2/3 of track)
+  POSITIONS: [405, 689], // X positions for checkpoints (equidistant: 1/3 and 2/3 of track)
   ARCH_HEIGHT: 60, // Height of the checkpoint arch
   ARCH_WIDTH: 30, // Width of the arch
   COLORS: {
@@ -175,8 +177,7 @@ export class RaceScene extends Phaser.Scene {
     // Add lead indicator
     this.createLeadIndicator();
 
-    // Add "TAP TO START" prompt
-    this.createTapToStartText();
+    // "TAP TO START" prompt is now handled by React overlay
 
     // Listen for tap events from React
     this.setupTapListener();
@@ -1059,14 +1060,14 @@ export class RaceScene extends Phaser.Scene {
     let count = COUNTDOWN_CONFIG.START_COUNT;
     const audioManager = AudioManager.getInstance();
 
-    // Play first beep
+    // Play countdown audio ONCE - the sound file contains the full "3, 2, 1, GO" sequence
     audioManager.playSFX(AUDIO_KEYS.COUNTDOWN);
     this.game.events.emit(GAME_EVENTS.COUNTDOWN_TICK, { count });
 
     // Animate the countdown number
     this.animateCountdownNumber();
 
-    // Set up timer for subsequent counts
+    // Set up timer for subsequent counts (visual only - audio plays through naturally)
     this.countdownTimer = this.time.addEvent({
       delay: COUNTDOWN_CONFIG.INTERVAL_MS,
       callback: () => {
@@ -1078,8 +1079,7 @@ export class RaceScene extends Phaser.Scene {
             this.countdownText.setText(count.toString());
             this.animateCountdownNumber();
           }
-          // Play beep
-          audioManager.playSFX(AUDIO_KEYS.COUNTDOWN);
+          // Emit event for React (no audio - it's handled by the single countdown sound)
           this.game.events.emit(GAME_EVENTS.COUNTDOWN_TICK, { count });
         } else if (count === 0) {
           // Show "GO!"
@@ -1089,8 +1089,7 @@ export class RaceScene extends Phaser.Scene {
             this.countdownText.setColor('#00ff00');
             this.animateCountdownNumber();
           }
-          // Play GO sound (using countdown sound - a different beep would be ideal)
-          audioManager.playSFX(AUDIO_KEYS.COUNTDOWN);
+          // Emit GO event (no additional audio - countdown sound includes GO)
           this.game.events.emit(GAME_EVENTS.COUNTDOWN_TICK, { count: 0 });
 
           // Start the race after a brief moment

@@ -28,7 +28,15 @@ function AppContent() {
     currentProblem,
     submitMathAnswer,
     raceResults,
+    gameState,
   } = useGame();
+
+  // TAP button should be disabled during ready and countdown states
+  // It only becomes enabled once gameState is 'racing'
+  const isTapButtonDisabled = gameState === 'ready' || gameState === 'countdown';
+
+  // Show overlay before race starts (when "Tap to Start" is displayed in the game)
+  const showPreRaceOverlay = gameState === 'ready';
 
   // Memoize game config to prevent recreation on re-renders
   const gameConfig = useMemo(
@@ -144,8 +152,69 @@ function AppContent() {
           alignItems: 'center',
         }}
       >
-        <TapButton onTap={handleTap} />
+        <TapButton onTap={handleTap} disabled={isTapButtonDisabled} />
       </Box>
+
+      {/* Pre-race overlay - darkens screen until user taps "Tap to Start" */}
+      {showPreRaceOverlay && (
+        <>
+          <Box
+            sx={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              bgcolor: 'rgba(0, 0, 0, 0.5)',
+              zIndex: 1100, // Above most content but below the Tap to Start button
+              pointerEvents: 'none',
+            }}
+          />
+          {/* Tap to Start button - above the overlay */}
+          <Box
+            component="button"
+            onClick={handleTap}
+            sx={{
+              position: 'fixed',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              zIndex: 1200, // Above the overlay
+              bgcolor: 'primary.main',
+              color: 'primary.contrastText',
+              border: 'none',
+              borderRadius: 4,
+              px: { xs: 4, sm: 6 },
+              py: { xs: 2, sm: 3 },
+              fontSize: { xs: '1.5rem', sm: '2rem' },
+              fontWeight: 700,
+              cursor: 'pointer',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+              // Pulsing animation
+              animation: 'pulse 1s ease-in-out infinite',
+              '@keyframes pulse': {
+                '0%, 100%': {
+                  transform: 'translate(-50%, -50%) scale(1)',
+                },
+                '50%': {
+                  transform: 'translate(-50%, -50%) scale(1.05)',
+                },
+              },
+              '&:hover': {
+                bgcolor: 'primary.dark',
+                animation: 'none',
+                transform: 'translate(-50%, -50%) scale(1.08)',
+              },
+              '&:active': {
+                animation: 'none',
+                transform: 'translate(-50%, -50%) scale(0.95)',
+              },
+            }}
+          >
+            Tap to Start!
+          </Box>
+        </>
+      )}
 
       {/* Math problem modal */}
       {currentProblem && <MathModal problem={currentProblem} onAnswer={submitMathAnswer} />}
