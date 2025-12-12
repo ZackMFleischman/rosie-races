@@ -254,10 +254,10 @@ describe('RaceScene', () => {
     });
 
     it('has checkpoint positions within track bounds', () => {
-      // Checkpoints should be positioned between start and finish
-      // The exact positions (300, 600) are design choices, not derived from track length
-      expect(CHECKPOINT_CONFIG.POSITIONS[0]).toBe(300);
-      expect(CHECKPOINT_CONFIG.POSITIONS[1]).toBe(600);
+      // Checkpoints should be positioned equidistant from start (120) and finish (974)
+      // Track length: 854, divided into 3 equal segments of ~285
+      expect(CHECKPOINT_CONFIG.POSITIONS[0]).toBe(405);
+      expect(CHECKPOINT_CONFIG.POSITIONS[1]).toBe(689);
     });
 
     it('has velocity boost values configured', () => {
