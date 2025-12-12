@@ -90,6 +90,8 @@ const createMockMakeGraphics = () => ({
 const createMockText = () => ({
   setOrigin: jest.fn().mockReturnThis(),
   setText: jest.fn().mockReturnThis(),
+  setDepth: jest.fn().mockReturnThis(),
+  destroy: jest.fn(),
 });
 
 export class Scene {

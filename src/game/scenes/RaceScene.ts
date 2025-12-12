@@ -94,6 +94,10 @@ export class RaceScene extends Phaser.Scene {
   private competitors: Competitor[] = [];
   private selectedRacers: FamilyMember[] = [];
 
+  // UI elements
+  private laneNameLabels: Phaser.GameObjects.Text[] = [];
+  private leadIndicator: Phaser.GameObjects.Text | null = null;
+
   constructor() {
     super({ key: 'RaceScene' });
   }
@@ -143,6 +147,12 @@ export class RaceScene extends Phaser.Scene {
     // Create AI competitors
     this.createCompetitors();
 
+    // Add lane name labels
+    this.createLaneLabels();
+
+    // Add lead indicator
+    this.createLeadIndicator();
+
     // Listen for tap events from React
     this.setupTapListener();
   }
@@ -187,6 +197,9 @@ export class RaceScene extends Phaser.Scene {
 
     // Apply bobbing animation when moving
     this.updateRosieAnimation(time);
+
+    // Update lead indicator to show current positions
+    this.updateLeadIndicator();
   }
 
   /**
@@ -668,6 +681,130 @@ export class RaceScene extends Phaser.Scene {
 
     // Recreate competitors
     this.createCompetitors();
+
+    // Update lane labels for new racers
+    this.updateLaneLabels();
+  }
+
+  /**
+   * Create lane name labels on the left side of each lane
+   */
+  private createLaneLabels(): void {
+    const skyHeight = this.scale.height * 0.2;
+    const actualLaneHeight = (this.scale.height - skyHeight) / TRACK_CONFIG.LANE_COUNT;
+    const labelX = 10; // Left margin
+
+    // Clear existing labels
+    this.laneNameLabels.forEach((label) => label.destroy());
+    this.laneNameLabels = [];
+
+    // Create label for Rosie in lane 1
+    const rosieLaneY = skyHeight + actualLaneHeight * 0.5;
+    const rosieLabel = this.add
+      .text(labelX, rosieLaneY, 'Rosie', {
+        fontSize: '14px',
+        color: '#ffffff',
+        fontStyle: 'bold',
+        backgroundColor: '#ff69b4',
+        padding: { x: 4, y: 2 },
+      })
+      .setOrigin(0, 0.5)
+      .setDepth(10);
+    this.laneNameLabels.push(rosieLabel);
+
+    // Create labels for competitors in lanes 2-6
+    this.selectedRacers.forEach((racer, index) => {
+      const laneIndex = index + 1;
+      const laneY = skyHeight + actualLaneHeight * laneIndex + actualLaneHeight * 0.5;
+      const label = this.add
+        .text(labelX, laneY, racer.name, {
+          fontSize: '14px',
+          color: '#ffffff',
+          fontStyle: 'bold',
+          backgroundColor: `#${racer.color.toString(16).padStart(6, '0')}`,
+          padding: { x: 4, y: 2 },
+        })
+        .setOrigin(0, 0.5)
+        .setDepth(10);
+      this.laneNameLabels.push(label);
+    });
+  }
+
+  /**
+   * Update lane labels when racers change (after restart)
+   */
+  private updateLaneLabels(): void {
+    // Recreate all labels with new racer names
+    this.createLaneLabels();
+  }
+
+  /**
+   * Create the lead indicator text at the top of the screen
+   */
+  private createLeadIndicator(): void {
+    const skyHeight = this.scale.height * 0.2;
+    this.leadIndicator = this.add
+      .text(this.scale.width - 10, skyHeight - 40, '1st: -', {
+        fontSize: '18px',
+        color: '#ffffff',
+        fontStyle: 'bold',
+        backgroundColor: '#333333',
+        padding: { x: 8, y: 4 },
+      })
+      .setOrigin(1, 0.5)
+      .setDepth(20);
+  }
+
+  /**
+   * Update the lead indicator to show the current leader
+   */
+  private updateLeadIndicator(): void {
+    if (!this.leadIndicator || !this.rosie) return;
+    if (!this.hasStarted) {
+      this.leadIndicator.setText('1st: -');
+      return;
+    }
+
+    // Get all racers with their positions
+    const racers: { name: string; x: number }[] = [
+      { name: 'Rosie', x: this.rosie.x },
+      ...this.competitors.map((c) => ({
+        name: c.familyMember.name,
+        x: c.sprite.x,
+      })),
+    ];
+
+    // Sort by x position (descending - furthest ahead is first)
+    racers.sort((a, b) => b.x - a.x);
+
+    // Update the lead indicator with the leader's name
+    const leader = racers[0];
+    this.leadIndicator.setText(`1st: ${leader.name}`);
+  }
+
+  /**
+   * Get current race positions for all racers
+   * Returns array sorted by position (1st place first)
+   */
+  getRacePositions(): { name: string; x: number; position: number }[] {
+    if (!this.rosie) return [];
+
+    const racers: { name: string; x: number }[] = [
+      { name: 'Rosie', x: this.rosie.x },
+      ...this.competitors.map((c) => ({
+        name: c.familyMember.name,
+        x: c.sprite.x,
+      })),
+    ];
+
+    // Sort by x position (descending - furthest ahead is first)
+    racers.sort((a, b) => b.x - a.x);
+
+    // Add position numbers
+    return racers.map((racer, index) => ({
+      ...racer,
+      position: index + 1,
+    }));
   }
 
   /**

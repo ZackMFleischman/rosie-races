@@ -472,4 +472,83 @@ describe('RaceScene', () => {
       expect(AI_CONFIG.SPEED_VARIATION_AMOUNT).toBe(5);
     });
   });
+
+  describe('lane labels', () => {
+    it('creates 6 lane name labels (Rosie + 5 competitors)', () => {
+      const { scene } = setupTest();
+      const textCalls = (scene.add.text as jest.Mock).mock.calls;
+
+      // Find labels that include Rosie's name
+      const rosieLabel = textCalls.find((call: unknown[]) => call[2] === 'Rosie');
+      expect(rosieLabel).toBeDefined();
+
+      // Labels should be on the left side (x = 10)
+      expect(rosieLabel?.[0]).toBe(10);
+    });
+
+    it('creates labels for competitors with their names', () => {
+      const { scene } = setupTest();
+      const textCalls = (scene.add.text as jest.Mock).mock.calls;
+      const selectedRacers = scene.getSelectedRacers();
+
+      // Each competitor should have a label
+      selectedRacers.forEach((racer) => {
+        const label = textCalls.find((call: unknown[]) => call[2] === racer.name);
+        expect(label).toBeDefined();
+      });
+    });
+  });
+
+  describe('lead indicator', () => {
+    it('creates lead indicator text', () => {
+      const { scene } = setupTest();
+      const textCalls = (scene.add.text as jest.Mock).mock.calls;
+
+      // Find the lead indicator (starts with "1st: ")
+      const leadIndicator = textCalls.find((call: unknown[]) =>
+        (call[2] as string).startsWith('1st:')
+      );
+      expect(leadIndicator).toBeDefined();
+    });
+  });
+
+  describe('getRacePositions', () => {
+    it('returns empty array before create is called', () => {
+      const scene = new RaceScene();
+      const positions = scene.getRacePositions();
+      expect(positions).toHaveLength(0);
+    });
+
+    it('returns 6 positions after create (Rosie + 5 competitors)', () => {
+      const { scene } = setupTest();
+      const positions = scene.getRacePositions();
+      expect(positions).toHaveLength(6);
+    });
+
+    it('includes Rosie in the positions', () => {
+      const { scene } = setupTest();
+      const positions = scene.getRacePositions();
+      const rosiePosition = positions.find((p) => p.name === 'Rosie');
+      expect(rosiePosition).toBeDefined();
+    });
+
+    it('positions are sorted by x position (furthest ahead first)', () => {
+      const { scene } = setupTest();
+      const positions = scene.getRacePositions();
+
+      // All positions should be in descending order by x
+      for (let i = 1; i < positions.length; i++) {
+        expect(positions[i - 1].x).toBeGreaterThanOrEqual(positions[i].x);
+      }
+    });
+
+    it('position numbers are 1-indexed (1st, 2nd, etc.)', () => {
+      const { scene } = setupTest();
+      const positions = scene.getRacePositions();
+
+      positions.forEach((pos, index) => {
+        expect(pos.position).toBe(index + 1);
+      });
+    });
+  });
 });

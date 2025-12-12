@@ -323,15 +323,15 @@ Racing game for 4-year-old Rosie with math challenges!
 
 ### 5.4 Visual Polish
 
-- [ ] **Placeholder avatars**
+- [x] **Placeholder avatars**
 
   > Generate colored circles per racer (matching their defined color). Later replace with actual head images. Use `this.add.circle()` with color from familyMember data.
 
-- [ ] **Lane name labels**
+- [x] **Lane name labels**
 
   > Add text labels on left side of each lane: racer name. Use smaller font, positioned at lane start. Update when avatars added.
 
-- [ ] **Lead indicator**
+- [x] **Lead indicator**
   > Display "1st: [Name]" text at top or show position badges (1st, 2nd...) next to each racer. Update in `update()` by sorting racers by x-position.
 
 **✅ Milestone:** 6 racers moving at different speeds
