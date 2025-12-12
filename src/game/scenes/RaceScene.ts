@@ -1,10 +1,6 @@
 import * as Phaser from 'phaser';
 import { GAME_EVENTS } from '../events';
-import type {
-  MathAnswerPayload,
-  GameState,
-  RacerResult,
-} from '../events';
+import type { MathAnswerPayload, GameState, RacerResult } from '../events';
 import rosieSpriteUrl from '../../assets/rosie-sprite.png';
 import { AudioManager, AUDIO_KEYS } from '../systems/AudioManager';
 import { getRandomRacers, type FamilyMember } from '../../data/familyMembers';
