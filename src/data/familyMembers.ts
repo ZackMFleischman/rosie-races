@@ -14,7 +14,7 @@ export interface FamilyMember {
 
 /**
  * Family members who race against Rosie
- * Rosie is in lane 1 (index 0), so these 5 members occupy lanes 2-6
+ * Rosie is in lane 1 (index 0), 5 random members selected for lanes 2-6
  */
 export const FAMILY_MEMBERS: FamilyMember[] = [
   {
@@ -50,6 +50,14 @@ export const FAMILY_MEMBERS: FamilyMember[] = [
     role: 'Grandma',
   },
   {
+    id: 'grandpa',
+    name: 'Grandpa',
+    color: 0xe74c3c, // Red
+    minSpeed: 45,
+    maxSpeed: 75,
+    role: 'Grandpa',
+  },
+  {
     id: 'lalo',
     name: 'Lalo',
     color: 0xf1c40f, // Yellow/Gold (for the dog)
@@ -71,4 +79,14 @@ export function getFamilyMemberById(id: string): FamilyMember | undefined {
  */
 export function getFamilyMemberIds(): string[] {
   return FAMILY_MEMBERS.map((member) => member.id);
+}
+
+/**
+ * Get a random selection of family members for a race
+ * @param count Number of racers to select (default 5 for lanes 2-6)
+ * @returns Array of randomly selected family members
+ */
+export function getRandomRacers(count: number = 5): FamilyMember[] {
+  const shuffled = [...FAMILY_MEMBERS].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, Math.min(count, FAMILY_MEMBERS.length));
 }

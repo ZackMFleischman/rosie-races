@@ -3,12 +3,13 @@ import {
   FAMILY_MEMBERS,
   getFamilyMemberById,
   getFamilyMemberIds,
+  getRandomRacers,
 } from './familyMembers';
 
 describe('familyMembers', () => {
   describe('FAMILY_MEMBERS', () => {
-    it('should have exactly 5 family members for lanes 2-6', () => {
-      expect(FAMILY_MEMBERS).toHaveLength(5);
+    it('should have 6 family members available', () => {
+      expect(FAMILY_MEMBERS).toHaveLength(6);
     });
 
     it('should include all expected family members', () => {
@@ -17,6 +18,7 @@ describe('familyMembers', () => {
       expect(names).toContain('Daddy');
       expect(names).toContain('Uncle Zack');
       expect(names).toContain('Gaga');
+      expect(names).toContain('Grandpa');
       expect(names).toContain('Lalo');
     });
 
@@ -52,6 +54,7 @@ describe('familyMembers', () => {
       expect(memberRoles['daddy']).toBe('Dad');
       expect(memberRoles['uncle-zack']).toBe('Uncle');
       expect(memberRoles['gaga']).toBe('Grandma');
+      expect(memberRoles['grandpa']).toBe('Grandpa');
       expect(memberRoles['lalo']).toBe('Dog');
     });
   });
@@ -80,11 +83,12 @@ describe('familyMembers', () => {
   describe('getFamilyMemberIds', () => {
     it('should return all family member IDs', () => {
       const ids = getFamilyMemberIds();
-      expect(ids).toHaveLength(5);
+      expect(ids).toHaveLength(6);
       expect(ids).toContain('mommy');
       expect(ids).toContain('daddy');
       expect(ids).toContain('uncle-zack');
       expect(ids).toContain('gaga');
+      expect(ids).toContain('grandpa');
       expect(ids).toContain('lalo');
     });
 
@@ -92,6 +96,50 @@ describe('familyMembers', () => {
       const ids = getFamilyMemberIds();
       const expectedIds = FAMILY_MEMBERS.map((m) => m.id);
       expect(ids).toEqual(expectedIds);
+    });
+  });
+
+  describe('getRandomRacers', () => {
+    it('should return 5 racers by default', () => {
+      const racers = getRandomRacers();
+      expect(racers).toHaveLength(5);
+    });
+
+    it('should return the requested number of racers', () => {
+      expect(getRandomRacers(3)).toHaveLength(3);
+      expect(getRandomRacers(4)).toHaveLength(4);
+      expect(getRandomRacers(5)).toHaveLength(5);
+    });
+
+    it('should not return more racers than available', () => {
+      const racers = getRandomRacers(10);
+      expect(racers).toHaveLength(6); // Only 6 family members exist
+    });
+
+    it('should return unique racers (no duplicates)', () => {
+      const racers = getRandomRacers(5);
+      const ids = racers.map((r) => r.id);
+      const uniqueIds = new Set(ids);
+      expect(uniqueIds.size).toBe(5);
+    });
+
+    it('should return valid family members', () => {
+      const racers = getRandomRacers(5);
+      racers.forEach((racer) => {
+        expect(FAMILY_MEMBERS).toContainEqual(racer);
+      });
+    });
+
+    it('should return different selections on multiple calls (randomness)', () => {
+      // Run multiple times and check we get different results at least once
+      const selections: string[][] = [];
+      for (let i = 0; i < 10; i++) {
+        const racers = getRandomRacers(5);
+        selections.push(racers.map((r) => r.id).sort());
+      }
+      // Check that not all selections are identical
+      const uniqueSelections = new Set(selections.map((s) => s.join(',')));
+      expect(uniqueSelections.size).toBeGreaterThan(1);
     });
   });
 });
