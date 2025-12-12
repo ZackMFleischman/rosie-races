@@ -1,8 +1,4 @@
-import {
-  generateProblem,
-  DEFAULT_MATH_CONFIG,
-  type MathConfig,
-} from './MathGenerator';
+import { generateProblem, DEFAULT_MATH_CONFIG, type MathConfig } from './MathGenerator';
 
 describe('MathGenerator', () => {
   describe('generateProblem', () => {
@@ -60,10 +56,7 @@ describe('MathGenerator', () => {
         // Run multiple times
         for (let i = 0; i < 10; i++) {
           const problem = generateProblem(config);
-          const [a, b] = problem.question
-            .replace(' = ?', '')
-            .split(' + ')
-            .map(Number);
+          const [a, b] = problem.question.replace(' = ?', '').split(' + ').map(Number);
 
           expect(problem.answer).toBe(a + b);
         }
@@ -75,10 +68,7 @@ describe('MathGenerator', () => {
 
         expect(problem.question).toMatch(/^\d+ \+ \d+ \+ \d+ = \?$/);
 
-        const numbers = problem.question
-          .replace(' = ?', '')
-          .split(' + ')
-          .map(Number);
+        const numbers = problem.question.replace(' = ?', '').split(' + ').map(Number);
 
         expect(problem.answer).toBe(numbers.reduce((a, b) => a + b, 0));
       });
@@ -107,10 +97,7 @@ describe('MathGenerator', () => {
 
         for (let i = 0; i < 10; i++) {
           const problem = generateProblem(config);
-          const [a, b] = problem.question
-            .replace(' = ?', '')
-            .split(' - ')
-            .map(Number);
+          const [a, b] = problem.question.replace(' = ?', '').split(' - ').map(Number);
 
           expect(problem.answer).toBe(a - b);
         }
@@ -130,10 +117,7 @@ describe('MathGenerator', () => {
 
         for (let i = 0; i < 10; i++) {
           const problem = generateProblem(config);
-          const [a, b] = problem.question
-            .replace(' = ?', '')
-            .split(' × ')
-            .map(Number);
+          const [a, b] = problem.question.replace(' = ?', '').split(' × ').map(Number);
 
           expect(problem.answer).toBe(a * b);
         }
@@ -144,10 +128,7 @@ describe('MathGenerator', () => {
 
         for (let i = 0; i < 10; i++) {
           const problem = generateProblem(config);
-          const numbers = problem.question
-            .replace(' = ?', '')
-            .split(' × ')
-            .map(Number);
+          const numbers = problem.question.replace(' = ?', '').split(' × ').map(Number);
 
           numbers.forEach((num) => {
             expect(num).toBeLessThanOrEqual(10);
@@ -184,10 +165,7 @@ describe('MathGenerator', () => {
 
         for (let i = 0; i < 20; i++) {
           const problem = generateProblem(config);
-          const numbers = problem.question
-            .replace(' = ?', '')
-            .split(' + ')
-            .map(Number);
+          const numbers = problem.question.replace(' = ?', '').split(' + ').map(Number);
 
           numbers.forEach((num) => {
             expect(num).toBeLessThanOrEqual(5);
@@ -207,10 +185,7 @@ describe('MathGenerator', () => {
       it('default maxNumber is 10', () => {
         for (let i = 0; i < 20; i++) {
           const problem = generateProblem();
-          const numbers = problem.question
-            .replace(' = ?', '')
-            .split(' + ')
-            .map(Number);
+          const numbers = problem.question.replace(' = ?', '').split(' + ').map(Number);
 
           numbers.forEach((num) => {
             expect(num).toBeLessThanOrEqual(10);

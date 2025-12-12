@@ -1,11 +1,4 @@
-import {
-  createContext,
-  useCallback,
-  useRef,
-  useState,
-  useEffect,
-  type ReactNode,
-} from 'react';
+import { createContext, useCallback, useRef, useState, useEffect, type ReactNode } from 'react';
 import * as Phaser from 'phaser';
 import { GAME_EVENTS, type MathAnswerPayload } from '../game/events';
 import { generateProblem, type MathProblem } from '../game/systems/MathGenerator';
@@ -60,16 +53,13 @@ export function GameProvider({ children }: GameProviderProps) {
     }
   }, []);
 
-  const submitMathAnswer = useCallback(
-    (correct: boolean, timeTaken: number) => {
-      if (gameRef.current) {
-        const payload: MathAnswerPayload = { correct, timeTaken };
-        gameRef.current.events.emit(GAME_EVENTS.MATH_ANSWER_SUBMITTED, payload);
-      }
-      setCurrentProblem(null);
-    },
-    []
-  );
+  const submitMathAnswer = useCallback((correct: boolean, timeTaken: number) => {
+    if (gameRef.current) {
+      const payload: MathAnswerPayload = { correct, timeTaken };
+      gameRef.current.events.emit(GAME_EVENTS.MATH_ANSWER_SUBMITTED, payload);
+    }
+    setCurrentProblem(null);
+  }, []);
 
   // Listen for game events
   useEffect(() => {

@@ -47,7 +47,7 @@ img {
 
 /* Touch-friendly focus states */
 :focus-visible {
-  outline: 3px solid #FF69B4;
+  outline: 3px solid #ff69b4;
   outline-offset: 2px;
 }
 

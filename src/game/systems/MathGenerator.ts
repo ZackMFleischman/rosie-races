@@ -74,11 +74,7 @@ function performOperation(a: number, b: number, operation: Operation): number {
 /**
  * Generates operands suitable for the given operation
  */
-function generateOperands(
-  operation: Operation,
-  maxNumber: number,
-  numTerms: number
-): number[] {
+function generateOperands(operation: Operation, maxNumber: number, numTerms: number): number[] {
   const operands: number[] = [];
 
   if (operation === 'subtract') {
@@ -153,7 +149,11 @@ function generateWrongAnswers(correctAnswer: number): number[] {
   let fallbackOffset = 1;
   while (wrongAnswers.size < 3) {
     const fallbackAnswer = correctAnswer + fallbackOffset;
-    if (fallbackAnswer > 0 && fallbackAnswer !== correctAnswer && !wrongAnswers.has(fallbackAnswer)) {
+    if (
+      fallbackAnswer > 0 &&
+      fallbackAnswer !== correctAnswer &&
+      !wrongAnswers.has(fallbackAnswer)
+    ) {
       wrongAnswers.add(fallbackAnswer);
     }
     fallbackOffset = fallbackOffset > 0 ? -fallbackOffset : -fallbackOffset + 1;

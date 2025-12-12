@@ -146,9 +146,7 @@ function AppContent() {
       </Box>
 
       {/* Math problem modal */}
-      {currentProblem && (
-        <MathModal problem={currentProblem} onAnswer={submitMathAnswer} />
-      )}
+      {currentProblem && <MathModal problem={currentProblem} onAnswer={submitMathAnswer} />}
 
       {/* Finished screen overlay */}
       {isFinished && finishTime !== null && (

@@ -46,8 +46,7 @@ describe('theme', () => {
     });
 
     it('has touch-friendly icon button minimum size', () => {
-      const iconButtonRoot =
-        theme.components?.MuiIconButton?.styleOverrides?.root;
+      const iconButtonRoot = theme.components?.MuiIconButton?.styleOverrides?.root;
       expect(iconButtonRoot).toHaveProperty('minHeight', 48);
       expect(iconButtonRoot).toHaveProperty('minWidth', 48);
     });

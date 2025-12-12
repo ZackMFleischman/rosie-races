@@ -172,12 +172,14 @@ function MathModal({ problem, onAnswer }: MathModalProps) {
                   },
                   transition: 'all 0.15s ease-in-out',
                   // Show visual feedback
-                  ...(selectedAnswer === choice && feedback === 'correct-fast' && {
-                    animation: 'pulse 0.3s ease-in-out',
-                  }),
-                  ...(selectedAnswer === choice && feedback === 'wrong' && {
-                    animation: 'shake 0.3s ease-in-out',
-                  }),
+                  ...(selectedAnswer === choice &&
+                    feedback === 'correct-fast' && {
+                      animation: 'pulse 0.3s ease-in-out',
+                    }),
+                  ...(selectedAnswer === choice &&
+                    feedback === 'wrong' && {
+                      animation: 'shake 0.3s ease-in-out',
+                    }),
                   '@keyframes pulse': {
                     '0%, 100%': { transform: 'scale(1)' },
                     '50%': { transform: 'scale(1.1)' },
