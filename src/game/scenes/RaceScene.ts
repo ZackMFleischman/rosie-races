@@ -18,6 +18,15 @@ export const MOVEMENT_CONFIG = {
   FRICTION: 0.98, // Velocity multiplier per frame (decay)
 };
 
+// Constants for animation
+export const ANIMATION_CONFIG = {
+  BOB_FREQUENCY: 0.015, // How fast the bobbing cycles (radians per ms)
+  BOB_AMPLITUDE_FACTOR: 0.1, // Bobbing amplitude relative to velocity
+  BOB_MAX_AMPLITUDE: 8, // Maximum bobbing amplitude in pixels
+  SCALE_PULSE_FREQUENCY: 0.02, // How fast the scale pulses
+  SCALE_PULSE_AMOUNT: 0.05, // How much the scale changes
+};
+
 /**
  * RaceScene - Main gameplay scene for the racing game.
  * Features:
@@ -27,13 +36,16 @@ export const MOVEMENT_CONFIG = {
  * - Tap-to-run movement system with momentum
  */
 export class RaceScene extends Phaser.Scene {
-  private rosie: Phaser.GameObjects.Arc | null = null;
+  private rosie: Phaser.GameObjects.Sprite | null = null;
   private laneHeight: number = 0;
   private laneYPositions: number[] = [];
 
   // Movement state
   private velocity: number = 0;
   private hasFinished: boolean = false;
+
+  // Animation state
+  private rosieBaseY: number = 0; // Base Y position for bobbing animation
 
   constructor() {
     super({ key: 'RaceScene' });
@@ -46,6 +58,9 @@ export class RaceScene extends Phaser.Scene {
 
     // Set world bounds to match camera (fixed viewport)
     this.physics.world.setBounds(0, 0, this.scale.width, this.scale.height);
+
+    // Create Rosie's circle texture (if not already created)
+    this.createRosieTexture();
 
     // Draw the track background
     this.drawBackground();
@@ -63,7 +78,7 @@ export class RaceScene extends Phaser.Scene {
     this.setupTapListener();
   }
 
-  update(_time: number, delta: number): void {
+  update(time: number, delta: number): void {
     if (this.hasFinished) return;
 
     // Apply friction (momentum decay)
@@ -91,6 +106,9 @@ export class RaceScene extends Phaser.Scene {
         this.handleFinish();
       }
     }
+
+    // Apply bobbing animation when moving
+    this.updateRosieAnimation(time);
   }
 
   /**
@@ -141,6 +159,8 @@ export class RaceScene extends Phaser.Scene {
     this.velocity = 0;
     if (this.rosie) {
       this.rosie.x = TRACK_CONFIG.ROSIE_START_X;
+      this.rosie.y = this.rosieBaseY;
+      this.rosie.setScale(1);
     }
   };
 
@@ -303,28 +323,86 @@ export class RaceScene extends Phaser.Scene {
   }
 
   /**
-   * Create the placeholder circle for Rosie
+   * Create the circle texture for Rosie dynamically.
+   * This enables future sprite swap by using generateTexture().
+   */
+  private createRosieTexture(): void {
+    // Only create texture if it doesn't exist
+    if (this.textures.exists('rosie-circle')) {
+      return;
+    }
+
+    const graphics = this.make.graphics({ x: 0, y: 0 });
+    const radius = TRACK_CONFIG.ROSIE_RADIUS;
+    const diameter = radius * 2;
+
+    // Draw filled circle
+    graphics.fillStyle(TRACK_CONFIG.ROSIE_COLOR, 1);
+    graphics.fillCircle(radius, radius, radius);
+
+    // Draw white border
+    graphics.lineStyle(3, 0xffffff, 1);
+    graphics.strokeCircle(radius, radius, radius - 1.5);
+
+    // Generate texture from graphics
+    graphics.generateTexture('rosie-circle', diameter, diameter);
+    graphics.destroy();
+  }
+
+  /**
+   * Create the placeholder sprite for Rosie using the generated circle texture
    */
   private createRosie(): void {
     // Rosie starts in lane 1 (index 0)
-    const rosieY = this.laneYPositions[0];
+    this.rosieBaseY = this.laneYPositions[0];
 
-    this.rosie = this.add.circle(
+    this.rosie = this.add.sprite(
       TRACK_CONFIG.ROSIE_START_X,
-      rosieY,
-      TRACK_CONFIG.ROSIE_RADIUS,
-      TRACK_CONFIG.ROSIE_COLOR
+      this.rosieBaseY,
+      'rosie-circle'
     );
+  }
 
-    // Add a simple border for visibility
-    this.rosie.setStrokeStyle(3, 0xffffff);
+  /**
+   * Update Rosie's bobbing animation based on velocity
+   */
+  private updateRosieAnimation(time: number): void {
+    if (!this.rosie) return;
+
+    if (this.velocity > 0) {
+      // Calculate bobbing amplitude based on velocity (faster = more bounce)
+      const bobAmplitude = Math.min(
+        this.velocity * ANIMATION_CONFIG.BOB_AMPLITUDE_FACTOR,
+        ANIMATION_CONFIG.BOB_MAX_AMPLITUDE
+      );
+
+      // Apply sine wave to Y position for bobbing effect
+      const bobOffset = Math.sin(time * ANIMATION_CONFIG.BOB_FREQUENCY) * bobAmplitude;
+      this.rosie.y = this.rosieBaseY + bobOffset;
+
+      // Apply subtle scale pulse for "running" feel
+      const scalePulse =
+        1 + Math.sin(time * ANIMATION_CONFIG.SCALE_PULSE_FREQUENCY) * ANIMATION_CONFIG.SCALE_PULSE_AMOUNT;
+      this.rosie.setScale(scalePulse);
+    } else {
+      // Reset to base position when not moving
+      this.rosie.y = this.rosieBaseY;
+      this.rosie.setScale(1);
+    }
   }
 
   /**
    * Get Rosie's game object (for external access)
    */
-  getRosie(): Phaser.GameObjects.Arc | null {
+  getRosie(): Phaser.GameObjects.Sprite | null {
     return this.rosie;
+  }
+
+  /**
+   * Get Rosie's base Y position (for external access/testing)
+   */
+  getRosieBaseY(): number {
+    return this.rosieBaseY;
   }
 
   /**

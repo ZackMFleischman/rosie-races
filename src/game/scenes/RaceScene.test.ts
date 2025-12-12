@@ -1,5 +1,5 @@
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
-import { RaceScene, MOVEMENT_CONFIG, TRACK_CONFIG } from './RaceScene';
+import { RaceScene, MOVEMENT_CONFIG, TRACK_CONFIG, ANIMATION_CONFIG } from './RaceScene';
 
 describe('RaceScene', () => {
   const setupTest = () => {
@@ -38,7 +38,8 @@ describe('RaceScene', () => {
       const { scene } = setupTest();
       // Clouds are drawn as white circles
       const circleCalls = (scene.add.circle as jest.Mock).mock.calls;
-      // Should have calls for clouds (5 clouds * 3 circles each = 15) plus Rosie (1)
+      // Should have calls for clouds (5 clouds * 3 circles each = 15)
+      // Note: Rosie is now a sprite, not a circle
       expect(circleCalls.length).toBeGreaterThanOrEqual(15);
     });
 
@@ -61,24 +62,32 @@ describe('RaceScene', () => {
       expect(finishLabel?.[0]).toBe(974); // FINISH_LINE_X
     });
 
-    it('creates Rosie as a pink circle', () => {
+    it('creates Rosie texture dynamically', () => {
       const { scene } = setupTest();
-      const circleCalls = (scene.add.circle as jest.Mock).mock.calls;
+      // The texture should be created using make.graphics
+      expect(scene.make.graphics).toHaveBeenCalled();
+      // The texture should check if it already exists
+      expect(scene.textures.exists).toHaveBeenCalledWith('rosie-circle');
+    });
 
-      // Rosie should be a pink circle (0xff69b4) with radius 30
-      const rosieCall = circleCalls.find(
-        (call: unknown[]) => call[2] === 30 && call[3] === 0xff69b4
+    it('creates Rosie as a sprite using generated texture', () => {
+      const { scene } = setupTest();
+      const spriteCalls = (scene.add.sprite as jest.Mock).mock.calls;
+
+      // Rosie should be created as a sprite with 'rosie-circle' texture
+      const rosieCall = spriteCalls.find(
+        (call: unknown[]) => call[2] === 'rosie-circle'
       );
       expect(rosieCall).toBeDefined();
     });
 
     it('positions Rosie at start position in lane 1', () => {
       const { scene } = setupTest();
-      const circleCalls = (scene.add.circle as jest.Mock).mock.calls;
+      const spriteCalls = (scene.add.sprite as jest.Mock).mock.calls;
 
-      // Find Rosie by color and radius
-      const rosieCall = circleCalls.find(
-        (call: unknown[]) => call[2] === 30 && call[3] === 0xff69b4
+      // Find Rosie by texture name
+      const rosieCall = spriteCalls.find(
+        (call: unknown[]) => call[2] === 'rosie-circle'
       );
 
       // Rosie should be at x=80 (ROSIE_START_X)
@@ -200,6 +209,41 @@ describe('RaceScene', () => {
 
     it('has Rosie start position after start line', () => {
       expect(TRACK_CONFIG.ROSIE_START_X).toBeGreaterThan(TRACK_CONFIG.START_LINE_X);
+    });
+  });
+
+  describe('ANIMATION_CONFIG', () => {
+    it('has expected bobbing frequency', () => {
+      expect(ANIMATION_CONFIG.BOB_FREQUENCY).toBe(0.015);
+    });
+
+    it('has expected bob amplitude factor', () => {
+      expect(ANIMATION_CONFIG.BOB_AMPLITUDE_FACTOR).toBe(0.1);
+    });
+
+    it('has expected max bob amplitude', () => {
+      expect(ANIMATION_CONFIG.BOB_MAX_AMPLITUDE).toBe(8);
+    });
+
+    it('has expected scale pulse settings', () => {
+      expect(ANIMATION_CONFIG.SCALE_PULSE_FREQUENCY).toBe(0.02);
+      expect(ANIMATION_CONFIG.SCALE_PULSE_AMOUNT).toBe(0.05);
+    });
+  });
+
+  describe('getRosieBaseY', () => {
+    it('returns the base Y position for Rosie', () => {
+      const { scene } = setupTest();
+      const baseY = scene.getRosieBaseY();
+      const lanePositions = scene.getLaneYPositions();
+      // Rosie's base Y should be the first lane position
+      expect(baseY).toBe(lanePositions[0]);
+    });
+
+    it('returns 0 before create is called', () => {
+      const scene = new RaceScene();
+      // Don't call create
+      expect(scene.getRosieBaseY()).toBe(0);
     });
   });
 });

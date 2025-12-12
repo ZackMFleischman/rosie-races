@@ -63,6 +63,25 @@ const createMockCircle = () => ({
   y: 0,
 });
 
+// Mock Sprite object
+const createMockSprite = () => ({
+  x: 0,
+  y: 0,
+  setScale: jest.fn().mockReturnThis(),
+  setOrigin: jest.fn().mockReturnThis(),
+  setTexture: jest.fn().mockReturnThis(),
+});
+
+// Mock Graphics for texture generation
+const createMockMakeGraphics = () => ({
+  fillStyle: jest.fn().mockReturnThis(),
+  fillCircle: jest.fn().mockReturnThis(),
+  lineStyle: jest.fn().mockReturnThis(),
+  strokeCircle: jest.fn().mockReturnThis(),
+  generateTexture: jest.fn().mockReturnThis(),
+  destroy: jest.fn(),
+});
+
 // Mock Text object
 const createMockText = () => ({
   setOrigin: jest.fn().mockReturnThis(),
@@ -77,8 +96,16 @@ export class Scene {
     rectangle: jest.fn(),
     text: jest.fn().mockImplementation(() => createMockText()),
     graphics: jest.fn().mockImplementation(() => createMockGraphics()),
-    sprite: jest.fn(),
+    sprite: jest.fn().mockImplementation(() => createMockSprite()),
     image: jest.fn(),
+  };
+  make = {
+    graphics: jest.fn().mockImplementation(() => createMockMakeGraphics()),
+  };
+  textures = {
+    exists: jest.fn().mockReturnValue(false),
+    get: jest.fn(),
+    addCanvas: jest.fn(),
   };
   physics = {
     add: {

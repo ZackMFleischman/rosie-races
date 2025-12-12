@@ -127,16 +127,16 @@ Racing game for 4-year-old Rosie with math challenges!
 
 ### 2.2 Player Avatar
 
-- [ ] **Placeholder circle sprite**
+- [x] **Placeholder circle sprite**
 
   > Replace `this.add.circle` with `this.add.sprite()` loading a circle texture. Create circle texture dynamically: `this.add.graphics().fillCircle()` then `generateTexture()`. This enables future sprite swap.
 
-- [ ] **Bobbing/running animation**
+- [x] **Bobbing/running animation**
 
   > Apply sine wave to y-position based on velocity: `rosie.y = laneY + Math.sin(time * 0.01) * (velocity / 50)`. Higher velocity = faster bob. Or use scale pulse: `rosie.setScale(1 + Math.sin(time * 0.02) * 0.05)`.
 
-- [ ] **Speed sparkles (optional)**
-  > Create particle emitter: `this.add.particles()`. Emit small yellow/white circles behind Rosie when velocity > threshold. Adjust emission rate based on speed. Can skip for MVP and add in Phase 9.
+- [x] **Speed sparkles (optional)**
+  > Create particle emitter: `this.add.particles()`. Emit small yellow/white circles behind Rosie when velocity > threshold. Adjust emission rate based on speed. Can skip for MVP and add in Phase 9. **(Skipped for MVP)**
 
 ### 2.3 Race Timer
 
