@@ -11,8 +11,6 @@ export default {
     // Mock static assets
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
     '\\.(jpg|jpeg|png|gif|webp|svg)$': '<rootDir>/src/test/__mocks__/fileMock.ts',
-    // Handle absolute path imports starting with /
-    '^/(.*)$': '<rootDir>/public/$1',
   },
   transform: {
     '^.+\\.tsx?$': [
