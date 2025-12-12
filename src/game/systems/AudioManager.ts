@@ -2,8 +2,7 @@ import * as Phaser from 'phaser';
 
 /** Audio keys for all game sounds */
 export const AUDIO_KEYS = {
-  BEEP: 'beep',
-  GO: 'go',
+  COUNTDOWN: 'countdown',
   RACE_MUSIC: 'race-music',
   FINISH: 'finish',
   RESULTS_MUSIC: 'results-music',
@@ -16,14 +15,13 @@ export type AudioKey = (typeof AUDIO_KEYS)[keyof typeof AUDIO_KEYS];
 
 /** Audio file paths for preloading */
 export const AUDIO_PATHS: Record<AudioKey, string> = {
-  [AUDIO_KEYS.BEEP]: 'assets/audio/beep.mp3',
-  [AUDIO_KEYS.GO]: 'assets/audio/go.mp3',
+  [AUDIO_KEYS.COUNTDOWN]: 'assets/audio/countdown.ogg',
   [AUDIO_KEYS.RACE_MUSIC]: 'assets/audio/race-music.mp3',
   [AUDIO_KEYS.FINISH]: 'assets/audio/finish.mp3',
-  [AUDIO_KEYS.RESULTS_MUSIC]: 'assets/audio/results-music.mp3',
+  [AUDIO_KEYS.RESULTS_MUSIC]: 'assets/audio/results-music.wav',
   [AUDIO_KEYS.CORRECT]: 'assets/audio/correct.mp3',
-  [AUDIO_KEYS.WRONG]: 'assets/audio/wrong.mp3',
-  [AUDIO_KEYS.TAP]: 'assets/audio/tap.mp3',
+  [AUDIO_KEYS.WRONG]: 'assets/audio/wrong.wav',
+  [AUDIO_KEYS.TAP]: 'assets/audio/tap.ogg',
 };
 
 const VOLUME_STORAGE_KEY = 'rosie-races-volume';

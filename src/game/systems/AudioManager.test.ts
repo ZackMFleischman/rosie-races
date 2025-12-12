@@ -161,8 +161,10 @@ describe('AudioManager', () => {
       manager.preloadAudio(mockScene);
 
       expect(mockScene.load.audio).toHaveBeenCalledTimes(Object.keys(AUDIO_PATHS).length);
-      expect(mockScene.load.audio).toHaveBeenCalledWith(AUDIO_KEYS.BEEP, AUDIO_PATHS.beep);
-      expect(mockScene.load.audio).toHaveBeenCalledWith(AUDIO_KEYS.GO, AUDIO_PATHS.go);
+      expect(mockScene.load.audio).toHaveBeenCalledWith(
+        AUDIO_KEYS.COUNTDOWN,
+        AUDIO_PATHS.countdown
+      );
       expect(mockScene.load.audio).toHaveBeenCalledWith(
         AUDIO_KEYS.RACE_MUSIC,
         AUDIO_PATHS['race-music']
@@ -293,8 +295,7 @@ describe('AudioManager', () => {
 
 describe('AUDIO_KEYS', () => {
   it('should have all required audio keys', () => {
-    expect(AUDIO_KEYS.BEEP).toBe('beep');
-    expect(AUDIO_KEYS.GO).toBe('go');
+    expect(AUDIO_KEYS.COUNTDOWN).toBe('countdown');
     expect(AUDIO_KEYS.RACE_MUSIC).toBe('race-music');
     expect(AUDIO_KEYS.FINISH).toBe('finish');
     expect(AUDIO_KEYS.RESULTS_MUSIC).toBe('results-music');
@@ -309,7 +310,7 @@ describe('AUDIO_PATHS', () => {
     Object.values(AUDIO_KEYS).forEach((key) => {
       expect(AUDIO_PATHS[key]).toBeDefined();
       expect(AUDIO_PATHS[key]).toContain('assets/audio/');
-      expect(AUDIO_PATHS[key]).toContain('.mp3');
+      expect(AUDIO_PATHS[key]).toMatch(/\.(mp3|ogg|wav)$/);
     });
   });
 });

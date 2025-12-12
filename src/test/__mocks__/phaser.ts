@@ -73,6 +73,7 @@ const createMockSprite = () => ({
   setScale: jest.fn().mockReturnThis(),
   setOrigin: jest.fn().mockReturnThis(),
   setTexture: jest.fn().mockReturnThis(),
+  setDepth: jest.fn().mockReturnThis(),
   destroy: jest.fn(),
 });
 
