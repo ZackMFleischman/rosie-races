@@ -2,6 +2,7 @@ import * as Phaser from 'phaser';
 import { GAME_EVENTS } from '../events';
 import type { MathAnswerPayload } from '../events';
 import rosieSpriteUrl from '../../assets/rosie-sprite.png';
+import { AudioManager, AUDIO_KEYS } from '../systems/AudioManager';
 
 // Constants for track layout
 export const TRACK_CONFIG = {
@@ -78,6 +79,10 @@ export class RaceScene extends Phaser.Scene {
   preload(): void {
     // Load Rosie's sprite image
     this.load.image('rosie-sprite', rosieSpriteUrl);
+
+    // Preload all audio assets
+    const audioManager = AudioManager.getInstance();
+    audioManager.preloadAudio(this);
   }
 
   create(): void {
@@ -90,6 +95,10 @@ export class RaceScene extends Phaser.Scene {
 
     // Set world bounds to match camera (fixed viewport)
     this.physics.world.setBounds(0, 0, this.scale.width, this.scale.height);
+
+    // Initialize AudioManager with this scene
+    const audioManager = AudioManager.getInstance();
+    audioManager.init(this);
 
     // Draw the track background
     this.drawBackground();
@@ -178,10 +187,15 @@ export class RaceScene extends Phaser.Scene {
     if (this.hasFinished) return;
     if (this.isPaused) return; // Don't respond to taps while paused at checkpoint
 
+    // Play tap sound
+    AudioManager.getInstance().playSFX(AUDIO_KEYS.TAP);
+
     // Emit race started on first tap
     if (!this.hasStarted) {
       this.hasStarted = true;
       this.game.events.emit(GAME_EVENTS.RACE_STARTED);
+      // Start race music
+      AudioManager.getInstance().playMusic(AUDIO_KEYS.RACE_MUSIC);
     }
 
     // Add velocity boost
@@ -197,6 +211,12 @@ export class RaceScene extends Phaser.Scene {
   private handleFinish(): void {
     this.hasFinished = true;
     this.velocity = 0;
+
+    // Stop race music and play finish celebration sound
+    const audioManager = AudioManager.getInstance();
+    audioManager.stopMusic(true);
+    audioManager.playSFX(AUDIO_KEYS.FINISH);
+
     this.game.events.emit(GAME_EVENTS.RACE_FINISHED);
   }
 
@@ -209,6 +229,10 @@ export class RaceScene extends Phaser.Scene {
     this.velocity = 0;
     this.isPaused = false;
     this.passedCheckpoints = CHECKPOINT_CONFIG.POSITIONS.map(() => false);
+
+    // Stop any playing music when restarting
+    AudioManager.getInstance().stopMusic(false);
+
     if (this.rosie) {
       this.rosie.x = TRACK_CONFIG.ROSIE_START_X;
       this.rosie.y = this.rosieBaseY;
@@ -242,13 +266,21 @@ export class RaceScene extends Phaser.Scene {
     // Resume the race
     this.isPaused = false;
 
+    const audioManager = AudioManager.getInstance();
+
     if (payload.correct) {
+      // Play correct answer sound
+      audioManager.playSFX(AUDIO_KEYS.CORRECT);
+
       // Apply velocity boost based on answer speed
       if (payload.timeTaken < CHECKPOINT_CONFIG.FAST_ANSWER_THRESHOLD) {
         this.velocity = CHECKPOINT_CONFIG.FAST_ANSWER_BOOST;
       } else {
         this.velocity = CHECKPOINT_CONFIG.SLOW_ANSWER_BOOST;
       }
+    } else {
+      // Play wrong answer sound
+      audioManager.playSFX(AUDIO_KEYS.WRONG);
     }
     // Wrong answers: no boost, just resume (stumble delay handled in React)
   };
