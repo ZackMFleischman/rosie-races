@@ -1,8 +1,8 @@
 import * as Phaser from 'phaser';
 import { GAME_EVENTS } from '../events';
 import type { MathAnswerPayload, GameState, RacerResult } from '../events';
-// Assets in public/ are served at root
-const rosieSpriteUrl = '/assets/rosie-sprite.png';
+// Assets in public/ - use relative path for correct base URL resolution
+const rosieSpriteUrl = 'assets/rosie-sprite.png';
 import { AudioManager, AUDIO_KEYS } from '../systems/AudioManager';
 import { getRandomRacers, type FamilyMember } from '../../data/familyMembers';
 
@@ -117,7 +117,6 @@ export class RaceScene extends Phaser.Scene {
   // UI elements
   private laneNameLabels: Phaser.GameObjects.Text[] = [];
   private leadIndicator: Phaser.GameObjects.Text | null = null;
-  private tapToStartText: Phaser.GameObjects.Text | null = null;
   private countdownText: Phaser.GameObjects.Text | null = null;
 
   // Countdown state
@@ -352,11 +351,6 @@ export class RaceScene extends Phaser.Scene {
 
     // Reset competitors and select new random racers
     this.resetCompetitors();
-
-    // Show "TAP TO START" again
-    if (this.tapToStartText) {
-      this.tapToStartText.setVisible(true);
-    }
 
     // Hide countdown text
     if (this.countdownText) {
@@ -1009,40 +1003,9 @@ export class RaceScene extends Phaser.Scene {
   }
 
   /**
-   * Create "TAP TO START" text in the center of the screen
-   */
-  private createTapToStartText(): void {
-    this.tapToStartText = this.add
-      .text(this.scale.width / 2, this.scale.height / 2, 'TAP TO START!', {
-        fontSize: '48px',
-        color: '#ffffff',
-        fontStyle: 'bold',
-        backgroundColor: '#ff69b4',
-        padding: { x: 24, y: 16 },
-      })
-      .setOrigin(0.5, 0.5)
-      .setDepth(100);
-
-    // Add subtle pulsing animation
-    this.tweens.add({
-      targets: this.tapToStartText,
-      scale: { from: 1, to: 1.05 },
-      duration: 500,
-      yoyo: true,
-      repeat: -1,
-      ease: 'Sine.easeInOut',
-    });
-  }
-
-  /**
    * Start the countdown sequence
    */
   private startCountdown(): void {
-    // Hide "TAP TO START" text
-    if (this.tapToStartText) {
-      this.tapToStartText.setVisible(false);
-    }
-
     // Set state to countdown
     this.setGameState('countdown');
 

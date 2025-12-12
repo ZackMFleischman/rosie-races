@@ -172,54 +172,54 @@ Racing game for 4-year-old Rosie with math challenges!
 
 ### 3.1 Checkpoint System
 
-- [x] **2 checkpoints on track**
+- [ ] **2 checkpoints on track**
 
   > Define checkpoint x-positions: `[300, 600]` (roughly 1/3 and 2/3 of track). Store in constant array. Checkpoints scale with difficulty later.
 
-- [x] **Visual markers (flags/arches)**
+- [ ] **Visual markers (flags/arches)**
 
   > Draw arches using `graphics.lineStyle()` + `arc()` or use simple vertical banners with `rectangle()`. Add alternating colors (red/white). Place "?" symbol on each checkpoint.
 
-- [x] **Pause Rosie at checkpoint (timer keeps running)**
+- [ ] **Pause Rosie at checkpoint (timer keeps running)**
   > When Rosie reaches checkpoint x: set `isPaused = true`, emit `showMathProblem` event with checkpoint index. In `update()`, skip movement when paused. Timer in React continues independently.
 
 ### 3.2 Math Problem Generator
 
-- [x] **Configurable operations/maxNumber/numTerms**
+- [ ] **Configurable operations/maxNumber/numTerms**
 
   > Create `src/game/systems/MathGenerator.ts`. Export interface `MathConfig { operations: Operation[], maxNumber: number, numTerms: number }`. Accept config in generator function.
 
-- [x] **Generate fresh problem per checkpoint**
+- [ ] **Generate fresh problem per checkpoint**
 
   > Function `generateProblem(config): { question: string, answer: number, choices: number[] }`. Pick random operation, random operands. For subtract, ensure `a >= b` (positive result). For multiply, use smaller numbers.
 
-- [x] **4 multiple choice answers**
+- [ ] **4 multiple choice answers**
   > Generate 3 wrong answers: `answer ± random(1,5)`, ensure unique and positive. Shuffle array of [correctAnswer, ...wrongAnswers]. Return shuffled choices array.
 
 ### 3.3 Math Modal UI
 
-- [x] **Modal over game (timer visible!)**
+- [ ] **Modal over game (timer visible!)**
 
   > Create `src/components/MathModal.tsx`. Use `position: fixed; top: 60px` (below timer). Semi-transparent background. Timer stays visible at top with higher z-index.
 
-- [x] **Answer buttons at TOP (away from TAP button)**
+- [ ] **Answer buttons at TOP (away from TAP button)**
 
   > Place 4 answer buttons in 2x2 grid at TOP of modal content. Large buttons (min 80px). Ensure minimum 200px gap between lowest answer button and TAP button location.
 
-- [x] **Visual ✓/✗ feedback**
+- [ ] **Visual ✓/✗ feedback**
   > On answer click, show result: green ✓ or red ✗ overlay on button. Brief delay (500ms) before closing modal. Use CSS animation for pop effect.
 
 ### 3.4 Answer Consequences
 
-- [x] **Correct fast → big boost + celebration**
+- [ ] **Correct fast → big boost + celebration**
 
   > Track time from modal open. If answered < 3 seconds: add large velocity boost (50), show "AWESOME! 🌟" text, trigger confetti particles.
 
-- [x] **Correct slow → small boost**
+- [ ] **Correct slow → small boost**
 
   > If answered 3-10 seconds: add small velocity boost (20), show "Good job! ✓" text. Resume race normally.
 
-- [x] **Wrong → stumble + delay**
+- [ ] **Wrong → stumble + delay**
   > On wrong answer: add 2 second pause before resuming, shake Rosie sprite, show "Oops! Try to beat it next time!" No velocity boost. Don't re-ask question—just continue.
 
 **✅ Milestone:** 2 checkpoints with math problems
@@ -292,46 +292,46 @@ Racing game for 4-year-old Rosie with math challenges!
 | Grandpa    | Grandpa |
 | Lalo       | Dog 🐕  |
 
-- [x] **Define family data**
-  > Create `src/data/familyMembers.ts`. Export array: `{ id, name, color, minSpeed, maxSpeed }`. Colors: distinct for each (blue, green, orange, purple, red, yellow). Speed ranges vary slightly for variety. 6 family members available, 5 randomly selected for lanes 2-6 each race (Rosie in lane 1).
+- [ ] **Define family data**
+  > Create `src/data/familyMembers.ts`. Export array: `{ id, name, color, minSpeed, maxSpeed }`. Colors: distinct for each (blue, green, orange, purple, red). Speed ranges vary slightly for variety.
 
 ### 5.2 Competitor System
 
-- [x] **5 family members in lanes**
+- [ ] **5 family members in lanes**
 
   > In RaceScene `create()`, iterate `familyMembers`, create sprite in each lane (lanes 2-6, Rosie in lane 1). Store in `competitors: Competitor[]` array.
 
-- [x] **Random speed per racer**
+- [ ] **Random speed per racer**
 
   > On race start, assign: `speed = Phaser.Math.FloatBetween(minSpeed, maxSpeed)`. This varies each race. Optionally adjust based on difficulty.
 
-- [x] **Rosie's lane highlighted**
+- [ ] **Rosie's lane highlighted**
   > Draw lane 1 with different color (light pink tint). Or add subtle glow/border around Rosie's lane. Make player's position visually obvious.
 
 ### 5.3 Competitor Movement
 
-- [x] **AI moves at varying speeds**
+- [ ] **AI moves at varying speeds**
 
   > In `update()`, for each competitor: `comp.x += comp.speed * (delta / 1000)`. Simple linear movement, no acceleration.
 
-- [x] **Speed variations for realism**
+- [ ] **Speed variations for realism**
 
   > Add subtle speed fluctuation: `comp.speed += Phaser.Math.FloatBetween(-5, 5)` occasionally (every ~2 seconds). Clamp within min/max bounds.
 
-- [x] **AI doesn't stop for checkpoints**
+- [ ] **AI doesn't stop for checkpoints**
   > Competitors ignore checkpoint x-positions. Only Rosie pauses for math. This gives Rosie a disadvantage balanced by boost potential.
 
 ### 5.4 Visual Polish
 
-- [x] **Placeholder avatars**
+- [ ] **Placeholder avatars**
 
   > Generate colored circles per racer (matching their defined color). Later replace with actual head images. Use `this.add.circle()` with color from familyMember data.
 
-- [x] **Lane name labels**
+- [ ] **Lane name labels**
 
   > Add text labels on left side of each lane: racer name. Use smaller font, positioned at lane start. Update when avatars added.
 
-- [x] **Lead indicator**
+- [ ] **Lead indicator**
   > Display "1st: [Name]" text at top or show position badges (1st, 2nd...) next to each racer. Update in `update()` by sorting racers by x-position.
 
 **✅ Milestone:** 6 racers moving at different speeds
@@ -342,49 +342,49 @@ Racing game for 4-year-old Rosie with math challenges!
 
 ### 6.1 Race States
 
-- [x] **Pre-Race: racers at start**
+- [ ] **Pre-Race: racers at start**
 
   > Add `gameState: 'ready' | 'countdown' | 'racing' | 'finished'`. In 'ready', show racers at start line, display "TAP TO START" prompt.
 
-- [x] **Countdown: 3...2...1...GO! (with sounds)**
+- [ ] **Countdown: 3...2...1...GO! (with sounds)**
 
   > On first tap, enter 'countdown'. Display large numbers. Play beep each second. After "GO!" (with gunshot sound), enter 'racing' state. Use Phaser time events for delays.
 
-- [x] **Racing: main gameplay**
+- [ ] **Racing: main gameplay**
 
   > In 'racing', TAP button works, timer runs, racers move. This is the current Phase 2 implementation.
 
-- [x] **Finished: celebration**
+- [ ] **Finished: celebration**
   > When any racer finishes, record their time. When ALL finish OR Rosie finishes, show results. Track each racer's finish order.
 
 ### 6.2 Position Tracking
 
-- [x] **Real-time position (1st, 2nd...)**
+- [ ] **Real-time position (1st, 2nd...)**
 
   > Create function `getPositions(): RacerPosition[]`. Sort all racers by x descending. Return array with `{ racer, position }`. Call in `update()`.
 
-- [x] **Position display during race**
+- [ ] **Position display during race**
 
   > Show Rosie's current position: "Position: 3rd" in UI. Update every frame. Use ordinal formatting (1st, 2nd, 3rd, 4th...).
 
-- [x] **Final position on finish**
+- [ ] **Final position on finish**
   > Store `finishOrder: string[]` array. When racer crosses finish, append to array if not already present. Rosie's final position = her index + 1.
 
 ### 6.3 Race Results Screen
 
-- [x] **Mario Kart-style finish order**
+- [ ] **Mario Kart-style finish order**
 
   > Show all 6 racers in order (1st at top). Animate entries appearing one by one (0.5s delay each). Show position number, name, avatar.
 
-- [x] **Finish times for all**
+- [ ] **Finish times for all**
 
   > Display time next to each racer. AI times calculated from their speed and distance. Format as MM:SS.
 
-- [x] **Medal for Rosie (🥇🥈🥉)**
+- [ ] **Medal for Rosie (🥇🥈🥉)**
 
   > If Rosie is 1st: gold medal + "WINNER!" text. 2nd: silver + "Great job!". 3rd: bronze + "Good effort!". 4th+: participation ribbon + "Keep trying!".
 
-- [x] **"Race Again" button**
+- [ ] **"Race Again" button**
   > Same as Phase 2 but now resets all racers, assigns new random speeds, clears finish order.
 
 **✅ Milestone:** Full race with results
@@ -471,7 +471,7 @@ Racing game for 4-year-old Rosie with math challenges!
 
 - [ ] **Kid-friendly art style**
 
-  > Replace placeholder circles with cartoon head images. Add expressions (happy, determined). Use bright, saturated colors throughout. Consider hiring artist or using AI-generated assets.
+  > Replace placeholder circles with photos of the peoples heads in question. Ask the user for the images you need e.g. like rosie-sprite.png
 
 - [ ] **Particle effects (confetti, sparkles)**
 
@@ -490,9 +490,6 @@ Racing game for 4-year-old Rosie with math challenges!
 
   > Every tap should have visual+audio feedback. Button press states. Loading spinners where needed. Never leave user wondering if action worked.
 
-- [ ] **Encouraging messages**
-  > Add random encouragement: "You're doing great!", "Keep going!", "Almost there!". Show on checkpoints, during race, after losses. Never negative messages.
-
 **✅ Milestone:** Polished and ready for Rosie!
 
 ---
@@ -501,11 +498,11 @@ Racing game for 4-year-old Rosie with math challenges!
 
 ### Setup
 
-- [ ] **GitHub repository**
+- [x] **GitHub repository**
 
-  > Create repo on GitHub. Initialize with main branch. Add `.gitignore` for node_modules, dist. Enable GitHub Pages in settings.
+  > Update `.gitignore` for node_modules, dist. Enable GitHub Pages in settings.
 
-- [ ] **GitHub Pages enabled**
+- [x] **GitHub Pages enabled**
 
   > Settings → Pages → Source: GitHub Actions. Create `.github/workflows/deploy.yml` workflow file.
 
@@ -514,15 +511,15 @@ Racing game for 4-year-old Rosie with math challenges!
 
 ### CI/CD
 
-- [ ] **GitHub Actions workflow**
+- [x] **GitHub Actions workflow**
 
   > Workflow triggers on push to main. Steps: checkout, setup Node, `npm ci`, `npm run lint`, `npm run test`, `npm run build`.
 
-- [ ] **On push: lint → test → build → deploy**
+- [x] **On push: lint → test → build → deploy**
 
-  > Add deploy step using `peaceiris/actions-gh-pages@v3`. Publish `dist` folder to gh-pages branch.
+  > Add deploy step using `actions/deploy-pages@v4`. Publishes `dist` folder via GitHub Pages artifact.
 
-- [ ] **PWA assets included in build**
+- [x] **PWA assets included in build**
   > Verify vite-plugin-pwa generates manifest, service worker, and icons in dist folder. Test offline functionality after deploy.
 
 ### Deploy Commands
