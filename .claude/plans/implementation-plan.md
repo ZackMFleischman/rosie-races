@@ -289,11 +289,10 @@ Racing game for 4-year-old Rosie with math challenges!
 | Daddy      | Dad     |
 | Uncle Zack | Uncle   |
 | Gaga       | Grandma |
-| Grandpa    | Grandpa |
 | Lalo       | Dog 🐕  |
 
-- [ ] **Define family data**
-  > Create `src/data/familyMembers.ts`. Export array: `{ id, name, color, minSpeed, maxSpeed }`. Colors: distinct for each (blue, green, orange, purple, red). Speed ranges vary slightly for variety.
+- [x] **Define family data**
+  > Create `src/data/familyMembers.ts`. Export array: `{ id, name, color, minSpeed, maxSpeed }`. Colors: distinct for each (blue, green, orange, purple, yellow). Speed ranges vary slightly for variety. 5 family members to fill lanes 2-6 (Rosie in lane 1).
 
 ### 5.2 Competitor System
 
