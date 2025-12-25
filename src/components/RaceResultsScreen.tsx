@@ -77,14 +77,14 @@ function RaceResultsScreen({ results, onRestart, compact = false }: RaceResultsS
           display: 'flex',
           alignItems: 'center',
           gap: 0.75,
-          p: 0.75,
+          p: 0.6,
           borderRadius: 1,
           backgroundColor: result.isRosie ? 'rgba(255, 105, 180, 0.2)' : 'rgba(0, 0, 0, 0.05)',
           border: result.isRosie ? '1px solid #ff69b4' : '1px solid transparent',
         }}
       >
         <Typography
-          sx={{ fontWeight: 700, fontSize: '0.8rem', minWidth: '24px', color: 'text.secondary' }}
+          sx={{ fontWeight: 700, fontSize: '0.75rem', minWidth: '22px', color: 'text.secondary' }}
         >
           {result.position !== null ? getOrdinal(result.position) : '...'}
         </Typography>
@@ -94,8 +94,8 @@ function RaceResultsScreen({ results, onRestart, compact = false }: RaceResultsS
             src={result.avatar}
             alt={result.name}
             sx={{
-              width: 24,
-              height: 24,
+              width: 22,
+              height: 22,
               borderRadius: '50%',
               objectFit: 'cover',
               flexShrink: 0,
@@ -104,8 +104,8 @@ function RaceResultsScreen({ results, onRestart, compact = false }: RaceResultsS
         ) : (
           <Box
             sx={{
-              width: 18,
-              height: 18,
+              width: 16,
+              height: 16,
               borderRadius: '50%',
               backgroundColor: `#${result.color.toString(16).padStart(6, '0')}`,
               flexShrink: 0,
@@ -115,7 +115,7 @@ function RaceResultsScreen({ results, onRestart, compact = false }: RaceResultsS
         <Typography
           sx={{
             fontWeight: result.isRosie ? 700 : 500,
-            fontSize: '0.75rem',
+            fontSize: '0.7rem',
             flex: 1,
             color: result.isRosie ? 'primary.main' : 'text.primary',
             overflow: 'hidden',
@@ -128,14 +128,14 @@ function RaceResultsScreen({ results, onRestart, compact = false }: RaceResultsS
         <Typography
           sx={{
             fontFamily: 'monospace',
-            fontSize: '0.7rem',
+            fontSize: '0.65rem',
             color: 'text.secondary',
           }}
         >
           {isFinished ? formatTime(result.finishTime!) : '...'}
         </Typography>
         {isFinished && result.position !== null && result.position <= 3 && (
-          <Typography sx={{ fontSize: '0.75rem' }}>{getMedal(result.position)}</Typography>
+          <Typography sx={{ fontSize: '0.7rem' }}>{getMedal(result.position)}</Typography>
         )}
       </Box>
     );
@@ -167,23 +167,24 @@ function RaceResultsScreen({ results, onRestart, compact = false }: RaceResultsS
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: 1,
-            p: 1.5,
+            gap: 0.75,
+            p: 1.25,
             borderRadius: 2,
             backgroundColor: 'rgba(255, 255, 255, 0.95)',
             boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3)',
-            maxWidth: '90%',
-            width: '440px',
+            width: 'min(92vw, 380px)',
+            maxHeight: '85vh',
+            overflowY: 'auto',
           }}
         >
           {/* Header */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-            <Typography sx={{ fontSize: '1.2rem' }}>{getMedal(rosiePosition)}</Typography>
+            <Typography sx={{ fontSize: '1rem' }}>{getMedal(rosiePosition)}</Typography>
             <Typography
               data-testid="celebration-message"
               sx={{
                 fontWeight: 800,
-                fontSize: '1.5rem',
+                fontSize: '1.25rem',
                 color: rosiePosition === 1 ? '#d97706' : 'primary.main', // Amber instead of gold for contrast
                 textShadow: rosiePosition === 1 ? '0 1px 0 rgba(0,0,0,0.2)' : 'none',
               }}
@@ -193,15 +194,15 @@ function RaceResultsScreen({ results, onRestart, compact = false }: RaceResultsS
           </Box>
 
           {/* 2-column results grid */}
-          <Box sx={{ display: 'flex', gap: 1, width: '100%' }}>
+          <Box sx={{ display: 'flex', gap: 0.75, width: '100%' }}>
             {/* Left column (1-3) */}
-            <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 0.25 }}>
+            <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 0.2 }}>
               {leftColumn.map((result) => (
                 <CompactResultRow key={result.name} result={result} />
               ))}
             </Box>
             {/* Right column (4-6) */}
-            <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 0.25 }}>
+            <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 0.2 }}>
               {rightColumn.map((result) => (
                 <CompactResultRow key={result.name} result={result} />
               ))}
@@ -216,14 +217,14 @@ function RaceResultsScreen({ results, onRestart, compact = false }: RaceResultsS
             onClick={onRestart}
             data-testid="race-again-button"
             sx={{
-              mt: 1,
-              px: 3,
-              py: 1,
-              fontSize: '0.9rem',
+              mt: 0.5,
+              px: 2.5,
+              py: 0.75,
+              fontSize: '0.85rem',
               fontWeight: 700,
               borderRadius: 2,
               textTransform: 'none',
-              minHeight: '36px',
+              minHeight: '32px',
             }}
           >
             Race Again
