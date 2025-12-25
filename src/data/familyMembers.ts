@@ -26,15 +26,15 @@ export interface FamilyMember {
 }
 
 /** Computed min speed for a family member after applying scale and variance */
-export function getMinSpeed(member: FamilyMember): number {
-  const scaledMin = member.baseMinSpeed * SPEED_CONFIG.SPEED_SCALE;
+export function getMinSpeed(member: FamilyMember, speedScale: number = SPEED_CONFIG.SPEED_SCALE): number {
+  const scaledMin = member.baseMinSpeed * speedScale;
   // Apply variance: lower the min speed further to create more variance
   return scaledMin * (1 - SPEED_CONFIG.VARIANCE_FACTOR);
 }
 
 /** Computed max speed for a family member after applying scale */
-export function getMaxSpeed(member: FamilyMember): number {
-  return member.baseMaxSpeed * SPEED_CONFIG.SPEED_SCALE;
+export function getMaxSpeed(member: FamilyMember, speedScale: number = SPEED_CONFIG.SPEED_SCALE): number {
+  return member.baseMaxSpeed * speedScale;
 }
 
 /**

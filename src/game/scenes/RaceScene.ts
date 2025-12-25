@@ -5,6 +5,7 @@ import type {
   GameState,
   RacerResult,
   RaceResultsUpdatedPayload,
+  SettingsUpdatedPayload,
 } from '../events';
 // Assets in public/ - use relative path for correct base URL resolution
 const rosieSpriteUrl = 'assets/rosie-sprite.png';
@@ -14,6 +15,7 @@ import {
   getMinSpeed,
   getMaxSpeed,
   FAMILY_MEMBERS,
+  SPEED_CONFIG,
   type FamilyMember,
 } from '../../data/familyMembers';
 
@@ -165,6 +167,7 @@ export class RaceScene extends Phaser.Scene {
   // Competitor state
   private competitors: Competitor[] = [];
   private selectedRacers: FamilyMember[] = [];
+  private speedScale: number = SPEED_CONFIG.SPEED_SCALE;
 
   // UI elements
   private laneNameLabels: Phaser.GameObjects.Text[] = [];
@@ -349,6 +352,12 @@ export class RaceScene extends Phaser.Scene {
     this.events.on('shutdown', () => {
       this.game.events.off(GAME_EVENTS.MATH_ANSWER_SUBMITTED, this.handleMathAnswer, this);
     });
+
+    // Listen for settings updates (speed scale changes)
+    this.game.events.on(GAME_EVENTS.SETTINGS_UPDATED, this.handleSettingsUpdated, this);
+    this.events.on('shutdown', () => {
+      this.game.events.off(GAME_EVENTS.SETTINGS_UPDATED, this.handleSettingsUpdated, this);
+    });
   }
 
   /**
@@ -384,6 +393,17 @@ export class RaceScene extends Phaser.Scene {
       // Cap at maximum velocity
       this.velocity = Math.min(this.velocity, MOVEMENT_CONFIG.MAX_VELOCITY);
     }
+  };
+
+  private handleSettingsUpdated = (payload: SettingsUpdatedPayload): void => {
+    this.speedScale = payload.speedScale;
+    this.competitors.forEach((competitor) => {
+      competitor.speed = Phaser.Math.Clamp(
+        competitor.speed,
+        getMinSpeed(competitor.familyMember, this.speedScale),
+        getMaxSpeed(competitor.familyMember, this.speedScale)
+      );
+    });
   };
 
   /**
@@ -810,7 +830,10 @@ export class RaceScene extends Phaser.Scene {
       sprite.setDepth(15);
 
       // Assign random speed within the family member's range (using scaled speeds)
-      const speed = Phaser.Math.FloatBetween(getMinSpeed(familyMember), getMaxSpeed(familyMember));
+      const speed = Phaser.Math.FloatBetween(
+        getMinSpeed(familyMember, this.speedScale),
+        getMaxSpeed(familyMember, this.speedScale)
+      );
 
       this.competitors.push({
         sprite,
@@ -852,8 +875,8 @@ export class RaceScene extends Phaser.Scene {
         // Clamp speed within the family member's min/max bounds (using scaled speeds)
         competitor.speed = Phaser.Math.Clamp(
           competitor.speed,
-          getMinSpeed(competitor.familyMember),
-          getMaxSpeed(competitor.familyMember)
+          getMinSpeed(competitor.familyMember, this.speedScale),
+          getMaxSpeed(competitor.familyMember, this.speedScale)
         );
       }
 

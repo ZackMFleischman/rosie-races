@@ -52,6 +52,14 @@ describe('familyMembers', () => {
       });
     });
 
+    it('should scale speeds with a custom speed scale', () => {
+      const member = FAMILY_MEMBERS[0];
+      const maxSpeed = getMaxSpeed(member, 1);
+      const minSpeed = getMinSpeed(member, 1);
+      expect(maxSpeed).toBe(member.baseMaxSpeed);
+      expect(minSpeed).toBeLessThan(maxSpeed);
+    });
+
     it('should have roles matching the family relationships', () => {
       const memberRoles = FAMILY_MEMBERS.reduce(
         (acc, m) => {

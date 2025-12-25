@@ -8,6 +8,7 @@ import Timer from './components/Timer';
 import RaceResultsScreen from './components/RaceResultsScreen';
 import MathModal from './components/MathModal';
 import VolumeControl from './components/VolumeControl';
+import SettingsMenu from './components/SettingsMenu';
 import { GameProvider } from './context/GameContext';
 import { useGame } from './hooks/useGame';
 import { RaceScene } from './game/scenes/RaceScene';
@@ -216,6 +217,7 @@ function AppContent() {
         </Box>
 
         <VolumeControl bottomRight />
+        <SettingsMenu bottomRight />
 
           <Box
             sx={{
@@ -290,6 +292,8 @@ function AppContent() {
       onPointerDown={handleGlobalTap}
     >
       <VolumeControl bottomRight />
+        <SettingsMenu />
+
 
       <Box component="header" sx={srOnlyStyles}>
         <Typography variant="h6">Rosie Races header landmark</Typography>

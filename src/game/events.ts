@@ -19,6 +19,7 @@ export const GAME_EVENTS = {
   COUNTDOWN_TICK: 'countdownTick',
   ALL_RACERS_FINISHED: 'allRacersFinished',
   RACE_RESULTS_UPDATED: 'raceResultsUpdated',
+  SETTINGS_UPDATED: 'settingsUpdated',
 } as const;
 
 /**
@@ -76,4 +77,11 @@ export interface MathProblemPayload {
 export interface MathAnswerPayload {
   correct: boolean;
   timeTaken: number; // in milliseconds
+}
+
+/**
+ * Payload for settings updates
+ */
+export interface SettingsUpdatedPayload {
+  speedScale: number;
 }

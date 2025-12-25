@@ -10,7 +10,8 @@ import {
   type AllRacersFinishedPayload,
   type RaceResultsUpdatedPayload,
 } from '../game/events';
-import { generateProblem, type MathProblem } from '../game/systems/MathGenerator';
+import { generateProblem, DEFAULT_MATH_CONFIG, type MathProblem, type MathConfig } from '../game/systems/MathGenerator';
+import { SPEED_CONFIG } from '../data/familyMembers';
 
 export interface GameContextValue {
   game: Phaser.Game | null;
@@ -20,9 +21,13 @@ export interface GameContextValue {
   isRacing: boolean;
   isFinished: boolean;
   finishTime: number | null;
+  speedScale: number;
+  setSpeedScale: (speedScale: number) => void;
   // Math problem state
   currentProblem: MathProblem | null;
   submitMathAnswer: (correct: boolean, timeTaken: number) => void;
+  mathConfig: MathConfig;
+  setMathConfig: (config: MathConfig | ((prev: MathConfig) => MathConfig)) => void;
   // Game state for Phase 6
   gameState: GameState;
   countdownValue: number | null;
@@ -46,6 +51,8 @@ export function GameProvider({ children }: GameProviderProps) {
   const [finishTime, setFinishTime] = useState<number | null>(null);
   const [gameVersion, setGameVersion] = useState(0);
   const [currentProblem, setCurrentProblem] = useState<MathProblem | null>(null);
+  const [speedScale, setSpeedScale] = useState(SPEED_CONFIG.SPEED_SCALE);
+  const [mathConfig, setMathConfig] = useState<MathConfig>(DEFAULT_MATH_CONFIG);
   const raceStartTimeRef = useRef<number | null>(null);
   // Phase 6 state
   const [gameState, setGameState] = useState<GameState>('ready');
@@ -115,7 +122,7 @@ export function GameProvider({ children }: GameProviderProps) {
 
     const handleShowMathProblem = () => {
       // Generate a new math problem and show modal
-      const problem = generateProblem();
+      const problem = generateProblem(mathConfig);
       setCurrentProblem(problem);
     };
 
@@ -154,7 +161,12 @@ export function GameProvider({ children }: GameProviderProps) {
       game.events.off(GAME_EVENTS.ALL_RACERS_FINISHED, handleAllRacersFinished);
       game.events.off(GAME_EVENTS.RACE_RESULTS_UPDATED, handleRaceResultsUpdated);
     };
-  }, [gameVersion]);
+  }, [gameVersion, mathConfig]);
+
+  useEffect(() => {
+    if (!gameRef.current) return;
+    gameRef.current.events.emit(GAME_EVENTS.SETTINGS_UPDATED, { speedScale });
+  }, [gameVersion, speedScale]);
 
   const value: GameContextValue = {
     get game() {
@@ -166,8 +178,12 @@ export function GameProvider({ children }: GameProviderProps) {
     isRacing,
     isFinished,
     finishTime,
+    speedScale,
+    setSpeedScale,
     currentProblem,
     submitMathAnswer,
+    mathConfig,
+    setMathConfig,
     // Phase 6 state
     gameState,
     countdownValue,

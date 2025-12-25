@@ -137,10 +137,51 @@ describe('MathGenerator', () => {
       });
     });
 
+    describe('division problems', () => {
+      it('generates valid division question format', () => {
+        const { config } = setupTest({ operations: ['divide'], numTerms: 2 });
+        const problem = generateProblem(config);
+
+        expect(problem.question).toMatch(/^\d+ ÷ \d+ = \?$/);
+      });
+
+      it('calculates correct quotient with whole-number results', () => {
+        const { config } = setupTest({ operations: ['divide'], numTerms: 2, maxNumber: 20 });
+
+        for (let i = 0; i < 10; i++) {
+          const problem = generateProblem(config);
+          const [a, b] = problem.question.replace(' = ?', '').split(' ÷ ').map(Number);
+
+          expect(a % b).toBe(0);
+          expect(problem.answer).toBe(a / b);
+        }
+      });
+    });
+
+    describe('square problems', () => {
+      it('generates valid square question format', () => {
+        const { config } = setupTest({ operations: ['square'], numTerms: 1 });
+        const problem = generateProblem(config);
+
+        expect(problem.question).toMatch(/^\d+² = \?$/);
+      });
+
+      it('calculates correct square', () => {
+        const { config } = setupTest({ operations: ['square'], numTerms: 1, maxNumber: 12 });
+
+        for (let i = 0; i < 10; i++) {
+          const problem = generateProblem(config);
+          const base = Number(problem.question.replace('² = ?', ''));
+
+          expect(problem.answer).toBe(base * base);
+        }
+      });
+    });
+
     describe('mixed operations', () => {
       it('randomly selects from available operations', () => {
         const { config } = setupTest({
-          operations: ['add', 'subtract', 'multiply'],
+          operations: ['add', 'subtract', 'multiply', 'divide', 'square'],
           numTerms: 2,
         });
 
@@ -152,6 +193,8 @@ describe('MathGenerator', () => {
           if (problem.question.includes('+')) operators.add('+');
           if (problem.question.includes('-')) operators.add('-');
           if (problem.question.includes('×')) operators.add('×');
+          if (problem.question.includes('÷')) operators.add('÷');
+          if (problem.question.includes('²')) operators.add('²');
         }
 
         // Should have generated at least 2 different operators
