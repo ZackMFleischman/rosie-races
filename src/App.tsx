@@ -83,6 +83,7 @@ function AppContent() {
   const isTapButtonDisabled = gameState === 'ready' || gameState === 'countdown';
   const shouldTapButtonBounce = gameState === 'racing' && !currentProblem;
   const showPreRaceOverlay = gameState === 'ready';
+  const canTapAnywhere = gameState === 'racing' && !currentProblem && !raceResults;
 
   const phoneGameConfig = useMemo(
     () => ({
@@ -135,6 +136,18 @@ function AppContent() {
     emitTap();
   }, [emitTap]);
 
+  const handleGlobalTap = useCallback(
+    (event: React.PointerEvent) => {
+      if (!canTapAnywhere) return;
+      const target = event.target as HTMLElement | null;
+      if (target?.closest('[data-ignore-global-tap="true"]')) {
+        return;
+      }
+      handleTap();
+    },
+    [canTapAnywhere, handleTap]
+  );
+
   const handleRestart = useCallback(() => {
     emitRestart();
   }, [emitRestart]);
@@ -152,6 +165,7 @@ function AppContent() {
           position: 'relative',
           bgcolor: '#4CAF50',
         }}
+        onPointerDown={handleGlobalTap}
       >
         <Box component="header" sx={srOnlyStyles}>
           <Typography variant="h6">Rosie Races header landmark</Typography>
@@ -162,16 +176,16 @@ function AppContent() {
         </Box>
 
         <Box component="main" sx={{ position: 'absolute', inset: 0 }}>
-        <Box
-          sx={{
-            width: '100%',
-            height: '100%',
-            position: 'absolute',
-            inset: 0,
-          }}
-        >
-          <GameContainer config={phoneGameConfig} onGameReady={handleGameReady} />
-        </Box>
+          <Box
+            sx={{
+              width: '100%',
+              height: '100%',
+              position: 'absolute',
+              inset: 0,
+            }}
+          >
+            <GameContainer config={phoneGameConfig} onGameReady={handleGameReady} />
+          </Box>
 
         <Typography
           variant="h6"
@@ -203,17 +217,22 @@ function AppContent() {
 
         <VolumeControl bottomRight />
 
-        <Box
-          sx={{
-            position: 'absolute',
-            right: 12,
-            top: '50%',
-            transform: 'translateY(-50%)',
-            zIndex: 10,
-          }}
-        >
-          <TapButton onTap={handleTap} disabled={isTapButtonDisabled} small shouldBounce={shouldTapButtonBounce} />
-        </Box>
+          <Box
+            sx={{
+              position: 'absolute',
+              right: 12,
+              top: '50%',
+              transform: 'translateY(-50%)',
+              zIndex: 10,
+            }}
+          >
+            <TapButton
+              onTap={handleTap}
+              disabled={isTapButtonDisabled}
+              small
+              shouldBounce={shouldTapButtonBounce}
+            />
+          </Box>
 
         {showPreRaceOverlay && (
           <Box
@@ -253,8 +272,8 @@ function AppContent() {
           </Box>
         )}
 
-        {currentProblem && <MathModal problem={currentProblem} onAnswer={submitMathAnswer} compact />}
-        {raceResults && <RaceResultsScreen results={raceResults} onRestart={handleRestart} compact />}
+          {currentProblem && <MathModal problem={currentProblem} onAnswer={submitMathAnswer} compact />}
+          {raceResults && <RaceResultsScreen results={raceResults} onRestart={handleRestart} compact />}
         </Box>
       </Box>
     );
@@ -268,6 +287,7 @@ function AppContent() {
         flexDirection: 'column',
         bgcolor: '#4CAF50',
       }}
+      onPointerDown={handleGlobalTap}
     >
       <VolumeControl />
 
@@ -336,13 +356,17 @@ function AppContent() {
             <Box
               sx={{
                 position: 'absolute',
-                bottom: 24,
-                left: '50%',
-                transform: 'translateX(-50%)',
+                right: 24,
+                top: '50%',
+                transform: 'translateY(-50%)',
                 pointerEvents: 'auto',
               }}
             >
-              <TapButton onTap={handleTap} disabled={isTapButtonDisabled} shouldBounce={shouldTapButtonBounce} />
+              <TapButton
+                onTap={handleTap}
+                disabled={isTapButtonDisabled}
+                shouldBounce={shouldTapButtonBounce}
+              />
             </Box>
           </Box>
         </Box>
