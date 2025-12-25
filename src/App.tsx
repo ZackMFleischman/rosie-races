@@ -291,8 +291,9 @@ function AppContent() {
       }}
       onPointerDown={handleGlobalTap}
     >
-      <VolumeControl />
-      <SettingsMenu />
+      <VolumeControl bottomRight />
+        <SettingsMenu />
+
 
       <Box component="header" sx={srOnlyStyles}>
         <Typography variant="h6">Rosie Races header landmark</Typography>
