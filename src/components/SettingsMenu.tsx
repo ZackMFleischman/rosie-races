@@ -141,7 +141,7 @@ export function SettingsMenu({ bottomRight = false }: SettingsMenuProps) {
               p: 2,
               minWidth: 280,
             },
-            'data-ignore-global-tap': 'true',
+            ...({ 'data-ignore-global-tap': 'true' } as Record<string, string>),
           },
         }}
       >

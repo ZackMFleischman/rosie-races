@@ -51,7 +51,7 @@ export function GameProvider({ children }: GameProviderProps) {
   const [finishTime, setFinishTime] = useState<number | null>(null);
   const [gameVersion, setGameVersion] = useState(0);
   const [currentProblem, setCurrentProblem] = useState<MathProblem | null>(null);
-  const [speedScale, setSpeedScale] = useState(SPEED_CONFIG.SPEED_SCALE);
+  const [speedScale, setSpeedScale] = useState<number>(SPEED_CONFIG.SPEED_SCALE);
   const [mathConfig, setMathConfig] = useState<MathConfig>(DEFAULT_MATH_CONFIG);
   const raceStartTimeRef = useRef<number | null>(null);
   // Phase 6 state
