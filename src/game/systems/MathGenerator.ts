@@ -3,7 +3,7 @@
  * Generates configurable math problems with multiple choice answers
  */
 
-export type Operation = 'add' | 'subtract' | 'multiply';
+export type Operation = 'add' | 'subtract' | 'multiply' | 'divide' | 'square';
 
 export interface MathConfig {
   operations: Operation[];
@@ -54,6 +54,10 @@ function getOperatorSymbol(operation: Operation): string {
       return '-';
     case 'multiply':
       return '×';
+    case 'divide':
+      return '÷';
+    case 'square':
+      return '²';
   }
 }
 
@@ -68,6 +72,10 @@ function performOperation(a: number, b: number, operation: Operation): number {
       return a - b;
     case 'multiply':
       return a * b;
+    case 'divide':
+      return a / b;
+    case 'square':
+      return a * a;
   }
 }
 
@@ -96,6 +104,27 @@ function generateOperands(operation: Operation, maxNumber: number, numTerms: num
     for (let i = 0; i < numTerms; i++) {
       operands.push(randomInt(1, multiplyMax));
     }
+  } else if (operation === 'divide') {
+    const divisorMin = 1;
+    const divisorMax = Math.max(1, maxNumber);
+    let attempts = 0;
+    const maxAttempts = 50;
+
+    while (attempts < maxAttempts) {
+      const divisor = randomInt(divisorMin, divisorMax);
+      const quotientMax = Math.max(1, Math.floor(maxNumber / divisor));
+      const quotient = randomInt(1, quotientMax);
+      const dividend = divisor * quotient;
+      if (dividend <= maxNumber) {
+        return [dividend, divisor];
+      }
+      attempts += 1;
+    }
+
+    const fallbackDivisor = randomInt(divisorMin, divisorMax);
+    return [fallbackDivisor, fallbackDivisor];
+  } else if (operation === 'square') {
+    return [randomInt(1, maxNumber)];
   } else {
     // Addition: any numbers within range
     for (let i = 0; i < numTerms; i++) {
@@ -110,6 +139,9 @@ function generateOperands(operation: Operation, maxNumber: number, numTerms: num
  * Calculates the answer from operands and operation
  */
 function calculateAnswer(operands: number[], operation: Operation): number {
+  if (operation === 'square') {
+    return operands[0] * operands[0];
+  }
   return operands.reduce((acc, num, index) => {
     if (index === 0) return num;
     return performOperation(acc, num, operation);
@@ -121,6 +153,9 @@ function calculateAnswer(operands: number[], operation: Operation): number {
  */
 function buildQuestion(operands: number[], operation: Operation): string {
   const symbol = getOperatorSymbol(operation);
+  if (operation === 'square') {
+    return `${operands[0]}${symbol} = ?`;
+  }
   return operands.join(` ${symbol} `) + ' = ?';
 }
 
@@ -167,7 +202,9 @@ function generateWrongAnswers(correctAnswer: number): number[] {
  */
 export function generateProblem(config: MathConfig = DEFAULT_MATH_CONFIG): MathProblem {
   // Pick a random operation from the available ones
-  const operation = config.operations[randomInt(0, config.operations.length - 1)];
+  const operations =
+    config.operations.length > 0 ? config.operations : DEFAULT_MATH_CONFIG.operations;
+  const operation = operations[randomInt(0, operations.length - 1)];
 
   // Generate operands suitable for the operation
   const operands = generateOperands(operation, config.maxNumber, config.numTerms);
