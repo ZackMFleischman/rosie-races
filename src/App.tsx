@@ -289,7 +289,7 @@ function AppContent() {
       }}
       onPointerDown={handleGlobalTap}
     >
-      <VolumeControl />
+      <VolumeControl bottomRight />
 
       <Box component="header" sx={srOnlyStyles}>
         <Typography variant="h6">Rosie Races header landmark</Typography>
