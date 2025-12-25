@@ -149,14 +149,12 @@ export function VolumeControl({ audioManager, bottomRight = false }: VolumeContr
           vertical: bottomRight ? 'bottom' : 'top',
           horizontal: 'center',
         }}
-        slotProps={{
-          paper: {
-            sx: {
-              borderRadius: 3,
-              mt: 1,
-            },
-            'data-ignore-global-tap': 'true',
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+            mt: 1,
           },
+          'data-ignore-global-tap': 'true',
         }}
       >
         <VolumeSliderContainer data-ignore-global-tap="true">
