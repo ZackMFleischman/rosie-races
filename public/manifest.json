@@ -3,7 +3,7 @@
   "short_name": "Rosie Races",
   "description": "A fun racing game for kids with math challenges!",
   "start_url": "/rosie-races/",
-  "display": "standalone",
+  "display": "fullscreen",
   "orientation": "landscape",
   "background_color": "#1a1a2e",
   "theme_color": "#ff69b4",
