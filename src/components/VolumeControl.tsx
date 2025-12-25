@@ -131,6 +131,7 @@ export function VolumeControl({ audioManager, bottomRight = false }: VolumeContr
         aria-label={muted || volume === 0 ? 'Unmute audio' : 'Mute audio'}
         size="large"
         sx={bottomRight ? { top: 'auto', bottom: 8 } : undefined}
+        data-ignore-global-tap="true"
       >
         {getSpeakerIcon()}
       </SpeakerButton>
@@ -154,10 +155,11 @@ export function VolumeControl({ audioManager, bottomRight = false }: VolumeContr
               borderRadius: 3,
               mt: 1,
             },
+            'data-ignore-global-tap': 'true',
           },
         }}
       >
-        <VolumeSliderContainer>
+        <VolumeSliderContainer data-ignore-global-tap="true">
           <VolumeSlider
             value={muted ? 0 : volume}
             onChange={handleVolumeChange}

@@ -83,6 +83,7 @@ function TapButton({
 
   const handlePointerDown = useCallback(
     (e: React.PointerEvent) => {
+      e.stopPropagation();
       e.preventDefault(); // Prevent touch scrolling
       if (disabled) return;
 
