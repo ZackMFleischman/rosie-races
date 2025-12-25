@@ -135,25 +135,26 @@ function MathModal({ problem, onAnswer, compact = false }: MathModalProps) {
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: 0.75,
-            p: 1.5,
+            gap: 0.5,
+            p: 1,
             borderRadius: 2,
             backgroundColor: 'rgba(255, 255, 255, 1)',
             boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)',
-            maxWidth: '70%',
-            width: '280px',
+            width: 'min(85vw, 260px)',
+            maxHeight: '80vh',
+            overflow: 'auto',
           }}
         >
           {/* Emoji + Question on same row */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Typography component="span" sx={{ fontSize: '1.3rem' }}>
+            <Typography component="span" sx={{ fontSize: '1.1rem' }}>
               🤔
             </Typography>
             <Typography
               data-testid="math-question"
               sx={{
                 fontWeight: 800,
-                fontSize: '1.3rem',
+                fontSize: '1.1rem',
                 color: 'text.primary',
                 fontFamily: '"Courier New", Courier, monospace',
               }}
@@ -163,7 +164,7 @@ function MathModal({ problem, onAnswer, compact = false }: MathModalProps) {
           </Box>
 
           {/* Answer buttons - 2x2 grid */}
-          <Grid container spacing={0.75} sx={{ maxWidth: '220px', paddingTop: 1.5 }}>
+          <Grid container spacing={0.5} sx={{ maxWidth: '200px', paddingTop: 0.75 }}>
             {problem.choices.map((choice, index) => (
               <Grid size={{ xs: 6 }} key={index}>
                 <Button
@@ -175,11 +176,11 @@ function MathModal({ problem, onAnswer, compact = false }: MathModalProps) {
                   data-choice={choice}
                   sx={{
                     width: '100%',
-                    py: 0.75,
-                    fontSize: '1rem',
+                    py: 0.5,
+                    fontSize: '0.9rem',
                     fontWeight: 700,
                     borderRadius: 1.5,
-                    minHeight: '40px',
+                    minHeight: '34px',
                     boxShadow: 2,
                     '&:active': { transform: 'scale(0.95)' },
                   }}
@@ -208,7 +209,7 @@ function MathModal({ problem, onAnswer, compact = false }: MathModalProps) {
             <Typography
               sx={{
                 fontWeight: 700,
-                fontSize: '0.65rem',
+                fontSize: '0.6rem',
                 color:
                   feedback === 'wrong'
                     ? 'error.main'
@@ -228,7 +229,7 @@ function MathModal({ problem, onAnswer, compact = false }: MathModalProps) {
               data-testid="wrong-answer-countdown"
               sx={{
                 width: '100%',
-                maxWidth: '200px',
+                maxWidth: '180px',
               }}
             >
               <LinearProgress
