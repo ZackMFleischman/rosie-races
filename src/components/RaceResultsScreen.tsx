@@ -172,8 +172,8 @@ function RaceResultsScreen({ results, onRestart, compact = false }: RaceResultsS
             borderRadius: 2,
             backgroundColor: 'rgba(255, 255, 255, 0.95)',
             boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3)',
-            width: 'min(92vw, 380px)',
-            maxHeight: '85vh',
+            width: 'min(75dvw, 340px)',
+            maxHeight: '75dvh',
             overflowY: 'auto',
           }}
         >
@@ -265,7 +265,7 @@ function RaceResultsScreen({ results, onRestart, compact = false }: RaceResultsS
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
           maxWidth: { xs: '95%', sm: '450px' },
           width: '100%',
-          maxHeight: '90vh',
+          maxHeight: '90dvh',
           overflowY: 'auto',
         }}
       >

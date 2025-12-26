@@ -39,7 +39,7 @@ export const TRACK_CONFIG = {
   START_LINE_RATIO: 0.065, //  from left
   FINISH_LINE_RATIO: 0.85, // from left -  leaves space for TAP button overlay
   ROSIE_START_RATIO: 0.03, // from left
-  ROSIE_RADIUS: 22, // Smaller circles for better proportions on mobile
+  ROSIE_RADIUS: 44, // Size for mobile sprites (2x for high-DPI displays)
   ROSIE_COLOR: 0xff69b4, // Pink
 };
 

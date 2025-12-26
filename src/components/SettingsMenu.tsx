@@ -18,8 +18,8 @@ import type { Operation } from '../game/systems/MathGenerator';
 
 const SettingsButton = styled(IconButton)(({ theme }) => ({
   position: 'fixed',
-  top: theme.spacing(1),
-  right: theme.spacing(9),
+  top: `calc(${theme.spacing(1)} + env(safe-area-inset-top, 0px))`,
+  right: `calc(${theme.spacing(9)} + env(safe-area-inset-right, 0px))`,
   zIndex: 1100,
   backgroundColor: theme.palette.background.paper,
   boxShadow: theme.shadows[2],
@@ -115,7 +115,7 @@ export function SettingsMenu({ bottomRight = false }: SettingsMenuProps) {
         aria-label="Open difficulty settings"
         onClick={handleSettingsClick}
         size="large"
-        sx={bottomRight ? { top: 'auto', bottom: 8 } : undefined}
+        sx={bottomRight ? { top: 'auto', bottom: `calc(8px + env(safe-area-inset-bottom, 0px))` } : undefined}
         data-ignore-global-tap="true"
       >
         <SettingsIcon />

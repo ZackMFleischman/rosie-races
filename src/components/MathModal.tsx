@@ -140,8 +140,8 @@ function MathModal({ problem, onAnswer, compact = false }: MathModalProps) {
             borderRadius: 2,
             backgroundColor: 'rgba(255, 255, 255, 1)',
             boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)',
-            width: 'min(85vw, 260px)',
-            maxHeight: '80vh',
+            width: 'min(45dvw, 180px)',
+            maxHeight: '50dvh',
             overflow: 'auto',
           }}
         >

@@ -188,36 +188,36 @@ function AppContent() {
             <GameContainer config={phoneGameConfig} onGameReady={handleGameReady} />
           </Box>
 
-        <Typography
-          variant="h6"
-          color="primary"
-          sx={{
-            position: 'absolute',
-            top: 0,
-            left: 12,
-            fontSize: '1.5rem',
-            fontWeight: 700,
-            zIndex: 10,
-            textShadow: '2px 2px 4px rgba(0,0,0,0.7), 0 0 8px rgba(0,0,0,0.5)',
-          }}
-        >
-          Rosie Races
-        </Typography>
+          <Typography
+            variant="h6"
+            color="primary"
+            sx={{
+              position: 'absolute',
+              top: 0,
+              left: 12,
+              fontSize: '1.5rem',
+              fontWeight: 700,
+              zIndex: 10,
+              textShadow: '2px 2px 4px rgba(0,0,0,0.7), 0 0 8px rgba(0,0,0,0.5)',
+            }}
+          >
+            Rosie Races
+          </Typography>
 
-        <Box
-          sx={{
-            position: 'absolute',
-            top: 15,
-            left: '50%',
-            transform: 'translateX(-50%)',
-            zIndex: 10,
-          }}
-        >
-          <Timer isRunning={isRacing} compact />
-        </Box>
+          <Box
+            sx={{
+              position: 'absolute',
+              top: 15,
+              left: '50%',
+              transform: 'translateX(-50%)',
+              zIndex: 10,
+            }}
+          >
+            <Timer isRunning={isRacing} compact />
+          </Box>
 
-        <VolumeControl bottomRight />
-        <SettingsMenu bottomRight />
+          <VolumeControl bottomRight />
+          <SettingsMenu bottomRight />
 
           <Box
             sx={{
@@ -236,46 +236,50 @@ function AppContent() {
             />
           </Box>
 
-        {showPreRaceOverlay && (
-          <Box
-            sx={{
-              position: 'fixed',
-              inset: 0,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              bgcolor: 'rgba(0, 0, 0, 0.5)',
-              zIndex: 1100,
-            }}
-          >
+          {showPreRaceOverlay && (
             <Box
-              component="button"
-              onClick={handleTap}
               sx={{
-                bgcolor: 'primary.main',
-                color: 'primary.contrastText',
-                border: 'none',
-                borderRadius: 3,
-                px: 3,
-                py: 1.5,
-                fontSize: '1.2rem',
-                fontWeight: 700,
-                cursor: 'pointer',
-                boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3)',
-                animation: 'pulse 1s ease-in-out infinite',
-                '@keyframes pulse': {
-                  '0%, 100%': { transform: 'scale(1)' },
-                  '50%': { transform: 'scale(1.05)' },
-                },
+                position: 'fixed',
+                inset: 0,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                bgcolor: 'rgba(0, 0, 0, 0.5)',
+                zIndex: 1100,
               }}
             >
-              Tap to Start!
+              <Box
+                component="button"
+                onPointerDown={handleTap}
+                sx={{
+                  bgcolor: 'primary.main',
+                  color: 'primary.contrastText',
+                  border: 'none',
+                  borderRadius: 3,
+                  px: 3,
+                  py: 1.5,
+                  fontSize: '1.2rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3)',
+                  animation: 'pulse 1s ease-in-out infinite',
+                  '@keyframes pulse': {
+                    '0%, 100%': { transform: 'scale(1)' },
+                    '50%': { transform: 'scale(1.05)' },
+                  },
+                }}
+              >
+                Tap to Start!
+              </Box>
             </Box>
-          </Box>
-        )}
+          )}
 
-          {currentProblem && <MathModal problem={currentProblem} onAnswer={submitMathAnswer} compact />}
-          {raceResults && <RaceResultsScreen results={raceResults} onRestart={handleRestart} compact />}
+          {currentProblem && (
+            <MathModal problem={currentProblem} onAnswer={submitMathAnswer} compact />
+          )}
+          {raceResults && (
+            <RaceResultsScreen results={raceResults} onRestart={handleRestart} compact />
+          )}
         </Box>
       </Box>
     );
@@ -292,8 +296,7 @@ function AppContent() {
       onPointerDown={handleGlobalTap}
     >
       <VolumeControl bottomRight />
-        <SettingsMenu />
-
+      <SettingsMenu />
 
       <Box component="header" sx={srOnlyStyles}>
         <Typography variant="h6">Rosie Races header landmark</Typography>
@@ -390,7 +393,7 @@ function AppContent() {
         >
           <Box
             component="button"
-            onClick={handleTap}
+            onPointerDown={handleTap}
             sx={{
               bgcolor: 'primary.main',
               color: 'primary.contrastText',
